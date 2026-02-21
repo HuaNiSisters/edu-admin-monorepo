@@ -1,0 +1,30 @@
+services:
+  backend:
+    image: edumadmin-backend:latest
+    build: ./backend
+    ports:
+      - "8888:8888"
+    environment:
+      - WATCHPACK_POLLING=true
+    develop:
+      watch:
+        - action: sync # Syncs changes into the running container
+          path: ./src
+          target: /app/src
+        # - action: rebuild # Rebuilds the image if key files change
+        #   path: ./package.json
+        #   target: /app/package.json
+
+  frontend:
+    image: edumadmin-frontend:latest
+    build: ./frontend
+    ports:
+      - "8080:3000"
+    develop:
+      watch:
+        - action: sync # Syncs changes into the running container
+          path: ./src
+          target: /app/src
+        # - action: rebuild # Rebuilds the image if key files change
+        #   path: ./package.json
+        #   target: /app/package.json

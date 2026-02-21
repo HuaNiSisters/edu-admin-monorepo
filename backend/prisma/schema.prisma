@@ -1,0 +1,287 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Gender {
+  M
+  F
+}
+
+enum StudentStatus {
+  attending
+  alumni
+}
+
+enum Location {
+  cabramatta_and_canley_vale
+  parramatta
+  online
+}
+
+enum SubjectType {
+  primary
+  selective
+  oc
+  mathematics
+  english
+  science
+  biology
+  chemistry
+  physics
+  economics
+}
+
+enum AttendanceStatus {
+  present
+  absent
+}
+
+enum EnrolmentStatus {
+  active
+  pending
+  completed
+  cancelled
+  unenrolled
+}
+
+enum PaymentType {
+  cash
+  bank_transfer
+  other
+}
+
+enum PaymentStatus {
+  unpaid
+  partial
+  paid
+}
+
+// Relationships: 
+// Student ↔ Parent (Many-to-Many): A student can have multiple parents, and a parent can have multiple students.
+
+// Student → Enrolment → ClassTime (Many-to-Many): A student can enrol in multiple class times, and each class time can have multiple students enrolled.
+// - Rosie enrols in Y7 Science CC Sunday 9am by tutor Manhua for Term 1 2024
+// - Rosie enrols in Y7 Maths CC Sunday 11am by tutor Manni for Term 1 2024
+// - Matthew enrols in Y7 Maths CC Sunday 11am by tutor Manni for Term 1 2024
+
+// ClassTime relationships:
+// → SubjectOffering (Many-to-One): Each class belongs to one subject offering
+//    - Y7 Science CC Sunday 9am and Y7 Science CC Sunday 11am both belong to the Y7 Science CC SubjectOffering
+// → Tutor (Many-to-One): Each class is assigned to one tutor
+
+// SubjectOffering composition:
+// → Subject (Many-to-One): Links to the subject type (mathematics, science, etc.)
+// → Grade (Many-to-One): Links to the grade level (Y7, Y8, etc.)
+// Location (Enum): Cabramatta, Parramatta, or Online
+// A subject offering can have multiple class times
+
+// Tutor relationships:
+// ↔ Subject (Many-to-Many): Tutors can teach multiple subjects, subjects can be taught by multiple tutors
+// → ClassTime (One-to-Many): A tutor can teach multiple classes
+
+// Enrolment → Term (Many-to-One): Each enrolment is for a specific term. Terms can have multiple enrolments
+
+// Attendance & Payment Relationships:
+// Student → Attendance ← ClassTime (Tracked per week)
+// - Links students to specific classes by week number (1-10)
+
+// Enrolment → Payment (One-to-Many): Each enrolment can have multiple payment records
+
+model Student {
+  student_id      String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student_mobile  String
+  first_name      String
+  last_name       String
+  preferred_name  String?
+  grade_at_school Int
+  school          String
+  suburb_of_home  String
+  email           String?
+  location        Location
+  gender          Gender?
+  status          StudentStatus?
+  notes           String?
+
+  parents     StudentParent[]
+  enrolments  Enrolment[]
+  attendances Attendance[]
+}
+
+model Parent {
+  parent_id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parent_mobile String
+  first_name    String
+  last_name     String
+  email         String?
+  notes         String?
+
+  children StudentParent[]
+}
+
+model StudentParent {
+  student_parent_id String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student_id        String  @db.Uuid
+  parent_id         String  @db.Uuid
+  relationship      String?
+
+  student Student @relation(fields: [student_id], references: [student_id], onDelete: Cascade)
+  parent  Parent  @relation(fields: [parent_id], references: [parent_id], onDelete: Cascade)
+}
+
+model Tutor {
+  tutor_id   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name String
+  last_name  String
+  phone      String
+  email      String?
+
+  classes  ClassTime[]
+  subjects Subject[]
+}
+
+////////////////////
+/// ACADEMIC STRUCTURE
+////////////////////
+model ClassTime {
+  class_id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  offering_id String  @db.Uuid
+  tutor_id    String? @db.Uuid // Allow null for unassigned classes
+  day_of_week String
+  start_time  String
+  end_time    String
+  capacity    Int?
+  active      Boolean @default(true)
+
+  offering   SubjectOffering @relation(fields: [offering_id], references: [offering_id])
+  enrolments Enrolment[]
+  attendance Attendance[]
+  tutor      Tutor?          @relation(fields: [tutor_id], references: [tutor_id])
+}
+
+model Subject {
+  subject_id String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       SubjectType
+
+  offerings SubjectOffering[]
+  tutors    Tutor[]
+}
+
+model Grade {
+  grade_id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  label              String // e.g. Y7, Y8, Y12
+  school_year_number Int
+
+  offerings SubjectOffering[]
+}
+
+// Y7 Science CC - $300
+model SubjectOffering {
+  offering_id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject_id     String   @db.Uuid
+  grade_id       String   @db.Uuid
+  location       Location
+  price_per_term Decimal  @db.Decimal(10, 2)
+
+  subject Subject @relation(fields: [subject_id], references: [subject_id])
+  grade   Grade   @relation(fields: [grade_id], references: [grade_id])
+
+  classTimes ClassTime[]
+
+  @@unique([subject_id, grade_id, location])
+}
+
+model Term {
+  term_id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       Int // 1, 2, 3, or 4
+  year       Int
+  start_date DateTime
+  end_date   DateTime
+
+  enrolments Enrolment[]
+
+  @@unique([year, name])
+}
+
+model Enrolment {
+  enrolment_id   String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student_id     String          @db.Uuid
+  class_id       String          @db.Uuid
+  term_id        String          @db.Uuid
+  enrolment_date DateTime        @default(now())
+  status         EnrolmentStatus @default(active)
+
+  student Student   @relation(fields: [student_id], references: [student_id])
+  class   ClassTime @relation(fields: [class_id], references: [class_id], onDelete: Cascade)
+  term    Term      @relation(fields: [term_id], references: [term_id], onDelete: Cascade)
+
+  payments Payment[]
+
+  @@unique([student_id, class_id, term_id])
+}
+
+model Attendance {
+  attendance_id String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student_id    String           @db.Uuid
+  class_id      String           @db.Uuid
+  week          Int // e.g. 1, 2, 3, ... 10
+  status        AttendanceStatus
+  notes         String?
+
+  student Student   @relation(fields: [student_id], references: [student_id])
+  class   ClassTime @relation(fields: [class_id], references: [class_id], onDelete: Cascade)
+
+  @@unique([student_id, class_id, week])
+}
+
+////////////////////
+/// FINANCE
+////////////////////
+
+model Payment {
+  payment_id   Int           @id @default(autoincrement())
+  enrolment_id String        @db.Uuid
+  amount_due   Decimal       @db.Decimal(10, 2)
+  amount_paid  Decimal       @db.Decimal(10, 2)
+  payment_date DateTime?
+  payment_type PaymentType
+  status       PaymentStatus
+  receipt      String // Store files externally? e.g. (S3, Cloudflare R2, local filesystem) and save the path/URL here
+  notes        String?
+
+  enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id])
+}
+
+generator typescriptInterfaces {
+  provider    = "prisma-generator-typescript-interfaces"
+  output      = "./../types/interfaces/models.ts"
+  dateType    = "string"
+  bigIntType  = "string"
+  decimalType = "string"
+  bytesType   = "number[]"
+}
+
+generator prismabox {
+  provider                    = "prisma-client"
+  // you can optionally specify the output location. Defaults to ./prismabox
+  output                      = "./prismaclient-models"
+  // // if you want, you can customize the imported variable name that is used for the schemes. Defaults to "Type" which is what the standard typebox package offers
+  // typeboxImportVariableName   = "Type"
+  // // you also can specify the dependency from which the above import should happen. This is useful if a package re-exports the typebox package and you would like to use that
+  // typeboxImportDependencyName = "@sinclair/typebox"
+  // // by default the generated schemes do not allow additional properties. You can allow them by setting this to true
+  // additionalProperties        = true
+  // // optionally enable the data model generation. See the data model section below for more info
+  // inputModel                  = true
+  // importFileExtension         = ".ts"
+}
