@@ -26,3 +26,4 @@ EXPOSE 3000
 # CMD [ "serve", "-s", "build" ]
 # CMD [ "npm", "start" ]
 CMD [ "npm", "run", "dev" ]
+# npm config set registry https://registry.npmjs.org/
