@@ -3,6 +3,7 @@ import { Database } from "./database.types";
 type Location = Database["public"]["Enums"]["Location"];
 type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
+type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
 
 type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
 type CreateStudentDataResponse = Database["public"]["Tables"]["Student"]["Row"];
@@ -15,6 +16,7 @@ export type {
   Location,
   StudentStatus,
   Gender,
+  SubjectOffering,
   CreateStudentDataParams,
   CreateStudentDataResponse,
   GetLocationsResponse,
