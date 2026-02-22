@@ -103,7 +103,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader>PEAK Tuition Admin Hub</SidebarHeader>
+      <SidebarHeader>
+        <SidebarMenuButton asChild>
+          <Link href="/">
+            <GraduationCap />
+            <span>PEAK Tuition Admin Hub</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
