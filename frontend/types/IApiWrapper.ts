@@ -4,7 +4,7 @@ type Location = Database["public"]["Enums"]["Location"];
 type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
 
-type CreateStudentDataParams = Omit<Database["public"]["Tables"]["Student"]["Insert"], "student_id">;
+type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
 type CreateStudentDataResponse = Database["public"]["Tables"]["Student"]["Row"];
 
 type GetLocationsResponse = Location[];
