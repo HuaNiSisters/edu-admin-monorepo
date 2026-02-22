@@ -18,7 +18,6 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 import Link from "next/link";
-import { ModeToggle } from "./mode-toggle";
 
 import {
   Home,
@@ -187,9 +186,7 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
       </SidebarContent>
-      <SidebarFooter>
-        <ModeToggle />
-      </SidebarFooter>
+      <SidebarFooter />
     </Sidebar>
   );
 }
