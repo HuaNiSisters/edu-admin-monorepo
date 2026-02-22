@@ -1,5 +1,8 @@
 import { Database } from "./database.types";
 
+//////////////////////////////////////////////////////////////////
+  // STUDENTS
+  //////////////////////////////////////////////////////////////////
 type Location = Database["public"]["Enums"]["Location"];
 type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
@@ -11,6 +14,13 @@ type GetLocationsResponse = Location[];
 type GetStatusesResponse = StudentStatus[];
 type GetGendersResponse = Gender[];
 
+//////////////////////////////////////////////////////////////////
+  // CLASSES
+  //////////////////////////////////////////////////////////////////
+type CreateClassDataParams = Database["public"]["Tables"]["ClassTime"]["Insert"];
+type CreateClassDataResponse = Database["public"]["Tables"]["ClassTime"]["Row"];
+
+
 export type {
   Location,
   StudentStatus,
@@ -20,6 +30,8 @@ export type {
   GetLocationsResponse,
   GetStatusesResponse,
   GetGendersResponse,
+  CreateClassDataParams,
+  CreateClassDataResponse
 }
 
 export interface ApiWrapper {

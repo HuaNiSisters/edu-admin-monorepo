@@ -45,7 +45,7 @@ const studentsSidebarItems = [
   },
   {
     name: "Create",
-    url: "/student/create",
+    url: "/students/create",
     icon: Plus,
   },
   {
@@ -83,7 +83,7 @@ const adminSidebarItems = [
   },
   {
     name: "Classes",
-    url: "/admin/classes",
+    url: "/admin/classes/create",
     icon: GraduationCap,
   },
   {
