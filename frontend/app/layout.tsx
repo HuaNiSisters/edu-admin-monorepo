@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -37,10 +41,16 @@ export default function RootLayout({
         >
           <SidebarProvider>
             <AppSidebar />
-            <main>
-              {/* <SidebarTrigger /> */}
-              {children}
-            </main>
+
+            <SidebarInset>
+              <div className="flex min-h-screen flex-col">
+                <header className="flex h-14 items-center px-4">
+                  <SidebarTrigger />
+                </header>
+
+                <main className="flex-1 px-4">{children}</main>
+              </div>
+            </SidebarInset>
           </SidebarProvider>
         </ThemeProvider>
       </body>
