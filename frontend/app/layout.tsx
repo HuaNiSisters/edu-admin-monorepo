@@ -49,7 +49,7 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
             <div className="block w-full">
-              <div className="h-16 border-b flex items-center p-5 justify-between">
+              <div className="h-16 flex items-center p-5 justify-between">
                 <div className="flex items-center gap-2">
                   <SidebarTrigger />
                   {documentTitle}
