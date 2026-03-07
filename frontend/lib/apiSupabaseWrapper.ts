@@ -9,6 +9,9 @@ import {
   GetGendersResponse,
   GetLocationsResponse,
   GetStatusesResponse,
+  GetSubjectOfferingsResponse,
+  SubjectOffering,
+  UpdateSubjectDataParams,
 } from "@/types/IApiWrapper";
 
 class ApiSupabaseWrapper implements ApiWrapper {
@@ -29,6 +32,19 @@ class ApiSupabaseWrapper implements ApiWrapper {
       .select()
       .single();
       return responseData;
+  }
+
+    async updateSubjectAsync(
+    id: string,
+    data: UpdateSubjectDataParams,
+  ): Promise<SubjectOffering> {
+    const { data: responseData, error } = await this.supabase
+      .from("SubjectOffering")
+      .update(data)
+      .eq("subject_id", id)
+      .select()
+      .single();
+    return responseData;
   }
 
   async createStudentAsync(
@@ -53,6 +69,16 @@ class ApiSupabaseWrapper implements ApiWrapper {
 
   async getGendersAsync(): Promise<GetGendersResponse> {
     return Object.values(Constants.public.Enums.Gender);
+  }
+
+  async getSubjectOfferingsAsync(): Promise<GetSubjectOfferingsResponse> {
+    const { data: responseData, error } = await this.supabase
+    .from("SubjectOffering")
+    .select("subject_id, subject_name, grade, location, price_per_term, tutorTutor_id")
+    .order("grade", { ascending: true });
+
+    if (error) throw error;
+    return responseData;
   }
 }
 

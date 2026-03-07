@@ -17,12 +17,6 @@ import { Label } from "@/components/ui/label";
 import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 
-const LOCATIONS = [
-  { label: "Parramatta", value: "parramatta" },
-  { label: "Cabramatta & Canley Vale", value: "cabramatta_and_canley_vale" },
-  { label: "Online", value: "online" },
-];
-
 const CreateSubjectPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<SubjectOffering | null>(
@@ -31,6 +25,21 @@ const CreateSubjectPage = () => {
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] =
     useState<string>("parramatta");
+  const [subjectOfferings, setSubjectOfferings] = useState<SubjectOffering[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+
+  const fetchSubjects = async () => {
+    try {
+      const data = await apiWrapper.getSubjectOfferingsAsync();
+      setSubjectOfferings(data);
+    } catch (err) {
+      console.error("Failed to fetch subjects:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchSelectableFieldsData() {
@@ -38,6 +47,7 @@ const CreateSubjectPage = () => {
       setLocationOptions(fetchedLocations);
     }
     fetchSelectableFieldsData();
+    fetchSubjects();
   }, []);
   const handleAdd = () => {
     setEditingSubject(null);
@@ -47,12 +57,17 @@ const CreateSubjectPage = () => {
   const handleSave = (data: {
     subjectName: string;
     grade: string;
-    price: string;
+    pricePerTerm: string;
     location: string;
   }) => {
     console.log("Save subject:", data);
-    // Ensure new subject appears on list
     setDialogOpen(false);
+    fetchSubjects();
+  };
+
+  const handleEdit = (subject: SubjectOffering) => {
+    setEditingSubject(subject);
+    setDialogOpen(true);
   };
 
   return (
@@ -66,7 +81,6 @@ const CreateSubjectPage = () => {
           onChange={() => setSelectedLocation(selectedLocation)}
         />
       </div>
-
       {/* Add Subject Button */}
       <div className="flex justify-end">
         <Button onClick={handleAdd} className="gap-2">
@@ -75,8 +89,16 @@ const CreateSubjectPage = () => {
         </Button>
       </div>
 
-      {/* Subjects List filtered by location */}
-      <SubjectsList locationFilter={selectedLocation} />
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        // Subjects filtered by location
+        <SubjectsList
+          locationFilter={selectedLocation}
+          subjectOfferings={subjectOfferings}
+          onEdit={handleEdit}
+        />
+      )}
 
       {/* Dialog */}
       <SubjectDialog

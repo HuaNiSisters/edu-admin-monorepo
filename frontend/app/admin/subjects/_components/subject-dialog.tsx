@@ -78,24 +78,38 @@ const SubjectDialog = ({
     fetchSelectableFieldsData();
 
     if (subject && open) {
-      // form.reset({
-      //   subjectName: subject.subject_name,
-      //   grade: subject.grade,
-      //   pricePerTerm: Number(subject.price_per_term),
-      // });
+      form.reset({
+        subjectName: subject.subject_name,
+        grade: String(subject.grade),
+        pricePerTerm: String(subject.price_per_term),
+        location: subject.location,
+      });
     } else if (open) {
-      form.reset();
+      form.reset({
+        subjectName: "",
+        grade: "",
+        pricePerTerm: "",
+        location: "",
+      });
     }
   }, [subject, open, form]);
 
   const onSubmit = async (data: zod.infer<typeof subjectFormSchema>) => {
-    // TODO: call API to create subject offering with selected location
-    await apiWrapper.createSubjectAsync({
-      subject_name: data.subjectName,
-      grade: data.grade as number,
-      location: data.location as Location,
-      price_per_term: data.pricePerTerm as number,
-    });
+    if (subject) {
+      await apiWrapper.updateSubjectAsync(subject.subject_id, {
+        subject_name: data.subjectName,
+        grade: Number(data.grade),
+        location: data.location as Location,
+        price_per_term: Number(data.pricePerTerm),
+      });
+    } else {
+      await apiWrapper.createSubjectAsync({
+        subject_name: data.subjectName,
+        grade: Number(data.grade),
+        location: data.location as Location,
+        price_per_term: Number(data.pricePerTerm),
+      });
+    }
     onSave(data);
     onOpenChange(false);
   };
