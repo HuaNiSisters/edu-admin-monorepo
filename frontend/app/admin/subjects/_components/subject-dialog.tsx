@@ -1,6 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
+import apiWrapper from "@/lib/apiWrapper";
+import { Location } from "@/types/IApiWrapper";
+import { SubjectOffering } from "@/types/IApiWrapper";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as zod from "zod";
@@ -16,10 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
-import apiWrapper from "@/lib/apiWrapper";
-import { Location } from "@/types/IApiWrapper";
-
-import { SubjectOffering } from "@/types/IApiWrapper";
 
 interface SubjectDialogProps {
   open: boolean;

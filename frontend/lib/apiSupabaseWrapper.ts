@@ -26,7 +26,7 @@ class ApiSupabaseWrapper implements ApiWrapper {
     data: CreateSubjectDataParams
   ): Promise<CreateSubjectDataResponse> {
       console.log({ createSubjectData: data });
-    const { data: responseData, error } = await this.supabase
+    const { data: responseData } = await this.supabase
       .from("SubjectOffering")
       .insert(data)
       .select()
@@ -38,7 +38,7 @@ class ApiSupabaseWrapper implements ApiWrapper {
     id: string,
     data: UpdateSubjectDataParams,
   ): Promise<SubjectOffering> {
-    const { data: responseData, error } = await this.supabase
+    const { data: responseData } = await this.supabase
       .from("SubjectOffering")
       .update(data)
       .eq("subject_id", id)
@@ -51,7 +51,7 @@ class ApiSupabaseWrapper implements ApiWrapper {
     data: CreateStudentDataParams,
   ): Promise<CreateStudentDataResponse> {
     console.log({ createStudentData: data });
-    const { data: responseData, error } = await this.supabase
+    const { data: responseData } = await this.supabase
       .from("Student")
       .insert(data)
       .select()

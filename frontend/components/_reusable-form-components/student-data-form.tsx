@@ -6,15 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as zod from "zod";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import apiWrapper from "@/lib/apiWrapper";
@@ -93,7 +85,7 @@ const StudentDataForm = () => {
       preferred_name: data.preferredName,
       gender: data.gender as Gender,
       email: data.email,
-      grade_at_school: data.grade as number,
+      grade_at_school: Number(data.grade),
       school: data.school,
       location: data.location as Location,
       status: data.status as StudentStatus,
