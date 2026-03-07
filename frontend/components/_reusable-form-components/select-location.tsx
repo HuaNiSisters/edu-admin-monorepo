@@ -9,13 +9,14 @@ import {
 } from "@/components/ui/select";
 
 interface SelectLocationProps {
-  values: string[];
+  options: string[];
   value?: string;
   onChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 const SelectLocation = (props: SelectLocationProps) => {
-  const { values, value, onChange } = props;
+  const { options, value, onChange, disabled } = props;
 
   const formatLabel = (value: string) =>
     value
@@ -26,16 +27,16 @@ const SelectLocation = (props: SelectLocationProps) => {
       .join(" ");
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger>
         <SelectValue placeholder="Select a location" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Locations</SelectLabel>
-          {values?.map((value) => (
-            <SelectItem key={value} value={value}>
-              {formatLabel(value)}
+          {options?.map((option) => (
+            <SelectItem key={option} value={option}>
+              {formatLabel(option)}
             </SelectItem>
           ))}
         </SelectGroup>

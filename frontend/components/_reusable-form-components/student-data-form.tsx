@@ -12,8 +12,14 @@ import { Textarea } from "@/components/ui/textarea";
 import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
-import { Location, StudentStatus, Gender } from "@/types/IApiWrapper";
+import {
+  Location,
+  StudentStatus,
+  Gender,
+  StudentData,
+} from "@/types/IApiWrapper";
 import { SelectGender } from "./select-gender";
+import { toast } from "sonner";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -27,7 +33,7 @@ const formSchema = zod.object({
   // grade: zod.number().min(7).max(12), // Hard-coded range validation check
   grade: zod.string().refine((value) => {
     const parsed = parseInt(value, 10);
-    return !isNaN(parsed) && parsed >= 7 && parsed <= 12;
+    return !isNaN(parsed) && parsed >= 1 && parsed <= 12;
   }),
   school: zod.string().min(1, "School is required"),
   suburb: zod.string().min(1, "Suburb is required"),
@@ -37,7 +43,49 @@ const formSchema = zod.object({
   mobile: zod.string().min(1, "Mobile number is required"),
 });
 
-const StudentDataForm = () => {
+const StudentDataForm = ({
+  studentData,
+  isEditing,
+}: {
+  studentData?: StudentData;
+  isEditing?: boolean;
+}) => {
+  const isEditMode = !!studentData && isEditing;
+  const isViewingMode = !!studentData && !isEditing;
+
+  const [studentId, setStudentId] = useState<string>("");
+
+  useEffect(() => {
+    const {
+      student_id,
+      first_name,
+      last_name,
+      preferred_name,
+      gender,
+      email,
+      grade_at_school,
+      school,
+      location,
+      status,
+      notes,
+      student_mobile,
+      suburb_of_home,
+    } = studentData || {};
+    setStudentId(student_id || "");
+    form.setValue("firstName", first_name || "");
+    form.setValue("lastName", last_name || "");
+    form.setValue("preferredName", preferred_name || "");
+    form.setValue("gender", gender || "");
+    form.setValue("email", email || "");
+    form.setValue("grade", grade_at_school ? grade_at_school.toString() : "");
+    form.setValue("school", school || "");
+    form.setValue("location", location || "");
+    form.setValue("status", status || "");
+    form.setValue("notes", notes || "");
+    form.setValue("mobile", student_mobile || "");
+    form.setValue("suburb", suburb_of_home || "");
+  }, [studentData]);
+
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,12 +121,39 @@ const StudentDataForm = () => {
   }, []);
 
   useEffect(() => {
-    if (form.formState.isSubmitSuccessful) {
+    if (form.formState.isSubmitSuccessful && !isEditMode) {
       form.reset();
     }
-  }, [form.formState.isSubmitSuccessful, form.reset]);
+  }, [
+    form.formState.isSubmitSuccessful,
+    form.reset,
+    isEditMode,
+    isViewingMode,
+  ]);
 
   async function onSubmit(data: zod.infer<typeof formSchema>) {
+    if (isEditMode) {
+      await apiWrapper.updateStudentAsync(studentId, {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        preferred_name: data.preferredName,
+        gender: data.gender as Gender,
+        email: data.email,
+        grade_at_school: parseInt(data.grade),
+        school: data.school,
+        location: data.location as Location,
+        status: data.status as StudentStatus,
+        notes: data.notes,
+        suburb_of_home: data.suburb,
+        student_mobile: data.mobile,
+      });
+
+      toast.success("Student updated successfully!", {
+        position: "top-center",
+      });
+      return;
+    }
+
     await apiWrapper.createStudentAsync({
       first_name: data.firstName,
       last_name: data.lastName,
@@ -93,6 +168,8 @@ const StudentDataForm = () => {
       suburb_of_home: data.suburb,
       student_mobile: data.mobile,
     });
+    toast.success("Student created successfully!", { position: "top-center" });
+    return;
   }
 
   return (
@@ -115,6 +192,7 @@ const StudentDataForm = () => {
                 id="student-name"
                 placeholder="Student's First Name"
                 {...field}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -133,6 +211,7 @@ const StudentDataForm = () => {
                 id="student-last-name"
                 placeholder="Student's Last Name"
                 {...field}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -147,7 +226,11 @@ const StudentDataForm = () => {
               <FieldLabel htmlFor="student-preferred-name">
                 Preferred name
               </FieldLabel>
-              <Input id="student-preferred-name" {...field} />
+              <Input
+                id="student-preferred-name"
+                {...field}
+                disabled={isViewingMode}
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -162,9 +245,10 @@ const StudentDataForm = () => {
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectGender
-                values={genderOptions}
+                options={genderOptions}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -180,7 +264,12 @@ const StudentDataForm = () => {
                 Grade at school
                 <span className="text-red-500">*</span>
               </FieldLabel>
-              <Input id="student-grade" type="number" {...field} />
+              <Input
+                id="student-grade"
+                type="number"
+                {...field}
+                disabled={isViewingMode}
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -195,7 +284,12 @@ const StudentDataForm = () => {
                 School
                 <span className="text-red-500">*</span>
               </FieldLabel>
-              <Input id="student-school" type="text" {...field} />
+              <Input
+                id="student-school"
+                type="text"
+                {...field}
+                disabled={isViewingMode}
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -210,7 +304,7 @@ const StudentDataForm = () => {
                 Suburb
                 <span className="text-red-500">*</span>
               </FieldLabel>
-              <Input id="student-suburb" {...field} />
+              <Input id="student-suburb" {...field} disabled={isViewingMode} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -226,9 +320,10 @@ const StudentDataForm = () => {
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectLocation
-                values={locationOptions}
+                options={locationOptions}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -245,9 +340,10 @@ const StudentDataForm = () => {
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectStatus
-                values={statusOptions}
+                options={statusOptions}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -268,6 +364,7 @@ const StudentDataForm = () => {
                 id="student-mobile"
                 placeholder="Student's Mobile Number"
                 {...field}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -282,7 +379,12 @@ const StudentDataForm = () => {
                 Email
                 <span className="text-red-500">*</span>
               </FieldLabel>
-              <Input id="student-email" type="email" {...field} />
+              <Input
+                id="student-email"
+                type="email"
+                {...field}
+                disabled={isViewingMode}
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -299,6 +401,7 @@ const StudentDataForm = () => {
                 id="student-notes"
                 placeholder="Additional notes"
                 {...field}
+                disabled={isViewingMode}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -306,7 +409,7 @@ const StudentDataForm = () => {
         />
       </div>
 
-      <div className="py-5">
+      <div className="py-5" hidden={isViewingMode}>
         <Field orientation="horizontal">
           <Button type="submit" form="student-data-form">
             Submit

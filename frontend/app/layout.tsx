@@ -9,7 +9,6 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { NavigationMenu } from "@/components/ui/navigation-menu";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,6 +18,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ModeToggle } from "@/components/mode-toggle";
+import { Toaster } from "@/components/ui/sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -35,7 +35,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const documentTitle = document.title;
+  const documentTitle = "document.title";
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -73,6 +73,7 @@ export default function RootLayout({
               </div>
               <SidebarInset>
                 <div className="flex min-h-screen flex-col">
+                  <Toaster />
                   <main className="flex-1 p-10">{children}</main>
                 </div>
               </SidebarInset>

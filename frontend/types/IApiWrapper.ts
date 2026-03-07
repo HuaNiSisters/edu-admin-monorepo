@@ -6,10 +6,11 @@ type Gender = Database["public"]["Enums"]["Gender"];
 type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
 
 type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
-type CreateStudentDataResponse = Database["public"]["Tables"]["Student"]["Row"];
+type StudentData = Database["public"]["Tables"]["Student"]["Row"];
+
+type UpdateStudentDataParams = Partial<Omit<CreateStudentDataParams, "id">>;
 
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
-type CreateSubjectDataResponse = Database["public"]["Tables"]["Student"]["Row"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
 
 type GetLocationsResponse = Location[];
@@ -21,12 +22,12 @@ export type {
   Location,
   StudentStatus,
   Gender,
+  StudentData,
   SubjectOffering,
   CreateStudentDataParams,
   CreateSubjectDataParams,
   UpdateSubjectDataParams,
-  CreateStudentDataResponse,
-  CreateSubjectDataResponse,
+  UpdateStudentDataParams,
   GetLocationsResponse,
   GetStatusesResponse,
   GetGendersResponse,
@@ -34,12 +35,14 @@ export type {
 }
 
 export interface ApiWrapper {
-  createStudentAsync: (data: CreateStudentDataParams) => Promise<CreateStudentDataResponse>;
-  createSubjectAsync: (data: CreateSubjectDataParams) => Promise<CreateSubjectDataResponse>;
+  createStudentAsync: (data: CreateStudentDataParams) => Promise<StudentData>;
+  createSubjectAsync: (data: CreateSubjectDataParams) => Promise<SubjectOffering>;
+  updateStudentAsync: (id: string, data: UpdateStudentDataParams) => Promise<StudentData>;
   updateSubjectAsync: (id: string, data: UpdateSubjectDataParams) => Promise<SubjectOffering>;
+  getStudentByIdAsync: (id: string) => Promise<StudentData>;
+  getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>
   getLocationsAsync: () => Promise<GetLocationsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;
   getGendersAsync: () => Promise<GetGendersResponse>;
-  getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>
 }
 
