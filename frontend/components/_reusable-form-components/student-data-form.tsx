@@ -96,7 +96,7 @@ const StudentDataForm = ({
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultoptions: {
       firstName: "",
       lastName: "",
       preferredName: "",
@@ -253,7 +253,7 @@ const StudentDataForm = ({
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectGender
-                values={genderOptions}
+                options={genderOptions}
                 value={field.value}
                 onChange={field.onChange}
                 disabled={isViewingMode}
@@ -328,7 +328,7 @@ const StudentDataForm = ({
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectLocation
-                values={locationOptions}
+                options={locationOptions}
                 value={field.value}
                 onChange={field.onChange}
                 disabled={isViewingMode}
@@ -348,7 +348,7 @@ const StudentDataForm = ({
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectStatus
-                values={statusOptions}
+                options={statusOptions}
                 value={field.value}
                 onChange={field.onChange}
                 disabled={isViewingMode}

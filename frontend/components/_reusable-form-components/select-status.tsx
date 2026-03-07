@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/select";
 
 interface SelectStatusProps {
-  values: string[];
+  options: string[];
   value?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
 }
 
 const SelectStatus = (props: SelectStatusProps) => {
-  const { values, value, onChange, disabled } = props;
+  const { options, value, onChange, disabled } = props;
 
   const mapValueToLabel: Record<string, string> = {
     attending: "Attending",
@@ -31,9 +31,9 @@ const SelectStatus = (props: SelectStatusProps) => {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Status</SelectLabel>
-          {values?.map((value) => (
-            <SelectItem key={value} value={value}>
-              {mapValueToLabel[value] || value}
+          {options?.map((option) => (
+            <SelectItem key={option} value={option}>
+              {mapValueToLabel[option] || option}
             </SelectItem>
           ))}
         </SelectGroup>

@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/select";
 
 interface SelectGenderProps {
-  values: string[];
+  options: string[];
   value?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
 }
 
 const SelectGender = (props: SelectGenderProps) => {
-  const { values, value, onChange } = props;
+  const { options, value, onChange } = props;
 
   const mapValueToLabel: Record<string, string> = {
     M: "Male",
@@ -31,9 +31,9 @@ const SelectGender = (props: SelectGenderProps) => {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Gender</SelectLabel>
-          {values?.map((value) => (
-            <SelectItem key={value} value={value}>
-              {mapValueToLabel[value] || value}
+          {options?.map((option) => (
+            <SelectItem key={option} value={option}>
+              {mapValueToLabel[option] || option}
             </SelectItem>
           ))}
         </SelectGroup>
