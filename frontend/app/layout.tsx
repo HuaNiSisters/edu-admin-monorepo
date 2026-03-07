@@ -49,27 +49,14 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
             <div className="block w-full">
-              <div className="h-16 flex items-center p-5 justify-between">
+              <div className="h-16 flex items-center p-5 justify-between text-foreground bg-background border-b border-border">
                 <div className="flex items-center gap-2">
-                  <SidebarTrigger />
-                  {documentTitle}
+                  <SidebarTrigger className="text-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground" />
+                  <span className="text-foreground text-sm font-medium">
+                    {documentTitle}
+                  </span>
                 </div>
                 <ModeToggle />
-                {/* <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="#">Home</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="#">Components</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb> */}
               </div>
               <SidebarInset>
                 <div className="flex min-h-screen flex-col">

@@ -20,7 +20,7 @@ type SubjectsListProps = {
 
 const SubjectsList = ({ subjectOfferings, onEdit }: SubjectsListProps) => {
   return (
-    <div className="w-full">
+    <div className="w-full border rounded-md bg-primary-foreground p-3">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
