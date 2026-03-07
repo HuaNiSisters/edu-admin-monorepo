@@ -47,36 +47,6 @@ export type Database = {
         }
         Relationships: []
       }
-      _SubjectToTutor: {
-        Row: {
-          A: string
-          B: string
-        }
-        Insert: {
-          A: string
-          B: string
-        }
-        Update: {
-          A?: string
-          B?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "_SubjectToTutor_A_fkey"
-            columns: ["A"]
-            isOneToOne: false
-            referencedRelation: "Subject"
-            referencedColumns: ["subject_id"]
-          },
-          {
-            foreignKeyName: "_SubjectToTutor_B_fkey"
-            columns: ["B"]
-            isOneToOne: false
-            referencedRelation: "Tutor"
-            referencedColumns: ["tutor_id"]
-          },
-        ]
-      }
       Attendance: {
         Row: {
           attendance_id: string
@@ -156,7 +126,7 @@ export type Database = {
             columns: ["offering_id"]
             isOneToOne: false
             referencedRelation: "SubjectOffering"
-            referencedColumns: ["offering_id"]
+            referencedColumns: ["subject_id"]
           },
           {
             foreignKeyName: "ClassTime_tutor_id_fkey"
@@ -215,24 +185,6 @@ export type Database = {
             referencedColumns: ["term_id"]
           },
         ]
-      }
-      Grade: {
-        Row: {
-          grade_id: string
-          label: string
-          school_year_number: number
-        }
-        Insert: {
-          grade_id?: string
-          label: string
-          school_year_number: number
-        }
-        Update: {
-          grade_id?: string
-          label?: string
-          school_year_number?: number
-        }
-        Relationships: []
       }
       Parent: {
         Row: {
@@ -389,57 +341,38 @@ export type Database = {
           },
         ]
       }
-      Subject: {
-        Row: {
-          name: Database["public"]["Enums"]["SubjectType"]
-          subject_id: string
-        }
-        Insert: {
-          name: Database["public"]["Enums"]["SubjectType"]
-          subject_id?: string
-        }
-        Update: {
-          name?: Database["public"]["Enums"]["SubjectType"]
-          subject_id?: string
-        }
-        Relationships: []
-      }
       SubjectOffering: {
         Row: {
-          grade_id: string
+          grade: number
           location: Database["public"]["Enums"]["Location"]
-          offering_id: string
           price_per_term: number
           subject_id: string
+          subject_name: string
+          tutorTutor_id: string | null
         }
         Insert: {
-          grade_id: string
+          grade: number
           location: Database["public"]["Enums"]["Location"]
-          offering_id?: string
           price_per_term: number
-          subject_id: string
+          subject_id?: string
+          subject_name: string
+          tutorTutor_id?: string | null
         }
         Update: {
-          grade_id?: string
+          grade?: number
           location?: Database["public"]["Enums"]["Location"]
-          offering_id?: string
           price_per_term?: number
           subject_id?: string
+          subject_name?: string
+          tutorTutor_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "SubjectOffering_grade_id_fkey"
-            columns: ["grade_id"]
+            foreignKeyName: "SubjectOffering_tutorTutor_id_fkey"
+            columns: ["tutorTutor_id"]
             isOneToOne: false
-            referencedRelation: "Grade"
-            referencedColumns: ["grade_id"]
-          },
-          {
-            foreignKeyName: "SubjectOffering_subject_id_fkey"
-            columns: ["subject_id"]
-            isOneToOne: false
-            referencedRelation: "Subject"
-            referencedColumns: ["subject_id"]
+            referencedRelation: "Tutor"
+            referencedColumns: ["tutor_id"]
           },
         ]
       }
@@ -511,17 +444,6 @@ export type Database = {
       PaymentStatus: "unpaid" | "partial" | "paid"
       PaymentType: "cash" | "bank_transfer" | "other"
       StudentStatus: "attending" | "alumni"
-      SubjectType:
-        | "primary"
-        | "selective"
-        | "oc"
-        | "mathematics"
-        | "english"
-        | "science"
-        | "biology"
-        | "chemistry"
-        | "physics"
-        | "economics"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -662,18 +584,6 @@ export const Constants = {
       PaymentStatus: ["unpaid", "partial", "paid"],
       PaymentType: ["cash", "bank_transfer", "other"],
       StudentStatus: ["attending", "alumni"],
-      SubjectType: [
-        "primary",
-        "selective",
-        "oc",
-        "mathematics",
-        "english",
-        "science",
-        "biology",
-        "chemistry",
-        "physics",
-        "economics",
-      ],
     },
   },
 } as const
