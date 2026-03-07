@@ -20,8 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
-import { Location, StudentStatus, Gender } from "@/types/IApiWrapper";
+import {
+  Location,
+  StudentStatus,
+  Gender,
+  StudentData,
+} from "@/types/IApiWrapper";
 import { SelectGender } from "./select-gender";
+import { toast } from "sonner";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -35,7 +41,7 @@ const formSchema = zod.object({
   // grade: zod.number().min(7).max(12), // Hard-coded range validation check
   grade: zod.string().refine((value) => {
     const parsed = parseInt(value, 10);
-    return !isNaN(parsed) && parsed >= 7 && parsed <= 12;
+    return !isNaN(parsed) && parsed >= 1 && parsed <= 12;
   }),
   school: zod.string().min(1, "School is required"),
   suburb: zod.string().min(1, "Suburb is required"),
@@ -45,7 +51,42 @@ const formSchema = zod.object({
   mobile: zod.string().min(1, "Mobile number is required"),
 });
 
-const StudentDataForm = () => {
+const StudentDataForm = ({ studentData, isEditing }: { studentData?: StudentData; isEditing?: boolean }) => {
+  const isEditMode = !!studentData && isEditing;
+
+  const [studentId, setStudentId] = useState<string>("");
+
+  useEffect(() => {
+    const {
+      student_id,
+      first_name,
+      last_name,
+      preferred_name,
+      gender,
+      email,
+      grade_at_school,
+      school,
+      location,
+      status,
+      notes,
+      student_mobile,
+      suburb_of_home,
+    } = studentData || {};
+    setStudentId(student_id || "");
+    form.setValue("firstName", first_name || "");
+    form.setValue("lastName", last_name || "");
+    form.setValue("preferredName", preferred_name || "");
+    form.setValue("gender", gender || "");
+    form.setValue("email", email || "");
+    form.setValue("grade", grade_at_school ? grade_at_school.toString() : "");
+    form.setValue("school", school || "");
+    form.setValue("location", location || "");
+    form.setValue("status", status || "");
+    form.setValue("notes", notes || "");
+    form.setValue("mobile", student_mobile || "");
+    form.setValue("suburb", suburb_of_home || "");
+  }, [studentData]);
+
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,19 +122,39 @@ const StudentDataForm = () => {
   }, []);
 
   useEffect(() => {
-    if (form.formState.isSubmitSuccessful) {
+    if (form.formState.isSubmitSuccessful && !isEditMode) {
       form.reset();
     }
-  }, [form.formState.isSubmitSuccessful, form.reset]);
+  }, [form.formState.isSubmitSuccessful, form.reset, isEditMode]);
 
   async function onSubmit(data: zod.infer<typeof formSchema>) {
+    if(isEditMode) {
+      await apiWrapper.updateStudentAsync(studentId, {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        preferred_name: data.preferredName,
+        gender: data.gender as Gender,
+        email: data.email,
+        grade_at_school: parseInt(data.grade),
+        school: data.school,
+        location: data.location as Location,
+        status: data.status as StudentStatus,
+        notes: data.notes,
+        suburb_of_home: data.suburb,
+        student_mobile: data.mobile,
+      });
+      
+      toast.success("Student updated successfully!", { position: "top-center" });
+      return;
+    }
+
     await apiWrapper.createStudentAsync({
       first_name: data.firstName,
       last_name: data.lastName,
       preferred_name: data.preferredName,
       gender: data.gender as Gender,
       email: data.email,
-      grade_at_school: data.grade as number,
+      grade_at_school: parseInt(data.grade),
       school: data.school,
       location: data.location as Location,
       status: data.status as StudentStatus,
@@ -101,6 +162,8 @@ const StudentDataForm = () => {
       suburb_of_home: data.suburb,
       student_mobile: data.mobile,
     });
+    toast.success("Student created successfully!", { position: "top-center" });
+    return;
   }
 
   return (

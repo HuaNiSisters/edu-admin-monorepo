@@ -5,7 +5,9 @@ type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
 
 type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
-type CreateStudentDataResponse = Database["public"]["Tables"]["Student"]["Row"];
+type StudentData = Database["public"]["Tables"]["Student"]["Row"];
+
+type UpdateStudentDataParams = Partial<Omit<CreateStudentDataParams, "id">>;
 
 type GetLocationsResponse = Location[];
 type GetStatusesResponse = StudentStatus[];
@@ -15,15 +17,18 @@ export type {
   Location,
   StudentStatus,
   Gender,
+  StudentData,
   CreateStudentDataParams,
-  CreateStudentDataResponse,
+  UpdateStudentDataParams,
   GetLocationsResponse,
   GetStatusesResponse,
   GetGendersResponse,
 }
 
 export interface ApiWrapper {
-  createStudentAsync: (data: CreateStudentDataParams) => Promise<CreateStudentDataResponse>;
+  createStudentAsync: (data: CreateStudentDataParams) => Promise<StudentData>;
+  getStudentByIdAsync: (id: string) => Promise<StudentData>;
+  updateStudentAsync: (id: string, data: UpdateStudentDataParams) => Promise<StudentData>;
   getLocationsAsync: () => Promise<GetLocationsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;
   getGendersAsync: () => Promise<GetGendersResponse>;
