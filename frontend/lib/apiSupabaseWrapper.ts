@@ -4,6 +4,8 @@ import {
   ApiWrapper,
   CreateStudentDataParams,
   CreateStudentDataResponse,
+  CreateSubjectDataParams,
+  CreateSubjectDataResponse,
   GetGendersResponse,
   GetLocationsResponse,
   GetStatusesResponse,
@@ -14,6 +16,19 @@ class ApiSupabaseWrapper implements ApiWrapper {
 
   constructor() {
     this.supabase = createClient();
+  }
+
+
+  async createSubjectAsync(
+    data: CreateSubjectDataParams
+  ): Promise<CreateSubjectDataResponse> {
+      console.log({ createSubjectData: data });
+    const { data: responseData, error } = await this.supabase
+      .from("SubjectOffering")
+      .insert(data)
+      .select()
+      .single();
+      return responseData;
   }
 
   async createStudentAsync(
