@@ -29,19 +29,6 @@ enum Location {
   online
 }
 
-enum SubjectType {
-  primary
-  selective
-  oc
-  mathematics
-  english
-  science
-  biology
-  chemistry
-  physics
-  economics
-}
-
 enum AttendanceStatus {
   present
   absent
@@ -146,8 +133,8 @@ model Tutor {
   phone      String
   email      String?
 
-  classes  ClassTime[]
-  subjects Subject[]
+  classes           ClassTime[]
+  subject_offerings SubjectOffering[]
 }
 
 ////////////////////
@@ -163,42 +150,25 @@ model ClassTime {
   capacity    Int?
   active      Boolean @default(true)
 
-  offering   SubjectOffering @relation(fields: [offering_id], references: [offering_id])
-  enrolments Enrolment[]
-  attendance Attendance[]
-  tutor      Tutor?          @relation(fields: [tutor_id], references: [tutor_id])
-}
-
-model Subject {
-  subject_id String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       SubjectType
-
-  offerings SubjectOffering[]
-  tutors    Tutor[]
-}
-
-model Grade {
-  grade_id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  label              String // e.g. Y7, Y8, Y12
-  school_year_number Int
-
-  offerings SubjectOffering[]
+  subject_offering SubjectOffering @relation(fields: [offering_id], references: [subject_id])
+  enrolments       Enrolment[]
+  attendance       Attendance[]
+  tutor            Tutor?          @relation(fields: [tutor_id], references: [tutor_id])
 }
 
 // Y7 Science CC - $300
 model SubjectOffering {
-  offering_id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  subject_id     String   @db.Uuid
-  grade_id       String   @db.Uuid
+  subject_id     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject_name   String
+  grade          Int
   location       Location
   price_per_term Decimal  @db.Decimal(10, 2)
 
-  subject Subject @relation(fields: [subject_id], references: [subject_id])
-  grade   Grade   @relation(fields: [grade_id], references: [grade_id])
+  classTimes    ClassTime[]
+  tutor         Tutor?      @relation(fields: [tutorTutor_id], references: [tutor_id])
+  tutorTutor_id String?     @db.Uuid
 
-  classTimes ClassTime[]
-
-  @@unique([subject_id, grade_id, location])
+  @@unique([subject_name, grade, location])
 }
 
 model Term {
@@ -272,9 +242,9 @@ generator typescriptInterfaces {
 }
 
 generator prismabox {
-  provider                    = "prisma-client"
+  provider = "prisma-client"
   // you can optionally specify the output location. Defaults to ./prismabox
-  output                      = "./prismaclient-models"
+  output   = "./prismaclient-models"
   // // if you want, you can customize the imported variable name that is used for the schemes. Defaults to "Type" which is what the standard typebox package offers
   // typeboxImportVariableName   = "Type"
   // // you also can specify the dependency from which the above import should happen. This is useful if a package re-exports the typebox package and you would like to use that
