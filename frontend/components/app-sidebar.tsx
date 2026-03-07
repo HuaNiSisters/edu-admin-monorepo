@@ -130,7 +130,7 @@ export function AppSidebar() {
         <Collapsible defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel className="flex justify-between">
-              Students
+              STUDENTS
               <CollapsibleTrigger>
                 <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
               </CollapsibleTrigger>
@@ -160,7 +160,7 @@ export function AppSidebar() {
         <Collapsible defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel className="flex justify-between">
-              Admin
+              ADMIN
               <CollapsibleTrigger>
                 <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
               </CollapsibleTrigger>
