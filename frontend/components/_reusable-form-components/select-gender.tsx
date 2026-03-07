@@ -12,6 +12,7 @@ interface SelectGenderProps {
   values: string[];
   value?: string;
   onChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 const SelectGender = (props: SelectGenderProps) => {
@@ -23,7 +24,7 @@ const SelectGender = (props: SelectGenderProps) => {
   };
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={onChange} disabled={props.disabled}>
       <SelectTrigger>
         <SelectValue placeholder="Select a gender" />
       </SelectTrigger>

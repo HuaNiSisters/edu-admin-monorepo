@@ -12,10 +12,11 @@ interface SelectStatusProps {
   values: string[];
   value?: string;
   onChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 const SelectStatus = (props: SelectStatusProps) => {
-  const { values, value, onChange } = props;
+  const { values, value, onChange, disabled } = props;
 
   const mapValueToLabel: Record<string, string> = {
     attending: "Attending",
@@ -23,7 +24,7 @@ const SelectStatus = (props: SelectStatusProps) => {
   };
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger>
         <SelectValue placeholder="Select a status" />
       </SelectTrigger>
