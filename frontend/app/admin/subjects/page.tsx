@@ -23,8 +23,7 @@ const CreateSubjectPage = () => {
     null,
   );
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] =
-    useState<string>("parramatta");
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [subjectOfferings, setSubjectOfferings] = useState<SubjectOffering[]>(
     [],
   );
@@ -44,7 +43,7 @@ const CreateSubjectPage = () => {
   useEffect(() => {
     async function fetchSelectableFieldsData() {
       const fetchedLocations = await apiWrapper.getLocationsAsync();
-      setLocationOptions(fetchedLocations);
+      setLocationOptions([...fetchedLocations, "all"]);
     }
     fetchSelectableFieldsData();
     fetchSubjects();
@@ -70,23 +69,30 @@ const CreateSubjectPage = () => {
     setDialogOpen(true);
   };
 
+  const filteredSubjects =
+    selectedLocation === "all"
+      ? subjectOfferings
+      : subjectOfferings.filter((s) => s.location === selectedLocation);
+
   return (
     <div className="gap-y-4">
-      {/* Location Filter */}
-      <div className="flex items-center gap-2">
-        <Label>Filter by Location:</Label>
-        <SelectLocation
-          values={locationOptions}
-          value={selectedLocation}
-          onChange={() => setSelectedLocation(selectedLocation)}
-        />
-      </div>
-      {/* Add Subject Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleAdd} className="gap-2">
-          <Plus className="size-4" />
-          Add Subject
-        </Button>
+      <div className="flex justify-between">
+        {/* Location Filter */}
+        <div className="flex items-center gap-2">
+          <Label>Location:</Label>
+          <SelectLocation
+            values={locationOptions}
+            value={selectedLocation}
+            onChange={(value) => setSelectedLocation(value)}
+          />
+        </div>
+        {/* Add Subject Button */}
+        <div className="flex justify-end py-4">
+          <Button onClick={handleAdd} className="gap-2">
+            <Plus className="size-4" />
+            Add Subject
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -95,7 +101,7 @@ const CreateSubjectPage = () => {
         // Subjects filtered by location
         <SubjectsList
           locationFilter={selectedLocation}
-          subjectOfferings={subjectOfferings}
+          subjectOfferings={filteredSubjects}
           onEdit={handleEdit}
         />
       )}

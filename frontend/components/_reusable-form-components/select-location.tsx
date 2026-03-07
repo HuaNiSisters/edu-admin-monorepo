@@ -17,11 +17,13 @@ interface SelectLocationProps {
 const SelectLocation = (props: SelectLocationProps) => {
   const { values, value, onChange } = props;
 
-  const mapValueToLabel: Record<string, string> = {
-    cabramatta_and_canley_vale: "Cabramatta and Canley Vale",
-    parramatta: "Parramatta",
-    online: "Online",
-  };
+  const formatLabel = (value: string) =>
+    value
+      .split("_")
+      .map((word) =>
+        word === "and" ? word : word.charAt(0).toUpperCase() + word.slice(1),
+      )
+      .join(" ");
 
   return (
     <Select value={value} onValueChange={onChange}>
@@ -33,7 +35,7 @@ const SelectLocation = (props: SelectLocationProps) => {
           <SelectLabel>Locations</SelectLabel>
           {values?.map((value) => (
             <SelectItem key={value} value={value}>
-              {mapValueToLabel[value] || value}
+              {formatLabel(value)}
             </SelectItem>
           ))}
         </SelectGroup>
