@@ -9,7 +9,6 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { NavigationMenu } from "@/components/ui/navigation-menu";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,7 +34,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const documentTitle = document.title;
+  const documentTitle = "document.title";
 
   return (
     <html lang="en" suppressHydrationWarning>

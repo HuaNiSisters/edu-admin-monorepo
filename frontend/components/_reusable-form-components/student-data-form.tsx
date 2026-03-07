@@ -93,7 +93,7 @@ const StudentDataForm = () => {
       preferred_name: data.preferredName,
       gender: data.gender as Gender,
       email: data.email,
-      grade_at_school: data.grade as number,
+      grade_at_school: parseInt(data.grade),
       school: data.school,
       location: data.location as Location,
       status: data.status as StudentStatus,
