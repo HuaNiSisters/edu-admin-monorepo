@@ -22,6 +22,7 @@ import { SelectLocation } from "@/components/_reusable-form-components/select-lo
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
 import { Location, StudentStatus, Gender } from "@/types/IApiWrapper";
 import { SelectGender } from "./select-gender";
+import { toast } from "sonner";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -101,6 +102,8 @@ const StudentDataForm = () => {
       suburb_of_home: data.suburb,
       student_mobile: data.mobile,
     });
+
+    toast.success("Student created successfully!", { position: "top-center"});
   }
 
   return (
