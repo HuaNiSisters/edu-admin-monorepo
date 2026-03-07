@@ -93,6 +93,10 @@ const StudentDataForm = ({
     form.setValue("notes", notes || "");
     form.setValue("mobile", student_mobile || "");
     form.setValue("suburb", suburb_of_home || "");
+    form.setValue("parent1FullName", studentData?.parent1FullName || "");
+    form.setValue("parent1Mobile", studentData?.parent1Mobile || "");
+    form.setValue("parent2FullName", studentData?.parent2FullName || "");
+    form.setValue("parent2Mobile", studentData?.parent2Mobile || "");
   }, [studentData]);
 
   const form = useForm<zod.infer<typeof formSchema>>({

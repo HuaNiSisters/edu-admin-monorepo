@@ -96,16 +96,48 @@ class ApiSupabaseWrapper implements ApiWrapper {
       }
     }
 
-    return createStudentResponse as StudentData;
+    return {
+      ...createStudentResponse,
+      parent1FullName: parent1Data.first_name,
+      parent1Mobile: parent1Data.parent_mobile,
+      parent2FullName: parent2Data?.first_name,
+      parent2Mobile: parent2Data?.parent_mobile,
+    };
   }
 
   async getStudentByIdAsync(id: string): Promise<StudentData> {
-    const { data: responseData, error } = await this.supabase
-      .from("Student")
-      .select()
-      .eq("student_id", id)
-      .single();
-    return responseData;
+    const { data: getStudentParentData, error: getStudentParentError } =
+      await this.supabase
+        .from("Student")
+        .select(
+          `
+        *,
+        parents:StudentParent (
+          relationship,
+          Parent (
+            first_name,
+            parent_mobile
+          )
+        )
+      `,
+        )
+        .eq("student_id", id)
+        .single();
+    console.log({ getStudentParentData, getStudentParentError });
+    if (!!getStudentParentError) {
+      throw new Error(getStudentParentError.message);
+    }
+    const parents = getStudentParentData?.parents || [];
+    delete getStudentParentData?.parents;
+
+    return {
+      ...getStudentParentData,
+      // TODO: CHECK ORDERING OF PARENTS, may need a 'primary' contact flag field
+      parent1FullName: parents[0]?.Parent.first_name,
+      parent1Mobile: parents[0]?.Parent.parent_mobile,
+      parent2FullName: parents[1]?.Parent.first_name,
+      parent2Mobile: parents[1]?.Parent.parent_mobile,
+    };
   }
 
   async updateStudentAsync(

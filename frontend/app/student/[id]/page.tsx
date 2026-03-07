@@ -5,12 +5,14 @@ import { StudentData } from "@/types/IApiWrapper";
 import StudentDataForm from "@/components/_reusable-form-components/student-data-form";
 import apiWrapper from "@/lib/apiWrapper";
 import { useParams } from "next/navigation";
+import { useAsync } from "@/hooks/use-async";
 
 export default function ViewStudentPage() {
   const params = useParams();
   const studentId = params.id as string;
 
   const [studentData, setStudentData] = useState<StudentData>();
+  const { run, isPending } = useAsync();
 
   const fetchStudentData = async () => {
     const data = await apiWrapper.getStudentByIdAsync(studentId);
@@ -19,12 +21,13 @@ export default function ViewStudentPage() {
   };
 
   useEffect(() => {
-    fetchStudentData();
+    run(fetchStudentData);
   }, [params.id]);
 
   return (
     <div>
-      <StudentDataForm studentData={studentData} isEditing={false} />
+      {isPending && <div></div>}
+      {!isPending && studentData && <StudentDataForm studentData={studentData} isEditing={false} />}
     </div>
   );
 }
