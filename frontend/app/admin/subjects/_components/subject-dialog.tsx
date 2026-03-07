@@ -180,7 +180,7 @@ const SubjectDialog = ({
                   <span className="text-red-500">*</span>
                 </FieldLabel>
                 <SelectLocation
-                  values={locationOptions}
+                  options={locationOptions}
                   value={field.value}
                   onChange={field.onChange}
                 />

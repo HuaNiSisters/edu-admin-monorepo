@@ -74,7 +74,7 @@ const CreateSubjectPage = () => {
         <div className="flex items-center gap-2">
           <Label>Location:</Label>
           <SelectLocation
-            values={locationOptions}
+            options={locationOptions}
             value={selectedLocation}
             onChange={(value) => setSelectedLocation(value)}
           />
