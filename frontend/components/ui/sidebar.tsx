@@ -513,7 +513,7 @@ const SidebarMenuItem = React.forwardRef<
   <li
     ref={ref}
     data-sidebar="menu-item"
-    className={cn("group/menu-item relative py-2", className)}
+    className={cn("group/menu-item relative py-1", className)}
     {...props}
   />
 ));

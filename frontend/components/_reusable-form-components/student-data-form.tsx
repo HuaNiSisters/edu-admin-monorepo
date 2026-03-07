@@ -414,7 +414,11 @@ const StudentDataForm = ({
           <Button type="submit" form="student-data-form">
             Submit
           </Button>
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => form.reset()}
+          >
             Reset
           </Button>
         </Field>
