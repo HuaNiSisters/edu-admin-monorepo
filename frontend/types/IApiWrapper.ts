@@ -6,9 +6,15 @@ type Gender = Database["public"]["Enums"]["Gender"];
 type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
 
 type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
+type CreateParentDataParams = Database["public"]["Tables"]["Parent"]["Insert"];
+type CreateStudentParams = {
+  studentData: CreateStudentDataParams;
+  parent1Data: CreateParentDataParams;
+  parent2Data?: CreateParentDataParams;
+}
 type StudentData = Database["public"]["Tables"]["Student"]["Row"];
 
-type UpdateStudentDataParams = Partial<Omit<CreateStudentDataParams, "id">>;
+type UpdateStudentDataParams = Partial<Omit<CreateStudentParams, "student_id">>;
 
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
@@ -27,6 +33,8 @@ export type {
   CreateStudentDataParams,
   CreateSubjectDataParams,
   UpdateSubjectDataParams,
+  CreateParentDataParams,
+  CreateStudentParams,
   UpdateStudentDataParams,
   GetLocationsResponse,
   GetStatusesResponse,
@@ -35,11 +43,11 @@ export type {
 }
 
 export interface ApiWrapper {
-  createStudentAsync: (data: CreateStudentDataParams) => Promise<StudentData>;
   createSubjectAsync: (data: CreateSubjectDataParams) => Promise<SubjectOffering>;
+  createStudentAsync: (data: CreateStudentParams) => Promise<StudentData>;
+  getStudentByIdAsync: (id: string) => Promise<StudentData>;
   updateStudentAsync: (id: string, data: UpdateStudentDataParams) => Promise<StudentData>;
   updateSubjectAsync: (id: string, data: UpdateSubjectDataParams) => Promise<SubjectOffering>;
-  getStudentByIdAsync: (id: string) => Promise<StudentData>;
   getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>
   getLocationsAsync: () => Promise<GetLocationsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;

@@ -5,6 +5,7 @@ import {
   StudentData,
   CreateStudentDataParams,
   CreateSubjectDataParams,
+  CreateStudentParams,
   UpdateStudentDataParams,
   GetGendersResponse,
   GetLocationsResponse,
@@ -21,20 +22,19 @@ class ApiSupabaseWrapper implements ApiWrapper {
     this.supabase = createClient();
   }
 
-
   async createSubjectAsync(
-    data: CreateSubjectDataParams
+    data: CreateSubjectDataParams,
   ): Promise<SubjectOffering> {
-      console.log({ createSubjectData: data });
+    console.log({ createSubjectData: data });
     const { data: responseData } = await this.supabase
       .from("SubjectOffering")
       .insert(data)
       .select()
       .single();
-      return responseData;
+    return responseData;
   }
 
-    async updateSubjectAsync(
+  async updateSubjectAsync(
     id: string,
     data: UpdateSubjectDataParams,
   ): Promise<SubjectOffering> {
@@ -47,21 +47,59 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return responseData;
   }
 
-  async createStudentAsync(
-    data: CreateStudentDataParams,
-  ): Promise<StudentData> {
+  async createStudentAsync(data: CreateStudentParams): Promise<StudentData> {
     console.log({ createStudentData: data });
-    const { data: responseData } = await this.supabase
-      .from("Student")
-      .insert(data)
-      .select()
-      .single();
-    return responseData;
+    const { studentData, parent1Data, parent2Data } = data;
+    const { data: createStudentResponse, error: createStudentError } =
+      await this.supabase.from("Student").insert(studentData).select().single();
+    if (!!createStudentError) {
+      throw new Error(createStudentError.message);
+    }
+
+    const { data: createParent1Response, error: createParent1Error } =
+      await this.supabase.from("Parent").insert(parent1Data).select().single();
+    if (!!createParent1Error) {
+      throw new Error(createParent1Error.message);
+    }
+
+    const {
+      data: createStudentParent1Response,
+      error: createStudentParent1Error,
+    } = await this.supabase.from("StudentParent").insert({
+      student_id: createStudentResponse?.student_id,
+      parent_id: createParent1Response?.parent_id,
+    });
+    if (!!createStudentParent1Error) {
+      throw new Error(createStudentParent1Error.message);
+    }
+
+    if (!!parent2Data?.first_name) {
+      const { data: createParent2Response, error: createParent2Error } =
+        await this.supabase
+          .from("Parent")
+          .insert(parent2Data)
+          .select()
+          .single();
+      if (!!createParent2Error) {
+        throw new Error(createParent2Error.message);
+      }
+
+      const {
+        data: createStudentParent2Response,
+        error: createStudentParent2Error,
+      } = await this.supabase.from("StudentParent").insert({
+        student_id: createStudentResponse?.student_id,
+        parent_id: createParent2Response?.parent_id,
+      });
+      if (!!createStudentParent2Error) {
+        throw new Error(createStudentParent2Error.message);
+      }
+    }
+
+    return createStudentResponse as StudentData;
   }
 
-  async getStudentByIdAsync(
-    id: string,
-  ): Promise<StudentData> {
+  async getStudentByIdAsync(id: string): Promise<StudentData> {
     const { data: responseData, error } = await this.supabase
       .from("Student")
       .select()
@@ -97,9 +135,11 @@ class ApiSupabaseWrapper implements ApiWrapper {
 
   async getSubjectOfferingsAsync(): Promise<GetSubjectOfferingsResponse> {
     const { data: responseData, error } = await this.supabase
-    .from("SubjectOffering")
-    .select("subject_id, subject_name, grade, location, price_per_term, tutorTutor_id")
-    .order("grade", { ascending: true });
+      .from("SubjectOffering")
+      .select(
+        "subject_id, subject_name, grade, location, price_per_term, tutorTutor_id",
+      )
+      .order("grade", { ascending: true });
 
     if (error) throw error;
     return responseData;

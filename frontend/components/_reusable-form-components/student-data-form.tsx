@@ -17,9 +17,12 @@ import {
   StudentStatus,
   Gender,
   StudentData,
+  CreateStudentDataParams,
+  CreateParentDataParams,
 } from "@/types/IApiWrapper";
 import { SelectGender } from "./select-gender";
 import { toast } from "sonner";
+import { useAsync } from "@/hooks/use-async";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -41,6 +44,12 @@ const formSchema = zod.object({
   status: zod.string().nonempty("Status is required"),
   notes: zod.string().optional(),
   mobile: zod.string().min(1, "Mobile number is required"),
+  parent1FullName: zod.string().nonempty("Full name of one parent is required"),
+  parent1Mobile: zod
+    .string()
+    .nonempty("Mobile number of one parent is required"),
+  parent2FullName: zod.string().optional(),
+  parent2Mobile: zod.string().optional(),
 });
 
 const StudentDataForm = ({
@@ -101,6 +110,10 @@ const StudentDataForm = ({
       notes: "",
       mobile: "",
       suburb: "",
+      parent1FullName: "",
+      parent1Mobile: "",
+      parent2FullName: "",
+      parent2Mobile: "",
     },
   });
 
@@ -131,30 +144,10 @@ const StudentDataForm = ({
     isViewingMode,
   ]);
 
+  const { run, isPending } = useAsync();
+
   async function onSubmit(data: zod.infer<typeof formSchema>) {
-    if (isEditMode) {
-      await apiWrapper.updateStudentAsync(studentId, {
-        first_name: data.firstName,
-        last_name: data.lastName,
-        preferred_name: data.preferredName,
-        gender: data.gender as Gender,
-        email: data.email,
-        grade_at_school: parseInt(data.grade),
-        school: data.school,
-        location: data.location as Location,
-        status: data.status as StudentStatus,
-        notes: data.notes,
-        suburb_of_home: data.suburb,
-        student_mobile: data.mobile,
-      });
-
-      toast.success("Student updated successfully!", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    await apiWrapper.createStudentAsync({
+    const studentData: CreateStudentDataParams = {
       first_name: data.firstName,
       last_name: data.lastName,
       preferred_name: data.preferredName,
@@ -167,9 +160,44 @@ const StudentDataForm = ({
       notes: data.notes,
       suburb_of_home: data.suburb,
       student_mobile: data.mobile,
+    };
+
+    const parent1Data: CreateParentDataParams = {
+      // full_name: data.parent1FullName,
+      first_name: data.parent1FullName,
+      last_name: "",
+      parent_mobile: data.parent1Mobile,
+    };
+
+    const parent2Data: CreateParentDataParams = {
+      // full_name: data.parent2FullName,
+      first_name: data.parent2FullName || "",
+      last_name: "",
+      parent_mobile: data.parent2Mobile || "",
+    };
+
+    run(async () => {
+      if (isEditMode) {
+        await apiWrapper.updateStudentAsync(studentId, {
+          studentData,
+        });
+
+        toast.success("Student updated successfully!", {
+          position: "top-center",
+        });
+        return;
+      }
+
+      await apiWrapper.createStudentAsync({
+        studentData,
+        parent1Data,
+        parent2Data,
+      });
+      toast.success("Student created successfully!", {
+        position: "top-center",
+      });
+      return;
     });
-    toast.success("Student created successfully!", { position: "top-center" });
-    return;
   }
 
   return (
@@ -389,7 +417,73 @@ const StudentDataForm = ({
             </Field>
           )}
         />
+        <div className="text-2xl font-bold mt-8">Parents info</div>
+        <div></div>
+        <Controller
+          name="parent1FullName"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor="parent1-full-name">
+                Parent 1 Full Name
+                <span className="text-red-500">*</span>
+              </FieldLabel>
+              <Input
+                id="parent1-full-name"
+                {...field}
+                disabled={isViewingMode}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="parent1Mobile"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor="parent1-mobile">
+                Parent 1 Mobile
+                <span className="text-red-500">*</span>
+              </FieldLabel>
+              <Input id="parent1-mobile" {...field} disabled={isViewingMode} />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="parent2FullName"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor="parent2-full-name">
+                Parent 2 Full Name
+              </FieldLabel>
+              <Input
+                id="parent2-full-name"
+                {...field}
+                disabled={isViewingMode}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="parent2Mobile"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor="parent2-mobile">Parent 2 Mobile</FieldLabel>
+              <Input id="parent2-mobile" {...field} disabled={isViewingMode} />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </div>
+
+      <br />
+      <br />
       <div className="py-5">
         <Controller
           name="notes"
@@ -411,13 +505,18 @@ const StudentDataForm = ({
 
       <div className="py-5" hidden={isViewingMode}>
         <Field orientation="horizontal">
-          <Button type="submit" form="student-data-form">
-            Submit
+          <Button type="submit" form="student-data-form" disabled={isPending}>
+            {isPending
+              ? "In progress..."
+              : isEditMode
+                ? "Update Student"
+                : "Create Student"}
           </Button>
           <Button
             type="button"
             variant="destructive"
             onClick={() => form.reset()}
+            disabled={isPending}
           >
             Reset
           </Button>
