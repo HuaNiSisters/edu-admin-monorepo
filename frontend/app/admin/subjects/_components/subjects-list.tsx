@@ -1,9 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import {
-  GetSubjectOfferingsResponse,
-  SubjectOffering,
-} from "@/types/IApiWrapper";
+
+import { SubjectOffering } from "@/types/IApiWrapper";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,8 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import apiWrapper from "@/lib/apiWrapper";
-import { DollarSign, Pencil, Trash2 } from "lucide-react";
+import { DollarSign, Pencil } from "lucide-react";
 
 type SubjectsListProps = {
   locationFilter: string;
@@ -22,11 +18,7 @@ type SubjectsListProps = {
   onEdit: (subject: SubjectOffering) => void;
 };
 
-const SubjectsList = ({
-  locationFilter,
-  subjectOfferings,
-  onEdit,
-}: SubjectsListProps) => {
+const SubjectsList = ({ subjectOfferings, onEdit }: SubjectsListProps) => {
   return (
     <div className="w-full">
       <Table>
@@ -63,15 +55,6 @@ const SubjectsList = ({
                     aria-label={`Edit ${subjectOffering.subject_name}`}
                   >
                     <Pencil className="size-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    // onClick={() => setDeleteTarget(subjectOffering)}
-                    aria-label={`Delete ${subjectOffering.subject_name}`}
-                  >
-                    <Trash2 className="size-3.5" />
                   </Button>
                 </div>
               </TableCell>
