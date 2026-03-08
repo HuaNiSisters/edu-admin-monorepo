@@ -54,7 +54,7 @@ export default function RootLayout({
                 <div className="flex items-center gap-2">
                   <SidebarTrigger className="text-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground" />
                   <span className="text-foreground text-sm font-medium">
-                    {documentTitle}
+                    {/* {documentTitle} */}
                   </span>
                 </div>
                 <ModeToggle />
