@@ -103,14 +103,29 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader>
-        <SidebarMenuButton asChild>
-          <Link href="/">
-            <GraduationCap />
-            <span>PEAK Tuition Admin Hub</span>
-          </Link>
-        </SidebarMenuButton>
+      {/* Header / Logo */}
+      <SidebarHeader className="bg-[#0A0A09] border-b border-white/[0.07]">
+        <SidebarMenu>
+          <SidebarMenuItem key="home">
+            <SidebarMenuButton asChild className="hover:bg-[#0A0A09]">
+              <Link href="/">
+                <div className="w-6 h-6 rounded-lg bg-[#2D6A4F] flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-[15px] font-medium text-white tracking-[0.01em]">
+                    PEAK Tuition
+                  </span>
+                  <span className="text-[10px] text-white/30 tracking-[0.12em] uppercase font-normal">
+                    Admin Hub
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

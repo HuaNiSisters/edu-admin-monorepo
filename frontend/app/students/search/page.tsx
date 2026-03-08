@@ -5,30 +5,19 @@ import { SearchIcon } from "lucide-react";
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton,
   InputGroupInput,
-  InputGroupText,
-  InputGroupTextarea,
 } from "@/components/ui/input-group";
 import apiWrapper from "@/lib/apiWrapper";
 import { useAsync } from "@/hooks/use-async";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { SearchStudentsResponse } from "@/types/IApiWrapper";
 import { useRouter } from "next/navigation";
+import { DataTable } from "@/components/ui/data-table";
+import { columns } from "./columns";
+import { LoadingBar } from "@/components/loading-bar";
 
 const SearchStudentPage = () => {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState("");
-
   const [searchResults, setSearchResults] = useState<SearchStudentsResponse>(
     [],
   );
@@ -50,6 +39,8 @@ const SearchStudentPage = () => {
 
   return (
     <div className="">
+      <LoadingBar isLoading={isPending} />
+
       <InputGroup>
         <InputGroupInput
           placeholder="Search by Mobile, First Name, Last Name and Email"
@@ -61,45 +52,26 @@ const SearchStudentPage = () => {
         </InputGroupAddon>
       </InputGroup>
 
-      {!searchInput && <div></div>}
-      {!!searchInput && isPending && <div>Loading...</div>}
       {!!searchInput && !isPending && searchResults.length === 0 && (
-        <div>No results found for "{searchInput}"</div>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
+            <SearchIcon className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-base font-medium text-foreground">
+            No results found for &quot;{searchInput}&quot;
+          </p>
+        </div>
       )}
 
-      {!!searchInput && !isPending && searchResults.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              <TableCell>Contacts</TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {searchResults.map((result, index) => (
-              <TableRow
-                key={result.student_id}
-                onClick={() => onClickRow(result.student_id)}
-                style={{ cursor: "pointer" }}
-              >
-                <TableCell>{result.first_name}</TableCell>
-                <TableCell>{result.last_name}</TableCell>
-                <TableCell>
-                  <div>Student: {result.student_mobile}</div>
-                  <div>
-                    {result.parents.map((parent) => (
-                      <div key={parent.parent_id}>
-                        {`${parent.first_name}: ${parent.parent_mobile}`}
-                      </div>
-                    ))}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+      <div className="py-4">
+        {!!searchInput && !isPending && searchResults.length > 0 && (
+          <DataTable
+            columns={columns}
+            data={searchResults}
+            onRowClick={(row) => onClickRow(row.student_id)}
+          />
+        )}
+      </div>
     </div>
   );
 };
