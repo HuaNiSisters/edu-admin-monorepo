@@ -14,6 +14,7 @@ import {
   SubjectOffering,
   UpdateSubjectDataParams,
   SearchStudentsResponse,
+  ParentInfo,
 } from "@/types/IApiWrapper";
 
 class ApiSupabaseWrapper implements ApiWrapper {
@@ -54,13 +55,17 @@ class ApiSupabaseWrapper implements ApiWrapper {
     const { data: createStudentResponse, error: createStudentError } =
       await this.supabase.from("Student").insert(studentData).select().single();
     if (!!createStudentError) {
-      throw new Error(createStudentError.message);
+      throw new Error("Failed to create student: " + createStudentError.message);
     }
 
     const { data: createParent1Response, error: createParent1Error } =
-      await this.supabase.from("Parent").insert(parent1Data).select().single();
+      await this.supabase.from("Parent").insert({
+        first_name: parent1Data.first_name,
+        last_name: parent1Data.last_name,
+        parent_mobile: parent1Data.parent_mobile,
+      }).select().single();
     if (!!createParent1Error) {
-      throw new Error(createParent1Error.message);
+      throw new Error("Failed to create parent 1: " + createParent1Error.message);
     }
 
     const {
@@ -71,18 +76,22 @@ class ApiSupabaseWrapper implements ApiWrapper {
       parent_id: createParent1Response?.parent_id,
     });
     if (!!createStudentParent1Error) {
-      throw new Error(createStudentParent1Error.message);
+      throw new Error("Failed to create student-parent relationship for parent 1: " + createStudentParent1Error.message);
     }
 
     if (!!parent2Data?.first_name) {
       const { data: createParent2Response, error: createParent2Error } =
         await this.supabase
           .from("Parent")
-          .insert(parent2Data)
+          .insert({
+            first_name: parent2Data.first_name,
+            last_name: parent2Data.last_name,
+            parent_mobile: parent2Data.parent_mobile,
+          })
           .select()
           .single();
       if (!!createParent2Error) {
-        throw new Error(createParent2Error.message);
+        throw new Error("Failed to create parent 2: " + createParent2Error.message);
       }
 
       const {
@@ -93,7 +102,7 @@ class ApiSupabaseWrapper implements ApiWrapper {
         parent_id: createParent2Response?.parent_id,
       });
       if (!!createStudentParent2Error) {
-        throw new Error(createStudentParent2Error.message);
+        throw new Error("Failed to create student-parent relationship for parent 2: " + createStudentParent2Error.message);
       }
     }
 
@@ -156,7 +165,7 @@ class ApiSupabaseWrapper implements ApiWrapper {
         .single();
 
     if (!!updateStudentError) {
-      throw new Error(updateStudentError.message);
+      throw new Error("Failed to update student: " + updateStudentError.message);
     }
 
     const { data: updateParent1Response, error: updateParent1Error } =
@@ -168,19 +177,42 @@ class ApiSupabaseWrapper implements ApiWrapper {
         .single();
 
     if (!!updateParent1Error) {
-      throw new Error(updateParent1Error.message);
+      throw new Error("Failed to update parent 1: " + updateParent1Error.message);
     }
 
-    const { data: updateParent2Response, error: updateParent2Error } =
-      await this.supabase
-        .from("Parent")
-        .update(data.parent2Data)
-        .eq("parent_id", data.parent2Data?.parent_id)
-        .select()
-        .single();
-
-    if (!!updateParent2Error) {
-      throw new Error(updateParent2Error.message);
+    let parent2Data: ParentInfo;
+    // REPEITIVE CODE: TO REFACTOR
+    if (!data.parent2Data?.parent_id) {
+      const { data: createParent2Response, error: createParent2Error } =
+        await this.supabase
+          .from("Parent")
+          .insert({
+            first_name: data.parent2Data?.first_name,
+            last_name: data.parent2Data?.last_name,
+            parent_mobile: data.parent2Data?.parent_mobile,
+          })
+          .select()
+          .single();
+      await this.supabase.from("StudentParent").insert({
+        student_id: id,
+        parent_id: createParent2Response?.parent_id,
+      });
+      if (!!createParent2Error) {
+        throw new Error("Failed to create parent 2: " + createParent2Error.message);
+      }
+      parent2Data = createParent2Response;
+    } else {
+      const { data: updateParent2Response, error: updateParent2Error } =
+        await this.supabase
+          .from("Parent")
+          .update(data.parent2Data)
+          .eq("parent_id", data.parent2Data?.parent_id)
+          .select()
+          .single();
+      if (!!updateParent2Error) {
+        throw new Error("Failed to update parent 2: " + updateParent2Error.message);
+      }
+      parent2Data = updateParent2Response;
     }
 
     const responseData = {
@@ -189,8 +221,8 @@ class ApiSupabaseWrapper implements ApiWrapper {
       parent1FullName: updateParent1Response?.first_name,
       parent1Mobile: updateParent1Response?.parent_mobile,
       parent2Id: data.parent2Data?.parent_id,
-      parent2FullName: updateParent2Response?.first_name,
-      parent2Mobile: updateParent2Response?.parent_mobile,
+      parent2FullName: parent2Data?.first_name,
+      parent2Mobile: parent2Data?.parent_mobile,
     };
     console.log({ responseData });
     return responseData;

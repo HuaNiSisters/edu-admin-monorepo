@@ -23,6 +23,7 @@ import {
 import { SelectGender } from "./select-gender";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
+import { useRouter } from "next/navigation";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -151,13 +152,16 @@ const StudentDataForm = ({
     fetchAndPopulate();
   }, [studentData]);
 
+  const { run, isPending, error } = useAsync();
+  const router = useRouter();
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+
   useEffect(() => {
-    if (form.formState.isSubmitSuccessful && !isEditMode) {
+    if (form.formState.isSubmitSuccessful && !isEditMode && !submissionError) {
       form.reset();
     }
-  }, [form.formState.isSubmitSuccessful, isEditMode]);
-
-  const { run, isPending } = useAsync();
+  }, [submissionError]);
 
   async function onSubmit(data: zod.infer<typeof formSchema>) {
     const studentData: CreateStudentDataParams = {
@@ -198,21 +202,28 @@ const StudentDataForm = ({
           parent1Data,
           parent2Data,
         });
-
+        if(error) {
+          setSubmissionError(error.message);
+        }
         toast.success("Student updated successfully!", {
           position: "top-center",
         });
+        router.replace(`/student/${studentId}`);
         return;
       }
 
-      await apiWrapper.createStudentAsync({
+      const createStudentResponse = await apiWrapper.createStudentAsync({
         studentData,
         parent1Data,
         parent2Data,
       });
+      if(error) {
+        setSubmissionError(error.message);
+      }
       toast.success("Student created successfully!", {
         position: "top-center",
       });
+      router.replace(`/student/${createStudentResponse?.student_id}`);
       return;
     });
   }
@@ -223,305 +234,351 @@ const StudentDataForm = ({
       onSubmit={form.handleSubmit(onSubmit)}
       className="w-full"
     >
-      <div className="grid grid-cols-2 gap-5">
-        <Controller
-          name="firstName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-name">
-                First name
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="student-name"
-                placeholder="Student's First Name"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <Controller
-          name="lastName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-last-name">
-                Last name
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="student-last-name"
-                placeholder="Student's Last Name"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+      <div>
+        <h2 className="text-xl font-bold mb-5">Student info</h2>
+        <div className="grid grid-cols-4 gap-5">
+          <Controller
+            name="firstName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-name">
+                  First name
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-name"
+                  placeholder="Student's First Name"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="lastName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-last-name">
+                  Last name
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-last-name"
+                  placeholder="Student's Last Name"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="email"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-email">
+                  Email
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-email"
+                  type="email"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="mobile"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-mobile">
+                  Mobile
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-mobile"
+                  placeholder="Student's Mobile Number"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="preferredName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-preferred-name">
-                Preferred name
-              </FieldLabel>
-              <Input
-                id="student-preferred-name"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <Controller
-          name="gender"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-gender">
-                Gender
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <SelectGender
-                key={field.value}
-                options={genderOptions}
-                value={field.value}
-                onChange={field.onChange}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="location"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-location">
+                  Location
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <SelectLocation
+                  key={field.value}
+                  options={locationOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="grade"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-grade">
-                Grade at school
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="student-grade"
-                type="number"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="grade"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-grade">
+                  Grade at school
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-grade"
+                  type="number"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="school"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-school">
-                School
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="student-school"
-                type="text"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="school"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-school">
+                  School
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-school"
+                  type="text"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="suburb"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-suburb">
-                Suburb
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input id="student-suburb" {...field} disabled={isViewingMode} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="suburb"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-suburb">
+                  Suburb of home
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="student-suburb"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="location"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-location">
-                Location
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <SelectLocation
-                key={field.value}
-                options={locationOptions}
-                value={field.value}
-                onChange={field.onChange}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="status"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-status">
+                  Status
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <SelectStatus
+                  key={field.value}
+                  options={statusOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="gender"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-gender">
+                  Gender
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <SelectGender
+                  key={field.value}
+                  options={genderOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="preferredName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="student-preferred-name">
+                  Preferred name
+                </FieldLabel>
+                <Input
+                  id="student-preferred-name"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="status"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-status">
-                Status
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <SelectStatus
-                key={field.value}
-                options={statusOptions}
-                value={field.value}
-                onChange={field.onChange}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <div></div>
+          <div className="col-span-2">
+            <Controller
+              name="notes"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor="student-notes">Notes</FieldLabel>
+                  <Textarea
+                    id="student-notes"
+                    placeholder="Additional notes"
+                    {...field}
+                    disabled={isViewingMode}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
 
-        <Controller
-          name="mobile"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-mobile">
-                Mobile
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="student-mobile"
-                placeholder="Student's Mobile Number"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <Controller
-          name="email"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-email">
-                Email
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="student-email"
-                type="email"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <div className="text-2xl font-bold mt-8">Parents info</div>
-        <div></div>
-        <Controller
-          name="parent1FullName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="parent1-full-name">
-                Parent 1 Full Name
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                id="parent1-full-name"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <Controller
-          name="parent1Mobile"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="parent1-mobile">
-                Parent 1 Mobile
-                <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input id="parent1-mobile" {...field} disabled={isViewingMode} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <div className="text-xl font-bold mt-8 col-span-4">Parents' info</div>
+          <Controller
+            name="parent1FullName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="parent1-full-name">
+                  Parent 1 Full Name
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="parent1-full-name"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="parent1Mobile"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="parent1-mobile">
+                  Parent 1 Mobile
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  id="parent1-mobile"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="parent2FullName"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="parent2-full-name">
-                Parent 2 Full Name
-              </FieldLabel>
-              <Input
-                id="parent2-full-name"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-        <Controller
-          name="parent2Mobile"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="parent2-mobile">Parent 2 Mobile</FieldLabel>
-              <Input id="parent2-mobile" {...field} disabled={isViewingMode} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="parent2FullName"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="parent2-full-name">
+                  Parent 2 Full Name
+                </FieldLabel>
+                <Input
+                  id="parent2-full-name"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            name="parent2Mobile"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="parent2-mobile">
+                  Parent 2 Mobile
+                </FieldLabel>
+                <Input
+                  id="parent2-mobile"
+                  {...field}
+                  disabled={isViewingMode}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
       </div>
 
       <br />
-      <br />
-      <div className="py-5">
-        <Controller
-          name="notes"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor="student-notes">Notes</FieldLabel>
-              <Textarea
-                id="student-notes"
-                placeholder="Additional notes"
-                {...field}
-                disabled={isViewingMode}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-      </div>
 
       <div className="py-5" hidden={isViewingMode}>
         <Field orientation="horizontal">

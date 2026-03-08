@@ -56,6 +56,7 @@ export type {
   StudentStatus,
   Gender,
   StudentData,
+  ParentInfo,
   SubjectOffering,
   CreateStudentDataParams,
   CreateSubjectDataParams,
