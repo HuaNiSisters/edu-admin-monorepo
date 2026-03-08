@@ -19,7 +19,7 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!error) return;
-    toast.error(error.message);
+    toast.error(error.message, { toasterId: "error-toaster" });
     const timer = setTimeout(() => setError(null), 4000);
     return () => clearTimeout(timer);
   }, [error]);
@@ -27,7 +27,7 @@ export function ErrorProvider({ children }: { children: ReactNode }) {
   return (
     <ErrorContext.Provider value={{ error, setError }}>
       {children}
-      {error && <Toaster position="top-center" />}
+      {error && <Toaster id="error-toaster" position="top-center" />}
     </ErrorContext.Provider>
   );
 }
