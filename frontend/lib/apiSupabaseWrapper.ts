@@ -115,6 +115,7 @@ class ApiSupabaseWrapper implements ApiWrapper {
         parents:StudentParent (
           relationship,
           Parent (
+            parent_id,
             first_name,
             parent_mobile
           )
@@ -133,8 +134,10 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return {
       ...getStudentParentData,
       // TODO: CHECK ORDERING OF PARENTS, may need a 'primary' contact flag field
+      parent1Id: parents[0]?.Parent.parent_id,
       parent1FullName: parents[0]?.Parent.first_name,
       parent1Mobile: parents[0]?.Parent.parent_mobile,
+      parent2Id: parents[1]?.Parent.parent_id,
       parent2FullName: parents[1]?.Parent.first_name,
       parent2Mobile: parents[1]?.Parent.parent_mobile,
     };
@@ -144,12 +147,52 @@ class ApiSupabaseWrapper implements ApiWrapper {
     id: string,
     data: UpdateStudentDataParams,
   ): Promise<StudentData> {
-    const { data: responseData, error } = await this.supabase
-      .from("Student")
-      .update(data)
-      .eq("student_id", id)
-      .select()
-      .single();
+    const { data: updateStudentResponse, error: updateStudentError } =
+      await this.supabase
+        .from("Student")
+        .update(data.studentData)
+        .eq("student_id", id)
+        .select()
+        .single();
+
+    if (!!updateStudentError) {
+      throw new Error(updateStudentError.message);
+    }
+
+    const { data: updateParent1Response, error: updateParent1Error } =
+      await this.supabase
+        .from("Parent")
+        .update(data.parent1Data)
+        .eq("parent_id", data.parent1Data?.parent_id)
+        .select()
+        .single();
+
+    if (!!updateParent1Error) {
+      throw new Error(updateParent1Error.message);
+    }
+
+    const { data: updateParent2Response, error: updateParent2Error } =
+      await this.supabase
+        .from("Parent")
+        .update(data.parent2Data)
+        .eq("parent_id", data.parent2Data?.parent_id)
+        .select()
+        .single();
+
+    if (!!updateParent2Error) {
+      throw new Error(updateParent2Error.message);
+    }
+
+    const responseData = {
+      ...updateStudentResponse,
+      parent1Id: data.parent1Data?.parent_id,
+      parent1FullName: updateParent1Response?.first_name,
+      parent1Mobile: updateParent1Response?.parent_mobile,
+      parent2Id: data.parent2Data?.parent_id,
+      parent2FullName: updateParent2Response?.first_name,
+      parent2Mobile: updateParent2Response?.parent_mobile,
+    };
+    console.log({ responseData });
     return responseData;
   }
 

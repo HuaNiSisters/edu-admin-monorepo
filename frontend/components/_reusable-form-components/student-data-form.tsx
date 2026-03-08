@@ -63,41 +63,8 @@ const StudentDataForm = ({
   const isViewingMode = !!studentData && !isEditing;
 
   const [studentId, setStudentId] = useState<string>("");
-
-  useEffect(() => {
-    const {
-      student_id,
-      first_name,
-      last_name,
-      preferred_name,
-      gender,
-      email,
-      grade_at_school,
-      school,
-      location,
-      status,
-      notes,
-      student_mobile,
-      suburb_of_home,
-    } = studentData || {};
-    setStudentId(student_id || "");
-    form.setValue("firstName", first_name || "");
-    form.setValue("lastName", last_name || "");
-    form.setValue("preferredName", preferred_name || "");
-    form.setValue("gender", gender || "");
-    form.setValue("email", email || "");
-    form.setValue("grade", grade_at_school ? grade_at_school.toString() : "");
-    form.setValue("school", school || "");
-    form.setValue("location", location || "");
-    form.setValue("status", status || "");
-    form.setValue("notes", notes || "");
-    form.setValue("mobile", student_mobile || "");
-    form.setValue("suburb", suburb_of_home || "");
-    form.setValue("parent1FullName", studentData?.parent1FullName || "");
-    form.setValue("parent1Mobile", studentData?.parent1Mobile || "");
-    form.setValue("parent2FullName", studentData?.parent2FullName || "");
-    form.setValue("parent2Mobile", studentData?.parent2Mobile || "");
-  }, [studentData]);
+  const [parent1Id, setParent1Id] = useState<string>("");
+  const [parent2Id, setParent2Id] = useState<string>("");
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -126,27 +93,69 @@ const StudentDataForm = ({
   const [genderOptions, setGenderOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    async function fetchSelectableFieldsData() {
-      const fetchedLocations = await apiWrapper.getLocationsAsync();
-      const fetchedStatuses = await apiWrapper.getStatusesAsync();
-      const fetchedGenders = await apiWrapper.getGendersAsync();
+    async function fetchAndPopulate() {
+      const [fetchedLocations, fetchedStatuses, fetchedGenders] =
+        await Promise.all([
+          apiWrapper.getLocationsAsync(),
+          apiWrapper.getStatusesAsync(),
+          apiWrapper.getGendersAsync(),
+        ]);
       setLocationOptions(fetchedLocations);
       setStatusOptions(fetchedStatuses);
       setGenderOptions(fetchedGenders);
+
+      if (studentData) {
+        const {
+          student_id,
+          first_name,
+          last_name,
+          preferred_name,
+          gender,
+          email,
+          grade_at_school,
+          school,
+          location,
+          status,
+          notes,
+          student_mobile,
+          suburb_of_home,
+          parent1Id,
+          parent1FullName,
+          parent1Mobile,
+          parent2Id,
+          parent2FullName,
+          parent2Mobile,
+        } = studentData;
+
+        setStudentId(student_id || "");
+        setParent1Id(parent1Id || "");
+        setParent2Id(parent2Id || "");
+        form.setValue("firstName", first_name || "");
+        form.setValue("lastName", last_name || "");
+        form.setValue("preferredName", preferred_name || "");
+        form.setValue("gender", gender || "");
+        form.setValue("email", email || "");
+        form.setValue("grade", grade_at_school?.toString() ?? "");
+        form.setValue("school", school || "");
+        form.setValue("location", location || "");
+        form.setValue("status", status || "");
+        form.setValue("notes", notes || "");
+        form.setValue("mobile", student_mobile || "");
+        form.setValue("suburb", suburb_of_home || "");
+        form.setValue("parent1FullName", parent1FullName || "");
+        form.setValue("parent1Mobile", parent1Mobile || "");
+        form.setValue("parent2FullName", parent2FullName || "");
+        form.setValue("parent2Mobile", parent2Mobile || "");
+      }
     }
-    fetchSelectableFieldsData();
-  }, []);
+    fetchAndPopulate();
+  }, [studentData]);
 
   useEffect(() => {
     if (form.formState.isSubmitSuccessful && !isEditMode) {
       form.reset();
     }
-  }, [
-    form.formState.isSubmitSuccessful,
-    form.reset,
-    isEditMode,
-    isViewingMode,
-  ]);
+  }, [form.formState.isSubmitSuccessful, isEditMode]);
 
   const { run, isPending } = useAsync();
 
@@ -168,6 +177,7 @@ const StudentDataForm = ({
 
     const parent1Data: CreateParentDataParams = {
       // full_name: data.parent1FullName,
+      parent_id: parent1Id,
       first_name: data.parent1FullName,
       last_name: "",
       parent_mobile: data.parent1Mobile,
@@ -175,6 +185,7 @@ const StudentDataForm = ({
 
     const parent2Data: CreateParentDataParams = {
       // full_name: data.parent2FullName,
+      parent_id: parent2Id,
       first_name: data.parent2FullName || "",
       last_name: "",
       parent_mobile: data.parent2Mobile || "",
@@ -184,6 +195,8 @@ const StudentDataForm = ({
       if (isEditMode) {
         await apiWrapper.updateStudentAsync(studentId, {
           studentData,
+          parent1Data,
+          parent2Data,
         });
 
         toast.success("Student updated successfully!", {
@@ -277,6 +290,7 @@ const StudentDataForm = ({
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectGender
+                key={field.value}
                 options={genderOptions}
                 value={field.value}
                 onChange={field.onChange}
@@ -352,6 +366,7 @@ const StudentDataForm = ({
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectLocation
+                key={field.value}
                 options={locationOptions}
                 value={field.value}
                 onChange={field.onChange}
@@ -372,6 +387,7 @@ const StudentDataForm = ({
                 <span className="text-red-500">*</span>
               </FieldLabel>
               <SelectStatus
+                key={field.value}
                 options={statusOptions}
                 value={field.value}
                 onChange={field.onChange}

@@ -61,6 +61,7 @@ export default function RootLayout({
               </div>
               <SidebarInset>
                 <div className="flex min-h-screen flex-col">
+                  <Toaster />
                   <ErrorProvider>
                     <main className="flex-1 p-10">{children}</main>
                   </ErrorProvider>

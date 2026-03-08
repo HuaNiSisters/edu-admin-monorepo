@@ -13,13 +13,19 @@ type CreateStudentParams = {
   parent2Data?: CreateParentDataParams;
 }
 type StudentData = Database["public"]["Tables"]["Student"]["Row"] & {
+  parent1Id: string;
   parent1FullName: string;
   parent1Mobile: string;
+  parent2Id?: string;
   parent2FullName?: string;
   parent2Mobile?: string;
 }
 
-type UpdateStudentDataParams = Partial<Omit<CreateStudentParams, "student_id">>;
+type UpdateStudentDataParams = {
+  studentData: Partial<Omit<CreateStudentDataParams, "student_id">>;
+  parent1Data: Partial<CreateParentDataParams>;
+  parent2Data?: Partial<CreateParentDataParams>;
+}
 
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
