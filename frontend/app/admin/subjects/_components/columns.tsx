@@ -3,14 +3,22 @@
 import { SubjectOffering } from "@/types/IApiWrapper";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Pencil } from "lucide-react";
+import { DollarSign, Pencil, ArrowUpDown } from "lucide-react";
 
 export const createSubjectColumns = (
   onEdit: (subject: SubjectOffering) => void,
 ): ColumnDef<SubjectOffering>[] => [
   {
     accessorKey: "subject_name",
-    header: "Subject",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Subject
+        <ArrowUpDown className="ml-2 size-3.5" />
+      </Button>
+    ),
     cell: ({ row }) => (
       <span className="pl-4 font-medium text-foreground">
         {row.getValue("subject_name")}
@@ -19,15 +27,27 @@ export const createSubjectColumns = (
   },
   {
     accessorKey: "grade",
-    header: "Grade",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Grade
+        <ArrowUpDown className="ml-2 size-3.5" />
+      </Button>
+    ),
   },
   {
     accessorKey: "price_per_term",
-    header: () => (
-      <span className="flex items-center">
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
         <DollarSign className="size-3.5 text-muted-foreground" />
         Price
-      </span>
+        <ArrowUpDown className="ml-2 size-3.5" />
+      </Button>
     ),
     cell: ({ row }) => {
       const price = row.getValue<number>("price_per_term");
