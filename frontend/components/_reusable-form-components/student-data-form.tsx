@@ -156,7 +156,6 @@ const StudentDataForm = ({
   const router = useRouter();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
-
   useEffect(() => {
     if (form.formState.isSubmitSuccessful && !isEditMode && !submissionError) {
       form.reset();
@@ -202,7 +201,7 @@ const StudentDataForm = ({
           parent1Data,
           parent2Data,
         });
-        if(error) {
+        if (error) {
           setSubmissionError(error.message);
         }
         toast.success("Student updated successfully!", {
@@ -217,7 +216,7 @@ const StudentDataForm = ({
         parent1Data,
         parent2Data,
       });
-      if(error) {
+      if (error) {
         setSubmissionError(error.message);
       }
       toast.success("Student created successfully!", {
@@ -235,8 +234,19 @@ const StudentDataForm = ({
       className="w-full"
     >
       <div>
-        <h2 className="text-xl font-bold mb-5">Student info</h2>
         <div className="grid grid-cols-4 gap-5">
+          <div className="mt-8 col-span-4 flex justify-between">
+            <span className="text-xl font-bold">Student info</span>
+            {isViewingMode && (
+              <Button
+                type="button"
+                onClick={() => router.push(`/student/update/${studentId}`)}
+              >
+                Edit
+              </Button>
+            )}
+          </div>
+
           <Controller
             name="firstName"
             control={form.control}
