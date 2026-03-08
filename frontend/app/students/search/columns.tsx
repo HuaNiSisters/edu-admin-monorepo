@@ -14,6 +14,7 @@ export const columns: ColumnDef<StudentRow>[] = [
       return (
         <Button
           variant="ghost"
+          className="text-base"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           First Name
@@ -21,6 +22,7 @@ export const columns: ColumnDef<StudentRow>[] = [
         </Button>
       );
     },
+    size: 150,
   },
   {
     accessorKey: "last_name",
@@ -28,6 +30,7 @@ export const columns: ColumnDef<StudentRow>[] = [
       return (
         <Button
           variant="ghost"
+          className="text-base"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Last Name
@@ -35,14 +38,15 @@ export const columns: ColumnDef<StudentRow>[] = [
         </Button>
       );
     },
+    size: 150,
   },
   {
     accessorKey: "contacts",
-    header: "Contacts",
+    header: () => <div className="pr-3">Contacts</div>,
     cell: ({ row }) => {
       const { student_mobile, parents } = row.original;
       return (
-        <div>
+        <div className="flex flex-col justify-end gap-1">
           <div>Student: {student_mobile}</div>
           {parents.map((parent) => (
             <div key={parent.parent_id}>
@@ -52,5 +56,6 @@ export const columns: ColumnDef<StudentRow>[] = [
         </div>
       );
     },
+    size: 300,
   },
 ];

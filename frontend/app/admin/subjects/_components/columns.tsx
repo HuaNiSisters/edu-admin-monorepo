@@ -13,6 +13,7 @@ export const createSubjectColumns = (
     header: ({ column }) => (
       <Button
         variant="ghost"
+        className="text-base"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Subject
@@ -30,6 +31,7 @@ export const createSubjectColumns = (
     header: ({ column }) => (
       <Button
         variant="ghost"
+        className="text-base"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Grade
@@ -42,6 +44,7 @@ export const createSubjectColumns = (
     header: ({ column }) => (
       <Button
         variant="ghost"
+        className="text-base"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <DollarSign className="size-3.5 text-muted-foreground" />
@@ -60,7 +63,7 @@ export const createSubjectColumns = (
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right pr-3">Actions</div>,
     cell: ({ row }) => (
       <div className="flex items-center justify-end gap-1 pr-4">
         <Button
