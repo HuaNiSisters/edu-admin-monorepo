@@ -12,7 +12,10 @@ type CreateStudentParams = {
   parent1Data: CreateParentDataParams;
   parent2Data?: CreateParentDataParams;
 }
-type StudentData = Database["public"]["Tables"]["Student"]["Row"] & {
+
+type ParentInfo = Database["public"]["Tables"]["Parent"]["Row"];
+type StudentInfo = Database["public"]["Tables"]["Student"]["Row"];
+type StudentData = StudentInfo & {
   parent1Id: string;
   parent1FullName: string;
   parent1Mobile: string;
@@ -26,6 +29,19 @@ type UpdateStudentDataParams = {
   parent1Data: Partial<CreateParentDataParams>;
   parent2Data?: Partial<CreateParentDataParams>;
 }
+
+type SearchStudentsResponse = {
+  student_id: StudentInfo["student_id"];
+  first_name: StudentInfo["first_name"];
+  last_name: StudentInfo["last_name"];
+  email: StudentInfo["email"];
+  student_mobile: StudentInfo["student_mobile"];
+  parents: {
+    parent_id: ParentInfo["parent_id"];
+    first_name: ParentInfo["first_name"];
+    parent_mobile: ParentInfo["parent_mobile"];
+  }[];
+}[];
 
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
@@ -47,6 +63,7 @@ export type {
   CreateParentDataParams,
   CreateStudentParams,
   UpdateStudentDataParams,
+  SearchStudentsResponse,
   GetLocationsResponse,
   GetStatusesResponse,
   GetGendersResponse,

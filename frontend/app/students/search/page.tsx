@@ -12,21 +12,40 @@ import {
 } from "@/components/ui/input-group";
 import apiWrapper from "@/lib/apiWrapper";
 import { useAsync } from "@/hooks/use-async";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { SearchStudentsResponse } from "@/types/IApiWrapper";
+import { useRouter } from "next/navigation";
 
 const SearchStudentPage = () => {
+  const router = useRouter();
   const [searchInput, setSearchInput] = useState("");
 
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchStudentsResponse>(
+    [],
+  );
   const { run, isPending } = useAsync();
 
   const onChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
-    if (searchInput.length < 4) return;
+    if (event.target.value.length < 4) return;
     const handleQuery = async () => {
-      const result = await apiWrapper.searchAsync(event.target.value);
+      const result = await apiWrapper.searchStudentsAsync(event.target.value);
       setSearchResults(result || []);
     };
     run(handleQuery);
+  };
+
+  const onClickRow = (studentId: string) => {
+    router.replace(`/student/${studentId}`);
   };
 
   return (
@@ -42,8 +61,6 @@ const SearchStudentPage = () => {
         </InputGroupAddon>
       </InputGroup>
 
-      <div>{searchInput}</div>
-
       {!searchInput && <div></div>}
       {!!searchInput && isPending && <div>Loading...</div>}
       {!!searchInput && !isPending && searchResults.length === 0 && (
@@ -51,20 +68,37 @@ const SearchStudentPage = () => {
       )}
 
       {!!searchInput && !isPending && searchResults.length > 0 && (
-        <table>
-          <thead>
-            <th>First Name</th>
-            <th>Last Name</th>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableCell>First Name</TableCell>
+              <TableCell>Last Name</TableCell>
+              <TableCell>Contacts</TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {searchResults.map((result, index) => (
-              <tr key={index}>
-                <td>{result.first_name}</td>
-                <td>{result.last_name}</td>
-              </tr>
+              <TableRow
+                key={result.student_id}
+                onClick={() => onClickRow(result.student_id)}
+                style={{ cursor: "pointer" }}
+              >
+                <TableCell>{result.first_name}</TableCell>
+                <TableCell>{result.last_name}</TableCell>
+                <TableCell>
+                  <div>Student: {result.student_mobile}</div>
+                  <div>
+                    {result.parents.map((parent) => (
+                      <div key={parent.parent_id}>
+                        {`${parent.first_name}: ${parent.parent_mobile}`}
+                      </div>
+                    ))}
+                  </div>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
     </div>
   );

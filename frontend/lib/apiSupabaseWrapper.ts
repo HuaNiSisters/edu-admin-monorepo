@@ -13,6 +13,7 @@ import {
   GetSubjectOfferingsResponse,
   SubjectOffering,
   UpdateSubjectDataParams,
+  SearchStudentsResponse,
 } from "@/types/IApiWrapper";
 
 class ApiSupabaseWrapper implements ApiWrapper {
@@ -195,39 +196,15 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return responseData;
   }
 
-  async searchAsync(query: string): Promise<any[] | null> {
-    const { data, error } = await this.supabase
-      .rpc("search_students", { query });
+  async searchStudentsAsync(query: string): Promise<SearchStudentsResponse> {
+    const { data: searchStudentsResult, error: searchStudentsError } =
+      await this.supabase.rpc("search_students", { search_query: query });
 
-    if (error) throw error;
-    return data;
+    if (searchStudentsError) {
+      throw new Error(searchStudentsError.message);
+    }
 
-    // const { data: queryResponse, error } = await this.supabase
-    //   .from("Student")
-    //   .select(
-    //     `
-    //         *,
-    //         parents:StudentParent (
-    //           Parent (
-    //             parent_id,
-    //             first_name,
-    //             parent_mobile
-    //           )
-    //         )
-    //       `,
-    //   )
-    //   .or(
-    //     `first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%,student_mobile.ilike.%${query}%,parents.first_name.ilike.%${query}%,parents.parent_mobile.ilike.%${query}%`,
-    //   );
-    // console.log({ queryResponse, searchError: error });
-    // return queryResponse;
-
-    // const { data: responseData, error } = await this.supabase
-    //   .from("Student")
-    //   .select()
-    //   .or(`first_name.ilike.%${query}%, last_name.ilike.%${query}%, email.ilike.%${query}%, student_mobile.ilike.%${query}%`);
-    //   console.log({ responseData, searchError: error });
-    //   return responseData;
+    return searchStudentsResult;
   }
 
   async getLocationsAsync(): Promise<GetLocationsResponse> {
