@@ -21,9 +21,7 @@ export const createSubjectColumns = (
       </Button>
     ),
     cell: ({ row }) => (
-      <span className="pl-4 font-medium text-foreground">
-        {row.getValue("subject_name")}
-      </span>
+      <span className="pl-4">{row.getValue("subject_name")}</span>
     ),
   },
   {

@@ -22,6 +22,9 @@ export const columns: ColumnDef<StudentRow>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => (
+      <span className="pl-4">{row.getValue("first_name")}</span>
+    ),
     size: 150,
   },
   {
