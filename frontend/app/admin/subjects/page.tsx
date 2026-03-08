@@ -9,6 +9,7 @@ import SubjectDialog from "./_components/subject-dialog";
 import { Label } from "@/components/ui/label";
 import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
+import { LoadingBar } from "@/components/loading-bar";
 
 const CreateSubjectPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -23,6 +24,7 @@ const CreateSubjectPage = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchSubjects = async () => {
+    setLoading(true);
     try {
       const data = await apiWrapper.getSubjectOfferingsAsync();
       setSubjectOfferings(data);
@@ -41,6 +43,7 @@ const CreateSubjectPage = () => {
     fetchSelectableFieldsData();
     fetchSubjects();
   }, []);
+
   const handleAdd = () => {
     setEditingSubject(null);
     setDialogOpen(true);
@@ -69,8 +72,9 @@ const CreateSubjectPage = () => {
 
   return (
     <div className="gap-y-4">
+      <LoadingBar isLoading={loading} />
+
       <div className="flex justify-between">
-        {/* Location Filter */}
         <div className="flex items-center gap-2">
           <Label>Location:</Label>
           <SelectLocation
@@ -79,7 +83,6 @@ const CreateSubjectPage = () => {
             onChange={(value) => setSelectedLocation(value)}
           />
         </div>
-        {/* Add Subject Button */}
         <div className="flex justify-end py-4">
           <Button onClick={handleAdd} className="gap-2">
             <Plus className="size-4" />
@@ -88,18 +91,12 @@ const CreateSubjectPage = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        // Subjects filtered by location
-        <SubjectsList
-          locationFilter={selectedLocation}
-          subjectOfferings={filteredSubjects}
-          onEdit={handleEdit}
-        />
-      )}
+      <SubjectsList
+        locationFilter={selectedLocation}
+        subjectOfferings={filteredSubjects}
+        onEdit={handleEdit}
+      />
 
-      {/* Dialog */}
       <SubjectDialog
         key={editingSubject?.subject_id}
         open={dialogOpen}
