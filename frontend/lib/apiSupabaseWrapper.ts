@@ -111,16 +111,15 @@ class ApiSupabaseWrapper implements ApiWrapper {
         .from("Student")
         .select(
           `
-        *,
-        parents:StudentParent (
-          relationship,
-          Parent (
-            parent_id,
-            first_name,
-            parent_mobile
-          )
-        )
-      `,
+            *,
+            parents:StudentParent (
+              Parent (
+                parent_id,
+                first_name,
+                parent_mobile
+              )
+            )
+          `,
         )
         .eq("student_id", id)
         .single();
@@ -194,6 +193,41 @@ class ApiSupabaseWrapper implements ApiWrapper {
     };
     console.log({ responseData });
     return responseData;
+  }
+
+  async searchAsync(query: string): Promise<any[] | null> {
+    const { data, error } = await this.supabase
+      .rpc("search_students", { query });
+
+    if (error) throw error;
+    return data;
+
+    // const { data: queryResponse, error } = await this.supabase
+    //   .from("Student")
+    //   .select(
+    //     `
+    //         *,
+    //         parents:StudentParent (
+    //           Parent (
+    //             parent_id,
+    //             first_name,
+    //             parent_mobile
+    //           )
+    //         )
+    //       `,
+    //   )
+    //   .or(
+    //     `first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%,student_mobile.ilike.%${query}%,parents.first_name.ilike.%${query}%,parents.parent_mobile.ilike.%${query}%`,
+    //   );
+    // console.log({ queryResponse, searchError: error });
+    // return queryResponse;
+
+    // const { data: responseData, error } = await this.supabase
+    //   .from("Student")
+    //   .select()
+    //   .or(`first_name.ilike.%${query}%, last_name.ilike.%${query}%, email.ilike.%${query}%, student_mobile.ilike.%${query}%`);
+    //   console.log({ responseData, searchError: error });
+    //   return responseData;
   }
 
   async getLocationsAsync(): Promise<GetLocationsResponse> {

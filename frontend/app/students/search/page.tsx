@@ -11,16 +11,22 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import apiWrapper from "@/lib/apiWrapper";
+import { useAsync } from "@/hooks/use-async";
 
 const SearchStudentPage = () => {
   const [searchInput, setSearchInput] = useState("");
 
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const { run, isPending } = useAsync();
 
-  const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
-    const result = await apiWrapper.searchAsync(event.target.value);
-    setSearchResults(result || []);
+    if (searchInput.length < 4) return;
+    const handleQuery = async () => {
+      const result = await apiWrapper.searchAsync(event.target.value);
+      setSearchResults(result || []);
+    };
+    run(handleQuery);
   };
 
   return (
@@ -28,8 +34,8 @@ const SearchStudentPage = () => {
       <InputGroup>
         <InputGroupInput
           placeholder="Search by Mobile, First Name, Last Name and Email"
-          // value={searchInput}
-          onChange={handleSearch}
+          value={searchInput}
+          onChange={onChange}
         />
         <InputGroupAddon>
           <SearchIcon />
@@ -38,20 +44,28 @@ const SearchStudentPage = () => {
 
       <div>{searchInput}</div>
 
-      <table>
-        <thead>
-          <th>First Name</th>
-          <th>Last Name</th>
-        </thead>
-        <tbody>
-          {searchResults.map((result, index) => (
-            <tr key={index}>
-              <td>{result.firstName}</td>
-              <td>{result.lastName}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {!searchInput && <div></div>}
+      {!!searchInput && isPending && <div>Loading...</div>}
+      {!!searchInput && !isPending && searchResults.length === 0 && (
+        <div>No results found for "{searchInput}"</div>
+      )}
+
+      {!!searchInput && !isPending && searchResults.length > 0 && (
+        <table>
+          <thead>
+            <th>First Name</th>
+            <th>Last Name</th>
+          </thead>
+          <tbody>
+            {searchResults.map((result, index) => (
+              <tr key={index}>
+                <td>{result.first_name}</td>
+                <td>{result.last_name}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
