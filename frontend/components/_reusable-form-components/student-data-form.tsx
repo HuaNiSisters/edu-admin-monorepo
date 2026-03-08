@@ -236,7 +236,7 @@ const StudentDataForm = ({
       <div>
         <div className="grid grid-cols-4 gap-5">
           <div className="mt-8 col-span-4 flex justify-between">
-            <span className="text-xl font-bold">Student info</span>
+            <span className="text-xl font-bold">Student Details</span>
             {isViewingMode && (
               <Button
                 type="button"
@@ -505,7 +505,9 @@ const StudentDataForm = ({
             />
           </div>
 
-          <div className="text-xl font-bold mt-8 col-span-4">Parents' info</div>
+          <div className="text-xl font-bold mt-8 col-span-4">
+            Parents&apos; Details
+          </div>
           <Controller
             name="parent1FullName"
             control={form.control}
