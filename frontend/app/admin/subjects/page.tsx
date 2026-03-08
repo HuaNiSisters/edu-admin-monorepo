@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAsync } from "@/hooks/use-async";
 import SubjectsList from "./_components/subjects-list";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -21,19 +22,7 @@ const CreateSubjectPage = () => {
   const [subjectOfferings, setSubjectOfferings] = useState<SubjectOffering[]>(
     [],
   );
-  const [loading, setLoading] = useState(true);
-
-  const fetchSubjects = async () => {
-    setLoading(true);
-    try {
-      const data = await apiWrapper.getSubjectOfferingsAsync();
-      setSubjectOfferings(data);
-    } catch (err) {
-      console.error("Failed to fetch subjects:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { run, isPending } = useAsync();
 
   useEffect(() => {
     async function fetchSelectableFieldsData() {
@@ -41,8 +30,14 @@ const CreateSubjectPage = () => {
       setLocationOptions([...fetchedLocations, "all"]);
     }
     fetchSelectableFieldsData();
-    fetchSubjects();
-  }, []);
+
+    const handleQuery = async () => {
+      const data = await apiWrapper.getSubjectOfferingsAsync();
+      setSubjectOfferings(data);
+    };
+
+    run(handleQuery);
+  }, [run]);
 
   const handleAdd = () => {
     setEditingSubject(null);
@@ -72,7 +67,7 @@ const CreateSubjectPage = () => {
 
   return (
     <div className="gap-y-4">
-      <LoadingBar isLoading={loading} />
+      <LoadingBar isLoading={isPending} />
 
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
