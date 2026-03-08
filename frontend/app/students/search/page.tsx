@@ -53,7 +53,14 @@ const SearchStudentPage = () => {
       </InputGroup>
 
       {!!searchInput && !isPending && searchResults.length === 0 && (
-        <div>No results found for "{searchInput}"</div>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
+            <SearchIcon className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-base font-medium text-foreground">
+            No results found for &quot;{searchInput}&quot;
+          </p>
+        </div>
       )}
 
       <div className="py-4">
