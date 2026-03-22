@@ -4,6 +4,7 @@ import type {
 } from "fastify";
 import swaggerUi from "@fastify/swagger-ui";
 import userRoutes from "./routes/user.ts";
+import broadcastRoutes from "./routes/broadcast.ts";
 
 export default async function (
   fastify: FastifyInstance,
@@ -18,4 +19,5 @@ export default async function (
   });
 
   fastify.register(userRoutes, { prefix: "/user" });
+  fastify.register(broadcastRoutes, { prefix: "/broadcast" });
 };
