@@ -4,6 +4,7 @@ type Location = Database["public"]["Enums"]["Location"];
 type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
 type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
+type ClassTime = Database["public"]["Tables"]["ClassTime"]["Row"];
 
 type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
 type CreateParentDataParams = Database["public"]["Tables"]["Parent"]["Insert"];
@@ -46,10 +47,21 @@ type SearchStudentsResponse = {
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
 
+type CreateClassDataParams = Database["public"]["Tables"]["ClassTime"]["Insert"];
+type UpdateClassDataParams = Partial<Omit<CreateClassDataParams, "class_id">>;
+
+// ClassTime enriched with subject info for display
+type ClassTimeWithSubject = ClassTime & {
+  subject_name?: string;
+  grade?: string | null;
+  location?: string | null;
+};
+
 type GetLocationsResponse = Location[];
 type GetStatusesResponse = StudentStatus[];
 type GetGendersResponse = Gender[];
 type GetSubjectOfferingsResponse = SubjectOffering[];
+type GetClassTimesResponse = ClassTimeWithSubject[];
 
 export type {
   Location,
@@ -58,9 +70,13 @@ export type {
   StudentData,
   ParentInfo,
   SubjectOffering,
+  ClassTime,
+  ClassTimeWithSubject,
   CreateStudentDataParams,
   CreateSubjectDataParams,
   UpdateSubjectDataParams,
+  CreateClassDataParams,
+  UpdateClassDataParams,
   CreateParentDataParams,
   CreateStudentParams,
   UpdateStudentDataParams,
@@ -69,17 +85,28 @@ export type {
   GetStatusesResponse,
   GetGendersResponse,
   GetSubjectOfferingsResponse,
+  GetClassTimesResponse,
 }
 
 export interface ApiWrapper {
+  // Subjects
   createSubjectAsync: (data: CreateSubjectDataParams) => Promise<SubjectOffering>;
+  updateSubjectAsync: (id: string, data: UpdateSubjectDataParams) => Promise<SubjectOffering>;
+  getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>;
+
+  // Classes
+  createClassAsync: (data: CreateClassDataParams) => Promise<ClassTime>;
+  updateClassAsync: (id: string, data: UpdateClassDataParams) => Promise<ClassTime>;
+  getClassTimesAsync: () => Promise<GetClassTimesResponse>;
+
+  // Students
   createStudentAsync: (data: CreateStudentParams) => Promise<StudentData>;
   getStudentByIdAsync: (id: string) => Promise<StudentData>;
   updateStudentAsync: (id: string, data: UpdateStudentDataParams) => Promise<StudentData>;
-  updateSubjectAsync: (id: string, data: UpdateSubjectDataParams) => Promise<SubjectOffering>;
-  getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>
+  searchStudentsAsync: (query: string) => Promise<SearchStudentsResponse>;
+
+  // Lookups
   getLocationsAsync: () => Promise<GetLocationsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;
   getGendersAsync: () => Promise<GetGendersResponse>;
 }
-

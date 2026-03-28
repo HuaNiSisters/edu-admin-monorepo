@@ -4,9 +4,11 @@ import * as React from "react";
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   SortingState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -27,24 +29,40 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowClick?: (row: TData) => void;
+
+  columnFilters?: ColumnFiltersState;
+  setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowClick,
+  columnFilters: externalColumnFilters,
+  setColumnFilters: externalSetColumnFilters,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [internalColumnFilters, setInternalColumnFilters] =
+    React.useState<ColumnFiltersState>([]);
+
+  const columnFilters = externalColumnFilters ?? internalColumnFilters;
+
+  const setColumnFilters = externalSetColumnFilters ?? setInternalColumnFilters;
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+
     state: {
       sorting,
+      columnFilters, // ✅ now dynamic
     },
   });
 
