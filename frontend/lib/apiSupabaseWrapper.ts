@@ -3,7 +3,6 @@ import { Constants } from "../types/database.types";
 import {
   ApiWrapper,
   StudentData,
-  CreateStudentDataParams,
   CreateSubjectDataParams,
   CreateStudentParams,
   UpdateStudentDataParams,
@@ -16,7 +15,6 @@ import {
   SearchStudentsResponse,
   ParentInfo,
   ClassTime,
-  ClassTimeWithSubject,
   CreateClassDataParams,
   UpdateClassDataParams,
   GetClassTimesResponse,

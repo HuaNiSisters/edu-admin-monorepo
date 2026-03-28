@@ -1,5 +1,8 @@
 import { Database } from "./database.types";
 
+//////////////////////////////////////////////////////////////////
+  // STUDENTS
+  //////////////////////////////////////////////////////////////////
 type Location = Database["public"]["Enums"]["Location"];
 type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
@@ -47,7 +50,6 @@ type SearchStudentsResponse = {
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
 
-type CreateClassDataParams = Database["public"]["Tables"]["ClassTime"]["Insert"];
 type UpdateClassDataParams = Partial<Omit<CreateClassDataParams, "class_id">>;
 
 // ClassTime enriched with subject info for display
@@ -62,6 +64,12 @@ type GetStatusesResponse = StudentStatus[];
 type GetGendersResponse = Gender[];
 type GetSubjectOfferingsResponse = SubjectOffering[];
 type GetClassTimesResponse = ClassTimeWithSubject[];
+
+//////////////////////////////////////////////////////////////////
+  // CLASSES
+  //////////////////////////////////////////////////////////////////
+type CreateClassDataParams = Database["public"]["Tables"]["ClassTime"]["Insert"];
+
 
 export type {
   Location,
