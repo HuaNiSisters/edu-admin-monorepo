@@ -23,8 +23,8 @@ async function routes(
     async (request: FastifyRequest<{ Params: { userId: string } }>) => {
       const { userId } = request.params;
       console.log("eeeeeeeeeeeeeeeees")
-      const user = await getUserByIdAsync(userId);
-      return { success: true, data: user };
+      // const user = await getUserByIdAsync(userId);
+      return { success: true, userId };
     },
   );
 }
