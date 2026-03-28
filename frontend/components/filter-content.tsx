@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ColumnFiltersState } from "@tanstack/react-table";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 const FilterContent = ({
   filterValue,
@@ -47,7 +48,7 @@ const FilterContent = ({
         <SelectItem value={ALL}>All {filterName}</SelectItem>
         {options.map((option) => (
           <SelectItem key={option} value={option}>
-            {option}
+            {formatValuesRemoveUnderscores(option)}
           </SelectItem>
         ))}
       </SelectContent>

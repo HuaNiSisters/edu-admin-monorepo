@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil } from "lucide-react";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 const DAY_ORDER = [
   "Monday",
@@ -79,7 +80,11 @@ export const createClassColumns = (
     accessorKey: "location",
     header: "Location",
     filterFn: "equalsString",
-    cell: ({ row }) => <span>{row.getValue("location") ?? "—"}</span>,
+    cell: ({ row }) => (
+      <span>
+        {formatValuesRemoveUnderscores(row.getValue("location")) ?? "—"}
+      </span>
+    ),
   },
   {
     accessorKey: "active",

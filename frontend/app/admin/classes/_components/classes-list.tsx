@@ -9,6 +9,7 @@ import FilterContent from "@/components/filter-content";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 const DataTable = dynamic(
   () => import("@/components/ui/data-table").then((m) => m.DataTable),
@@ -61,7 +62,11 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
   const locationOptions = useMemo(
     () =>
       [
-        ...new Set(classes.map((c) => c.location).filter(Boolean)),
+        ...new Set(
+          classes
+            .map((c) => formatValuesRemoveUnderscores(c.location ?? ""))
+            .filter(Boolean),
+        ),
       ].sort() as string[],
     [classes],
   );

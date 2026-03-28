@@ -52,7 +52,6 @@ const SubjectsList = ({ subjectOfferings, onEdit }: SubjectsListProps) => {
 
   return (
     <div className="space-y-3">
-      {/* ✅ Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
         <FilterContent
           filterValue="subject_name"

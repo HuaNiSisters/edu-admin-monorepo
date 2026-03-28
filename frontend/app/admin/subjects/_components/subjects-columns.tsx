@@ -13,18 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DollarSign, Pencil, ChevronDown, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 export const createSubjectColumns = (
   onEdit: (subject: SubjectOffering) => void,
   subjectOfferings: SubjectOffering[],
 ): ColumnDef<SubjectOffering>[] => {
-  const uniqueSubjectNames = [
-    ...new Set(subjectOfferings.map((s) => s.subject_name)),
-  ].sort();
-  const uniqueGrades = [
-    ...new Set(subjectOfferings.map((s) => String(s.grade))),
-  ].sort((a, b) => Number(a) - Number(b));
-
   return [
     {
       accessorKey: "subject_name",
@@ -44,7 +38,9 @@ export const createSubjectColumns = (
       accessorKey: "location",
       header: "Location",
       filterFn: "equalsString",
-      cell: ({ row }) => <span>{row.getValue("location") ?? "—"}</span>,
+      cell: ({ row }) => (
+        <span>{formatValuesRemoveUnderscores(row.getValue("location"))}</span>
+      ),
     },
     {
       accessorKey: "price_per_term",
