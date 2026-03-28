@@ -1,23 +1,13 @@
 "use client";
 
 import { SubjectOffering } from "@/types/IApiWrapper";
-import { Column, ColumnDef } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DollarSign, Pencil, ChevronDown, Check, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { DollarSign, Pencil } from "lucide-react";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 export const createSubjectColumns = (
   onEdit: (subject: SubjectOffering) => void,
-  subjectOfferings: SubjectOffering[],
 ): ColumnDef<SubjectOffering>[] => {
   return [
     {

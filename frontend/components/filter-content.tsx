@@ -41,7 +41,7 @@ const FilterContent = ({
       value={getFilter(filterValue)}
       onValueChange={(v) => setFilter(filterValue, v)}
     >
-      <SelectTrigger className="w-36">
+      <SelectTrigger>
         <SelectValue placeholder={filterName} />
       </SelectTrigger>
       <SelectContent>
