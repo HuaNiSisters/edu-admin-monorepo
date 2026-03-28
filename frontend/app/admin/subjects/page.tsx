@@ -12,7 +12,7 @@ import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { LoadingBar } from "@/components/loading-bar";
 
-const CreateSubjectPage = () => {
+const SubjectsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<SubjectOffering | null>(
     null,
@@ -103,4 +103,4 @@ const CreateSubjectPage = () => {
   );
 };
 
-export default CreateSubjectPage;
+export default SubjectsPage;
