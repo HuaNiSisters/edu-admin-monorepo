@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { RECEPTION_ADMIN_ROUTES, ROUTES } from "@/core/routes/consts";
 
 const studentsSidebarItems = [
   {
@@ -94,13 +95,13 @@ const adminSidebarItems = [
   },
   {
     name: "Employees",
-    url: "/admin/employees",
+    url: ROUTES.ADMIN.EMPLOYEES,
     icon: IdCard,
   },
 ];
 
 export function AppSidebar() {
-  const { isUserAdmin } = useAuth();
+  const { isUserAdmin, isUserReceptionist } = useAuth();
   const pathname = usePathname();
 
   return (
@@ -174,7 +175,7 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        {isUserAdmin() && (
+        {(isUserAdmin() || isUserReceptionist()) && (
           <>
             <Collapsible defaultOpen className="group/collapsible">
               <SidebarGroup>
@@ -187,19 +188,30 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarGroupContent>
                     <SidebarMenu>
-                      {adminSidebarItems.map((item) => (
-                        <SidebarMenuItem key={item.name}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={pathname === item.url}
-                          >
-                            <Link href={item.url}>
-                              <item.icon />
-                              <div>{item.name}</div>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
+                      {adminSidebarItems
+                        .filter((item) => {
+                          if (isUserAdmin()) return true;
+                          if (
+                            isUserReceptionist() &&
+                            RECEPTION_ADMIN_ROUTES.includes(item.url)
+                          ) {
+                            return true;
+                          }
+                          return false;
+                        })
+                        .map((item) => (
+                          <SidebarMenuItem key={item.name}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={pathname === item.url}
+                            >
+                              <Link href={item.url}>
+                                <item.icon />
+                                <div>{item.name}</div>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
                     </SidebarMenu>
                   </SidebarGroupContent>
                 </CollapsibleContent>

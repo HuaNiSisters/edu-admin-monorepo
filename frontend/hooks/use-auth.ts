@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { UserResponse, User } from "@supabase/supabase-js";
-
-enum UserRole {
-  ADMIN = "admin",
-}
+import { UserRole } from "@/core/userRoles/types";
 
 const supabase = createClient();
 
@@ -41,8 +38,12 @@ export function useAuth() {
   }
 
   function isUserAdmin() {
-    return currentUser?.user_metadata?.role === UserRole.ADMIN;
+    return currentUser?.user_metadata?.role === UserRole.Admin;
   }
 
-  return { isUserLoggedIn, isUserAdmin };
+  function isUserReceptionist() {
+    return currentUser?.user_metadata?.role === UserRole.Receptionist;
+  }
+
+  return { isUserLoggedIn, isUserAdmin, isUserReceptionist };
 }
