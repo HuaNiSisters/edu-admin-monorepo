@@ -2,14 +2,27 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
 
+const AUTH_ROUTES = {
+  LOGIN: "/auth/login",
+  SIGN_UP: "/auth/sign-up",
+  RESET_PASSWORD: "/auth/forgot-password",
+};
+
+const ROUTES = {
+  FORBIDDEN: "/forbidden",
+};
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // If the env vars are not set, skip proxy check. You can remove this
-  // once you setup the project.
-  if (!hasEnvVars) {
+  // Pages that don't require authentication
+  if (
+    request.nextUrl.pathname === AUTH_ROUTES.LOGIN ||
+    request.nextUrl.pathname === AUTH_ROUTES.SIGN_UP ||
+    request.nextUrl.pathname === AUTH_ROUTES.RESET_PASSWORD
+  ) {
     return supabaseResponse;
   }
 
@@ -47,16 +60,20 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // // no user, potentially respond by redirecting the user to the login page
-    // const url = request.nextUrl.clone();
-    // url.pathname = "/auth/login";
-    // return NextResponse.redirect(url);
+  // Pages that require authentication
+  if (!user) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone();
+    url.pathname = AUTH_ROUTES.LOGIN;
+    return NextResponse.redirect(url);
+  }
+
+  // Pages that require the user to be an admin
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    // Otherwise, 403 or redirect to home page
+    const url = request.nextUrl.clone();
+    url.pathname = ROUTES.FORBIDDEN;
+    return NextResponse.redirect(url);
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -36,6 +36,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 
 const studentsSidebarItems = [
   {
@@ -99,6 +100,7 @@ const adminSidebarItems = [
 ];
 
 export function AppSidebar() {
+  const { isUserAdmin } = useAuth();
   const pathname = usePathname();
 
   return (
@@ -172,35 +174,39 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        <Collapsible defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel className="flex justify-between">
-              ADMIN
-              <CollapsibleTrigger>
-                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {adminSidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.url}
-                      >
-                        <Link href={item.url}>
-                          <item.icon />
-                          <div>{item.name}</div>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+        {isUserAdmin() && (
+          <>
+            <Collapsible defaultOpen className="group/collapsible">
+              <SidebarGroup>
+                <SidebarGroupLabel className="flex justify-between">
+                  ADMIN
+                  <CollapsibleTrigger>
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </CollapsibleTrigger>
+                </SidebarGroupLabel>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {adminSidebarItems.map((item) => (
+                        <SidebarMenuItem key={item.name}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={pathname === item.url}
+                          >
+                            <Link href={item.url}>
+                              <item.icon />
+                              <div>{item.name}</div>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>

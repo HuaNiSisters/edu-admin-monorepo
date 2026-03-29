@@ -20,6 +20,8 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorProvider } from "@/contexts/ErrorContext";
+import { LogoutButton } from "@/components/logout-button";
+import { useAuth } from "@/hooks/use-auth";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -37,6 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const documentTitle = "document.title";
+  const { isUserLoggedIn } = useAuth();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -48,7 +51,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <AppSidebar />
+            {isUserLoggedIn() && <AppSidebar />}
             <div className="block w-full">
               <div className="h-16 flex items-center p-5 justify-between text-foreground bg-background border-b border-border">
                 <div className="flex items-center gap-2">
@@ -57,7 +60,10 @@ export default function RootLayout({
                     {/* {documentTitle} */}
                   </span>
                 </div>
-                <ModeToggle />
+                <div className="flex items-center gap-4">
+                  {isUserLoggedIn() && <LogoutButton />}
+                  <ModeToggle />
+                </div>
               </div>
               <SidebarInset>
                 <div className="flex min-h-screen flex-col">
