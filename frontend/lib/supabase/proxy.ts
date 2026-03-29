@@ -70,6 +70,9 @@ export async function updateSession(request: NextRequest) {
 
   // Pages that require the user to be an admin
   if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (user.user_metadata?.role === "admin") {
+      return supabaseResponse;
+    }
     // Otherwise, 403 or redirect to home page
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.FORBIDDEN;
