@@ -10,14 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
 
 const DataTable = dynamic(
   () => import("@/components/ui/data-table").then((m) => m.DataTable),
@@ -38,14 +30,6 @@ interface ClassesListProps {
   classes: ClassTimeWithSubject[];
   onEdit: (classTime: ClassTimeWithSubject) => void;
 }
-
-const frameworks = [
-  "Next.js",
-  "SvelteKit",
-  "Nuxt.js",
-  "Remix",
-  "Astro",
-] as const;
 
 const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -187,20 +171,6 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
       />
-
-      <Combobox items={classes}>
-        <ComboboxInput placeholder="Select a framework" />
-        <ComboboxContent>
-          <ComboboxEmpty>No items found.</ComboboxEmpty>
-          <ComboboxList>
-            {(item) => (
-              <ComboboxItem key={item.class_id} value={item}>
-                {item}
-              </ComboboxItem>
-            )}
-          </ComboboxList>
-        </ComboboxContent>
-      </Combobox>
     </div>
   );
 };
