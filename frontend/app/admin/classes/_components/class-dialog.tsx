@@ -26,7 +26,11 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import { Switch } from "@/components/ui/switch";
-import { ClassTimeWithSubject, SubjectOffering } from "@/types/IApiWrapper";
+import {
+  ClassTimeWithSubjectAndTutor,
+  SubjectOffering,
+  EmployeeInfo,
+} from "@/types/IApiWrapper";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -49,6 +53,7 @@ const classFormSchema = zod
     dayOfWeek: zod.string().min(1, "Day is required"),
     startTime: zod.string().min(1, "Start time is required"),
     endTime: zod.string().min(1, "End time is required"),
+    tutor: zod.string().optional(),
     capacity: zod.string(),
     active: zod.boolean(),
   })
@@ -65,13 +70,15 @@ type ClassFormValues = zod.infer<typeof classFormSchema>;
 interface ClassDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  classTime?: ClassTimeWithSubject | null;
+  classTime?: ClassTimeWithSubjectAndTutor | null;
   subjectOfferings: SubjectOffering[];
+  tutors: EmployeeInfo[];
   onSave: (data: {
     offering_id: string;
     day_of_week: string;
     start_time: string;
     end_time: string;
+    tutor_id: string | null;
     capacity: number | null;
     active: boolean;
   }) => void;
@@ -85,10 +92,12 @@ const ClassDialog = ({
   onOpenChange,
   classTime,
   subjectOfferings,
+  tutors,
   onSave,
 }: ClassDialogProps) => {
   const isEditing = !!classTime;
   const [subjectSearch, setSubjectSearch] = useState("");
+  const [tutorsSearch, setTutorsSearch] = useState("");
   const [isSelected, setIsSelected] = useState(false);
 
   const form = useForm<ClassFormValues>({
@@ -98,6 +107,7 @@ const ClassDialog = ({
       dayOfWeek: "",
       startTime: "",
       endTime: "",
+      tutor: "",
       capacity: "",
       active: true,
     },
@@ -110,16 +120,25 @@ const ClassDialog = ({
       return;
     }
     if (classTime) {
-      const selected = subjectOfferings.find(
+      const selectedSubject = subjectOfferings.find(
         (s) => s.subject_id === classTime.offering_id,
       );
-      setSubjectSearch(selected ? getSubjectLabel(selected) : "");
+      const selectedTutor = tutors.find(
+        (t) => t.tutor_id === classTime.tutor_id,
+      );
+      setSubjectSearch(selectedSubject ? getSubjectLabel(selectedSubject) : "");
+      setTutorsSearch(
+        selectedTutor
+          ? `${selectedTutor.first_name} ${selectedTutor.last_name}`
+          : "",
+      );
       setIsSelected(true);
       form.reset({
         offeringId: classTime.offering_id ?? "",
         dayOfWeek: classTime.day_of_week ?? "",
         startTime: classTime.start_time ?? "",
         endTime: classTime.end_time ?? "",
+        tutor: classTime.tutor_id ?? "",
         capacity: classTime.capacity != null ? String(classTime.capacity) : "",
         active: classTime.active ?? true,
       });
@@ -155,12 +174,20 @@ const ClassDialog = ({
       : getSubjectLabel(s).toLowerCase().includes(subjectSearch.toLowerCase()),
   );
 
+  const filteredTutors = tutors.filter((t) =>
+    isSelected
+      ? true
+      : t.first_name.toLowerCase().includes(tutorsSearch.toLowerCase()) &&
+        t.last_name.toLowerCase().includes(tutorsSearch.toLowerCase()),
+  );
+
   const onSubmit = async (data: ClassFormValues) => {
     const newClassTime = {
       offering_id: data.offeringId,
       day_of_week: data.dayOfWeek,
       start_time: data.startTime,
       end_time: data.endTime,
+      tutor_id: data.tutor || null,
       capacity: data.capacity !== "" ? Number(data.capacity) : null,
       active: data.active,
     };
@@ -315,35 +342,37 @@ const ClassDialog = ({
                   value={field.value}
                   onValueChange={(value) => {
                     field.onChange(value ?? "");
-                    const selected = subjectOfferings.find(
-                      (s) => s.subject_id === value,
+                    const selected = tutors.find((s) => s.tutor_id === value);
+                    setTutorsSearch(
+                      selected
+                        ? `${selected.first_name} ${selected.last_name}`
+                        : "",
                     );
-                    setSubjectSearch(selected ? getSubjectLabel(selected) : "");
                     setIsSelected(true);
                   }}
                 >
                   <ComboboxInput
-                    placeholder="Search or select a subject..."
-                    value={subjectSearch}
+                    placeholder="Search or select a tutor..."
+                    value={tutorsSearch}
                     onChange={(e) => {
-                      setSubjectSearch(e.target.value);
+                      setTutorsSearch(e.target.value);
                       setIsSelected(false);
                     }}
                   />
                   <ComboboxContent className="pointer-events-auto">
                     <ComboboxList>
-                      {filteredOfferings.length === 0 ? (
+                      {filteredTutors.length === 0 ? (
                         <div className="p-1 text-center text-sm text-muted-foreground">
-                          No subjects found.
+                          No tutors found.
                         </div>
                       ) : (
-                        filteredOfferings.map((s) => (
+                        filteredTutors.map((tutor) => (
                           <ComboboxItem
-                            key={s.subject_id}
-                            value={s.subject_id}
+                            key={tutor.tutor_id}
+                            value={tutor.tutor_id}
                             className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                           >
-                            {getSubjectLabel(s)}
+                            {tutor.first_name} {tutor.last_name}
                           </ComboboxItem>
                         ))
                       )}

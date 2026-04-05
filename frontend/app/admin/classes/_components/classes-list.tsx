@@ -80,6 +80,12 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
     return options;
   }, [classes]);
 
+  const tutorOptions = useMemo(() => {
+    return [
+      ...new Set(classes.map((c) => c.tutor).filter(Boolean)),
+    ].sort() as string[];
+  }, [classes]);
+
   const hasActiveFilters = columnFilters.length > 0;
 
   return (
@@ -148,6 +154,15 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
           filterName="Status"
           placeholderName="Status"
           options={statusOptions}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
+
+        <FilterContent
+          filterValue="tutor"
+          filterName="Tutor"
+          placeholderName="Tutor"
+          options={tutorOptions}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
         />

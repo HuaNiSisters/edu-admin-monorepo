@@ -54,18 +54,18 @@ type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id
 
 type UpdateClassDataParams = Partial<Omit<CreateClassDataParams, "class_id">>;
 
-// ClassTime enriched with subject info for display
-type ClassTimeWithSubject = ClassTime & {
+type ClassTimeWithSubjectAndTutor = ClassTime & {
   subject_name?: string;
   grade?: string | null;
   location?: string | null;
+  tutor?: string | null;
 };
 
 type GetLocationsResponse = Location[];
 type GetStatusesResponse = StudentStatus[];
 type GetGendersResponse = Gender[];
 type GetSubjectOfferingsResponse = SubjectOffering[];
-type GetClassTimesResponse = ClassTimeWithSubject[];
+type GetClassTimesResponse = ClassTimeWithSubjectAndTutor[];
 type GetTutorsResponse = EmployeeInfo[];
 
 //////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ export type {
   EmployeeInfo,
   SubjectOffering,
   ClassTime,
-  ClassTimeWithSubject,
+  ClassTimeWithSubjectAndTutor,
   CreateStudentDataParams,
   CreateSubjectDataParams,
   UpdateSubjectDataParams,

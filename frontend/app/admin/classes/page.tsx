@@ -6,19 +6,24 @@ import ClassesList from "./_components/classes-list";
 import ClassDialog from "./_components/class-dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { ClassTimeWithSubject, SubjectOffering } from "@/types/IApiWrapper";
+import {
+  ClassTimeWithSubjectAndTutor,
+  EmployeeInfo,
+  SubjectOffering,
+} from "@/types/IApiWrapper";
 import { LoadingBar } from "@/components/loading-bar";
 import apiWrapper from "@/lib/apiWrapper";
 
 const ClassesPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<ClassTimeWithSubject | null>(
-    null,
-  );
-  const [classes, setClasses] = useState<ClassTimeWithSubject[]>([]);
+  const [editingClass, setEditingClass] =
+    useState<ClassTimeWithSubjectAndTutor | null>(null);
+  const [classes, setClasses] = useState<ClassTimeWithSubjectAndTutor[]>([]);
   const [subjectOfferings, setSubjectOfferings] = useState<SubjectOffering[]>(
     [],
   );
+  const [tutors, setTutors] = useState<EmployeeInfo[]>([]);
+
   const { run, isPending } = useAsync();
 
   const fetchClasses = useCallback(() => {
@@ -33,7 +38,13 @@ const ClassesPage = () => {
       const fetchedSubjects = await apiWrapper.getSubjectOfferingsAsync();
       setSubjectOfferings(fetchedSubjects);
     }
+    async function fetchTutors() {
+      const fetchedTutors = await apiWrapper.getTutorsAsync();
+      setTutors(fetchedTutors);
+    }
+
     fetchSubjects();
+    fetchTutors();
     fetchClasses();
   }, [fetchClasses]);
 
@@ -42,7 +53,7 @@ const ClassesPage = () => {
     setDialogOpen(true);
   };
 
-  const handleEdit = (classTime: ClassTimeWithSubject) => {
+  const handleEdit = (classTime: ClassTimeWithSubjectAndTutor) => {
     setEditingClass(classTime);
     setDialogOpen(true);
   };
@@ -52,9 +63,11 @@ const ClassesPage = () => {
     day_of_week: string;
     start_time: string;
     end_time: string;
+    tutor: string | null;
     capacity: number | null;
     active: boolean;
   }) => {
+    console.log("Save class:", data);
     setDialogOpen(false);
     fetchClasses();
   };
@@ -78,6 +91,7 @@ const ClassesPage = () => {
         onOpenChange={setDialogOpen}
         classTime={editingClass}
         subjectOfferings={subjectOfferings}
+        tutors={tutors}
         onSave={handleSave}
       />
     </div>

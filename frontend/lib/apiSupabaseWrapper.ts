@@ -96,35 +96,41 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return responseData;
   }
 
-  async getClassTimesAsync(): Promise<GetClassTimesResponse> {
-    const { data: responseData, error } = await this.supabase
-      .from("ClassTime")
-      .select(
-        `
-        *,
-        subject_offering:SubjectOffering (
-          subject_name,
-          grade,
-          location
-        )
-      `,
+async getClassTimesAsync(): Promise<GetClassTimesResponse> {
+  const { data: responseData, error } = await this.supabase
+    .from("ClassTime")
+    .select(
+      `
+      *,
+      subject_offering:SubjectOffering (
+        subject_name,
+        grade,
+        location
+      ),
+      tutor:Tutor (
+        first_name,
+        last_name
       )
-      .order("day_of_week", { ascending: true });
+    `,
+    )
+    .order("day_of_week", { ascending: true });
 
-    if (error) throw new Error("Failed to fetch classes: " + error.message);
+  if (error) throw new Error("Failed to fetch classes: " + error.message);
 
-    return (responseData ?? []).map((row) => {
-      const { subject_offering, ...rest } = row as typeof row & {
-        subject_offering: { subject_name: string; grade: string | null; location: string | null } | null;
-      };
-      return {
-        ...rest,
-        subject_name: subject_offering?.subject_name,
-        grade: subject_offering?.grade,
-        location: subject_offering?.location,
-      };
-    });
-  }
+  return (responseData ?? []).map((row) => {
+    const { subject_offering, tutor, ...rest } = row as typeof row & {
+      subject_offering: { subject_name: string; grade: string | null; location: string | null } | null;
+      tutor: { first_name: string; last_name: string } | null;
+    };
+    return {
+      ...rest,
+      subject_name: subject_offering?.subject_name,
+      grade: subject_offering?.grade,
+      location: subject_offering?.location,
+      tutor: tutor ? `${tutor.first_name} ${tutor.last_name}` : null,
+    };
+  });
+}
 
   // ─── Students ────────────────────────────────────────────────────────────────
 
