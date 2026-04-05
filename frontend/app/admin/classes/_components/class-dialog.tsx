@@ -304,6 +304,59 @@ const ClassDialog = ({
             />
           </div>
 
+          {/* Tutor */}
+          <Controller
+            name="tutor"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor="tutor">Tutor (optional)</FieldLabel>
+                <Combobox
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value ?? "");
+                    const selected = subjectOfferings.find(
+                      (s) => s.subject_id === value,
+                    );
+                    setSubjectSearch(selected ? getSubjectLabel(selected) : "");
+                    setIsSelected(true);
+                  }}
+                >
+                  <ComboboxInput
+                    placeholder="Search or select a subject..."
+                    value={subjectSearch}
+                    onChange={(e) => {
+                      setSubjectSearch(e.target.value);
+                      setIsSelected(false);
+                    }}
+                  />
+                  <ComboboxContent className="pointer-events-auto">
+                    <ComboboxList>
+                      {filteredOfferings.length === 0 ? (
+                        <div className="p-1 text-center text-sm text-muted-foreground">
+                          No subjects found.
+                        </div>
+                      ) : (
+                        filteredOfferings.map((s) => (
+                          <ComboboxItem
+                            key={s.subject_id}
+                            value={s.subject_id}
+                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                          >
+                            {getSubjectLabel(s)}
+                          </ComboboxItem>
+                        ))
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
           {/* Capacity */}
           <Controller
             name="capacity"

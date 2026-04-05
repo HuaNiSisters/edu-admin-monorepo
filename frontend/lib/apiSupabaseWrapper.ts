@@ -18,6 +18,7 @@ import {
   CreateClassDataParams,
   UpdateClassDataParams,
   GetClassTimesResponse,
+  GetTutorsResponse,
 } from "@/types/IApiWrapper";
 
 class ApiSupabaseWrapper implements ApiWrapper {
@@ -312,6 +313,19 @@ class ApiSupabaseWrapper implements ApiWrapper {
     }
 
     return searchStudentsResult;
+  }
+
+  // --- Tutors (Employees) ---
+  async getTutorsAsync(): Promise<GetTutorsResponse> {
+    const { data: responseData, error } = await this.supabase
+      .from("Tutor")
+      .select(
+        "tutor_id, first_name, last_name, email, phone",
+      )
+      .order("first_name", { ascending: true });
+
+    if (error) throw error;
+    return responseData;
   }
 
   // ─── Lookups ─────────────────────────────────────────────────────────────────

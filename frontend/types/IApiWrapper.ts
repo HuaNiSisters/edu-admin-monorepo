@@ -28,6 +28,8 @@ type StudentData = StudentInfo & {
   parent2Mobile?: string;
 }
 
+type EmployeeInfo = Database["public"]["Tables"]["Tutor"]["Row"];
+
 type UpdateStudentDataParams = {
   studentData: Partial<Omit<CreateStudentDataParams, "student_id">>;
   parent1Data: Partial<CreateParentDataParams>;
@@ -64,6 +66,7 @@ type GetStatusesResponse = StudentStatus[];
 type GetGendersResponse = Gender[];
 type GetSubjectOfferingsResponse = SubjectOffering[];
 type GetClassTimesResponse = ClassTimeWithSubject[];
+type GetTutorsResponse = EmployeeInfo[];
 
 //////////////////////////////////////////////////////////////////
   // CLASSES
@@ -77,6 +80,7 @@ export type {
   Gender,
   StudentData,
   ParentInfo,
+  EmployeeInfo,
   SubjectOffering,
   ClassTime,
   ClassTimeWithSubject,
@@ -94,6 +98,7 @@ export type {
   GetGendersResponse,
   GetSubjectOfferingsResponse,
   GetClassTimesResponse,
+  GetTutorsResponse,
 }
 
 export interface ApiWrapper {
@@ -112,6 +117,10 @@ export interface ApiWrapper {
   getStudentByIdAsync: (id: string) => Promise<StudentData>;
   updateStudentAsync: (id: string, data: UpdateStudentDataParams) => Promise<StudentData>;
   searchStudentsAsync: (query: string) => Promise<SearchStudentsResponse>;
+
+  // Tutors 
+  // TODO: add createTutorsAsync, updateTutorAsync
+  getTutorsAsync: () => Promise<GetTutorsResponse>;
 
   // Lookups
   getLocationsAsync: () => Promise<GetLocationsResponse>;

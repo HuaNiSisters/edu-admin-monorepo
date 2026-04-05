@@ -109,6 +109,15 @@ export const createClassColumns = (
     ),
   },
   {
+    accessorKey: "tutor",
+    size: 200,
+    header: "Tutor",
+    filterFn: "equalsString",
+    cell: ({ row }) => (
+      <span className="font-medium">{row.getValue("tutor") ?? "—"}</span>
+    ),
+  },
+  {
     id: "actions",
     header: () => <div className="text-right pr-3">Actions</div>,
     cell: ({ row }) => (
