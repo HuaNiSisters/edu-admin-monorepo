@@ -1,5 +1,12 @@
 # EduAdmin-frontend
 
+Ensure you are on nvm v22.12.0
+
+You can do that by running: 
+`nvm use v22.12.0` 
+
+Only then can you run `npm install`
+
 ## Must be run after changes to Prisma Schema
 `npx supabase gen types typescript --local ./types/database.types.ts`
 
