@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import apiWrapper from "@/lib/apiWrapper";
 import {
   Dialog,
@@ -18,6 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { Switch } from "@/components/ui/switch";
 import { ClassTimeWithSubject, SubjectOffering } from "@/types/IApiWrapper";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
@@ -70,6 +77,9 @@ interface ClassDialogProps {
   }) => void;
 }
 
+const getSubjectLabel = (s: SubjectOffering) =>
+  `${s.subject_name} - Grade ${s.grade}${s.location ? ` (${formatValuesRemoveUnderscores(s.location)})` : ""}`;
+
 const ClassDialog = ({
   open,
   onOpenChange,
@@ -78,6 +88,7 @@ const ClassDialog = ({
   onSave,
 }: ClassDialogProps) => {
   const isEditing = !!classTime;
+  const [subjectSearch, setSubjectSearch] = useState("");
 
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
@@ -92,8 +103,15 @@ const ClassDialog = ({
   });
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setSubjectSearch("");
+      return;
+    }
     if (classTime) {
+      const selected = subjectOfferings.find(
+        (s) => s.subject_id === classTime.offering_id,
+      );
+      setSubjectSearch(selected ? getSubjectLabel(selected) : "");
       form.reset({
         offeringId: classTime.offering_id ?? "",
         dayOfWeek: classTime.day_of_week ?? "",
@@ -103,6 +121,7 @@ const ClassDialog = ({
         active: classTime.active ?? true,
       });
     } else {
+      setSubjectSearch("");
       form.reset({
         offeringId: "",
         dayOfWeek: "",
@@ -112,7 +131,7 @@ const ClassDialog = ({
         active: true,
       });
     }
-  }, [classTime, open, form]);
+  }, [classTime, open, form, subjectOfferings]);
 
   const handleStartTimeChange = (value: string) => {
     form.setValue("startTime", value, { shouldValidate: true });
@@ -126,6 +145,10 @@ const ClassDialog = ({
       );
     }
   };
+
+  const filteredOfferings = subjectOfferings.filter((s) =>
+    getSubjectLabel(s).toLowerCase().includes(subjectSearch.toLowerCase()),
+  );
 
   const onSubmit = async (data: ClassFormValues) => {
     const newClassTime = {
@@ -156,7 +179,10 @@ const ClassDialog = ({
 
         <form
           id="class-data-form"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            e.stopPropagation();
+            form.handleSubmit(onSubmit)(e);
+          }}
           className="grid gap-4 py-2"
         >
           {/* Subject Offering */}
@@ -166,21 +192,37 @@ const ClassDialog = ({
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor="offering">Subject</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="offering">
-                    <SelectValue placeholder="Select a subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjectOfferings.map((s) => (
-                      <SelectItem key={s.subject_id} value={s.subject_id}>
-                        {s.subject_name} - Year {s.grade}
-                        {s.location
-                          ? ` (${formatValuesRemoveUnderscores(s.location)})`
-                          : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value ?? "");
+                    const selected = subjectOfferings.find(
+                      (s) => s.subject_id === value,
+                    );
+                    setSubjectSearch(selected ? getSubjectLabel(selected) : "");
+                  }}
+                >
+                  <ComboboxInput
+                    placeholder="Search or select a subject..."
+                    value={subjectSearch}
+                    onChange={(e) => setSubjectSearch(e.target.value)}
+                  />
+                  <ComboboxContent className="pointer-events-auto">
+                    <ComboboxList>
+                      {filteredOfferings.length === 0 ? (
+                        <div className="p-1 text-center text-sm text-muted-foreground">
+                          No subjects found.
+                        </div>
+                      ) : (
+                        filteredOfferings.map((s) => (
+                          <ComboboxItem key={s.subject_id} value={s.subject_id}>
+                            {getSubjectLabel(s)}
+                          </ComboboxItem>
+                        ))
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}

@@ -55,11 +55,6 @@ const ClassesPage = () => {
     capacity: number | null;
     active: boolean;
   }) => {
-    if (editingClass) {
-      await apiWrapper.updateClassAsync(editingClass.class_id, data);
-    } else {
-      await apiWrapper.createClassAsync(data);
-    }
     setDialogOpen(false);
     fetchClasses();
   };
