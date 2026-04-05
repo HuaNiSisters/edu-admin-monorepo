@@ -32,6 +32,7 @@ export const createClassColumns = (
 ): ColumnDef<ClassTimeWithSubject>[] => [
   {
     accessorKey: "day_of_week",
+    size: 100,
     header: "Day",
     sortingFn: (a, b) =>
       DAY_ORDER.indexOf(a.original.day_of_week) -
@@ -41,6 +42,7 @@ export const createClassColumns = (
   },
   {
     accessorKey: "grade",
+    size: 50,
     header: "Grade",
     filterFn: (row, columnId, filterValue) =>
       String(row.getValue(columnId)) === filterValue,
@@ -51,6 +53,7 @@ export const createClassColumns = (
   },
   {
     accessorKey: "subject_name",
+    size: 200,
     header: "Subject",
     filterFn: "equalsString",
     cell: ({ row }) => (
@@ -59,6 +62,7 @@ export const createClassColumns = (
   },
   {
     accessorKey: "start_time",
+    size: 200,
     header: "Time",
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue) return true;
@@ -78,6 +82,7 @@ export const createClassColumns = (
   },
   {
     accessorKey: "location",
+    size: 200,
     header: "Location",
     filterFn: "equalsString",
     cell: ({ row }) => (
@@ -89,18 +94,16 @@ export const createClassColumns = (
   {
     accessorKey: "active",
     header: "Status",
-    cell: ({ row }) => {
-      const active = row.getValue<boolean>("active");
-      return (
-        <Badge
-          className={
-            active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }
-        >
-          {active ? "Active" : "Inactive"}
-        </Badge>
-      );
+    // Convert the boolean row value to "Active"/"Inactive" before matching
+    filterFn: (row, columnId, filterValues: string[]) => {
+      const label = row.getValue<boolean>(columnId) ? "Active" : "Inactive";
+      return filterValues.includes(label);
     },
+    cell: ({ row }) => (
+      <Badge className={row.original.active ? "default" : "secondary"}>
+        {row.original.active ? "Active" : "Inactive"}
+      </Badge>
+    ),
   },
   {
     id: "actions",

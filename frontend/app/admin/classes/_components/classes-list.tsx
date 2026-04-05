@@ -36,7 +36,6 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
 
   const columns = useMemo(() => createClassColumns(onEdit), [onEdit]);
 
-  // ✅ Filter options (unchanged)
   const subjectOptions = useMemo(
     () =>
       [
@@ -71,11 +70,20 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
     [classes],
   );
 
+  // Derive which status labels actually exist in the data, preserving both true/false
+  const statusOptions = useMemo(() => {
+    const hasActive = classes.some((c) => c.active === true);
+    const hasInactive = classes.some((c) => c.active === false);
+    const options: string[] = [];
+    if (hasActive) options.push("Active");
+    if (hasInactive) options.push("Inactive");
+    return options;
+  }, [classes]);
+
   const hasActiveFilters = columnFilters.length > 0;
 
   return (
     <div className="space-y-3">
-      {/* ✅ Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
         <FilterContent
           filterValue="day_of_week"
@@ -106,7 +114,6 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
 
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Start Time</span>
-
           <Input
             type="time"
             step="60"
@@ -117,19 +124,10 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
             }
             onChange={(e) => {
               const value = e.target.value;
-
               setColumnFilters((prev) => {
                 const otherFilters = prev.filter((f) => f.id !== "start_time");
-
                 if (!value) return otherFilters;
-
-                return [
-                  ...otherFilters,
-                  {
-                    id: "start_time",
-                    value,
-                  },
-                ];
+                return [...otherFilters, { id: "start_time", value }];
               });
             }}
           />
@@ -144,11 +142,12 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
           setColumnFilters={setColumnFilters}
         />
 
+        {/* Status filter stores "Active" | "Inactive" strings as the filter value */}
         <FilterContent
           filterValue="active"
           filterName="Status"
           placeholderName="Status"
-          options={["Active", "Inactive"]}
+          options={statusOptions}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
         />

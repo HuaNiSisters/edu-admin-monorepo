@@ -12,13 +12,13 @@ export const createSubjectColumns = (
   return [
     {
       accessorKey: "subject_name",
-      size: 400,
+      size: 200,
       filterFn: "equalsString",
       header: "Subject",
     },
     {
       accessorKey: "grade",
-      size: 220,
+      size: 100,
       filterFn: (row, columnId, filterValue) =>
         String(row.getValue(columnId)) === filterValue,
       header: "Grade",
@@ -26,6 +26,7 @@ export const createSubjectColumns = (
     },
     {
       accessorKey: "location",
+      size: 200,
       header: "Location",
       filterFn: "equalsString",
       cell: ({ row }) => (

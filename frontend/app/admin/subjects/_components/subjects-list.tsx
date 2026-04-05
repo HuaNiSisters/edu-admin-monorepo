@@ -93,7 +93,6 @@ const SubjectsList = ({ subjectOfferings, onEdit }: SubjectsListProps) => {
         )}
       </div>
 
-      {/* ✅ Table */}
       <DataTable
         columns={columns}
         data={subjectOfferings}

@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ClassTimeWithSubject, SubjectOffering } from "@/types/IApiWrapper";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
+import zod from "zod";
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -45,6 +47,21 @@ interface ClassDialogProps {
     active: boolean;
   }) => void;
 }
+
+const classFormSchema = zod.object({
+  subjectName: zod.string().min(1, "Subject is required"),
+  dayOfWeek: zod.string(),
+  startTime: zod.string(),
+  endTime: zod.string().refine(
+    (value, ctx) => {
+      const { startTime } = ctx.parent;
+      if (!startTime || !value) return true;
+      return value > startTime;
+    },
+    { message: "End time must be after start time" },
+  ),
+  capacity: zod.string(),
+});
 
 const ClassDialog = ({
   open,
@@ -124,8 +141,10 @@ const ClassDialog = ({
               <SelectContent>
                 {subjectOfferings.map((s) => (
                   <SelectItem key={s.subject_id} value={s.subject_id}>
-                    {s.subject_name} — Year {s.grade}
-                    {s.location ? ` (${s.location})` : ""}
+                    {s.subject_name} - Year {s.grade}
+                    {s.location
+                      ? ` (${formatValuesRemoveUnderscores(s.location)})`
+                      : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
