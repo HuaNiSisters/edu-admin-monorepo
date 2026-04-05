@@ -215,7 +215,11 @@ const ClassDialog = ({
                         </div>
                       ) : (
                         filteredOfferings.map((s) => (
-                          <ComboboxItem key={s.subject_id} value={s.subject_id}>
+                          <ComboboxItem
+                            key={s.subject_id}
+                            value={s.subject_id}
+                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                          >
                             {getSubjectLabel(s)}
                           </ComboboxItem>
                         ))
