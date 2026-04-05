@@ -89,6 +89,7 @@ const ClassDialog = ({
 }: ClassDialogProps) => {
   const isEditing = !!classTime;
   const [subjectSearch, setSubjectSearch] = useState("");
+  const [isSelected, setIsSelected] = useState(false);
 
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
@@ -105,6 +106,7 @@ const ClassDialog = ({
   useEffect(() => {
     if (!open) {
       setSubjectSearch("");
+      setIsSelected(false);
       return;
     }
     if (classTime) {
@@ -112,6 +114,7 @@ const ClassDialog = ({
         (s) => s.subject_id === classTime.offering_id,
       );
       setSubjectSearch(selected ? getSubjectLabel(selected) : "");
+      setIsSelected(true);
       form.reset({
         offeringId: classTime.offering_id ?? "",
         dayOfWeek: classTime.day_of_week ?? "",
@@ -147,7 +150,9 @@ const ClassDialog = ({
   };
 
   const filteredOfferings = subjectOfferings.filter((s) =>
-    getSubjectLabel(s).toLowerCase().includes(subjectSearch.toLowerCase()),
+    isSelected
+      ? true
+      : getSubjectLabel(s).toLowerCase().includes(subjectSearch.toLowerCase()),
   );
 
   const onSubmit = async (data: ClassFormValues) => {
@@ -200,12 +205,16 @@ const ClassDialog = ({
                       (s) => s.subject_id === value,
                     );
                     setSubjectSearch(selected ? getSubjectLabel(selected) : "");
+                    setIsSelected(true);
                   }}
                 >
                   <ComboboxInput
                     placeholder="Search or select a subject..."
                     value={subjectSearch}
-                    onChange={(e) => setSubjectSearch(e.target.value)}
+                    onChange={(e) => {
+                      setSubjectSearch(e.target.value);
+                      setIsSelected(false);
+                    }}
                   />
                   <ComboboxContent className="pointer-events-auto">
                     <ComboboxList>
