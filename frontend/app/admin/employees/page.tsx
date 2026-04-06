@@ -3,10 +3,16 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import apiWrapper from "@/lib/apiWrapper";
-import { DataTable } from "@/components/ui/data-table";
 import { useRouter } from "next/navigation";
 import { columns } from "./employees-columns";
 import { EmployeeInfo } from "@/types/IApiWrapper";
+
+import dynamic from "next/dynamic";
+
+const DataTable = dynamic(
+  () => import("@/components/ui/data-table").then((m) => m.DataTable),
+  { ssr: false },
+);
 
 const EmployeesPage = () => {
   const router = useRouter();
