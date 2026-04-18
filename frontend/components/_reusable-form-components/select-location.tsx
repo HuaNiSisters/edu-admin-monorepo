@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 interface SelectLocationProps {
   options: string[];
   value?: string;
@@ -17,14 +17,6 @@ interface SelectLocationProps {
 
 const SelectLocation = (props: SelectLocationProps) => {
   const { options, value, onChange, disabled } = props;
-
-  const formatLabel = (value: string) =>
-    value
-      .split("_")
-      .map((word) =>
-        word === "and" ? word : word.charAt(0).toUpperCase() + word.slice(1),
-      )
-      .join(" ");
 
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
@@ -36,7 +28,7 @@ const SelectLocation = (props: SelectLocationProps) => {
           <SelectLabel>Locations</SelectLabel>
           {options?.map((option) => (
             <SelectItem key={option} value={option}>
-              {formatLabel(option)}
+              {formatValuesRemoveUnderscores(option)}
             </SelectItem>
           ))}
         </SelectGroup>

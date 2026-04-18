@@ -1,9 +1,13 @@
 import { Database } from "./database.types";
 
+//////////////////////////////////////////////////////////////////
+  // STUDENTS
+  //////////////////////////////////////////////////////////////////
 type Location = Database["public"]["Enums"]["Location"];
 type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
 type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
+type ClassTime = Database["public"]["Tables"]["ClassTime"]["Row"];
 
 type CreateStudentDataParams = Database["public"]["Tables"]["Student"]["Insert"];
 type CreateParentDataParams = Database["public"]["Tables"]["Parent"]["Insert"];
@@ -23,6 +27,8 @@ type StudentData = StudentInfo & {
   parent2FullName?: string;
   parent2Mobile?: string;
 }
+
+type EmployeeInfo = Database["public"]["Tables"]["Tutor"]["Row"];
 
 type UpdateStudentDataParams = {
   studentData: Partial<Omit<CreateStudentDataParams, "student_id">>;
@@ -46,10 +52,27 @@ type SearchStudentsResponse = {
 type CreateSubjectDataParams = Database["public"]["Tables"]["SubjectOffering"]["Insert"];
 type UpdateSubjectDataParams = Partial<Omit<CreateSubjectDataParams, "subject_id">>;
 
+type UpdateClassDataParams = Partial<Omit<CreateClassDataParams, "class_id">>;
+
+type ClassTimeWithSubjectAndTutor = ClassTime & {
+  subject_name?: string;
+  grade?: string | null;
+  location?: string | null;
+  tutor?: string | null;
+};
+
 type GetLocationsResponse = Location[];
 type GetStatusesResponse = StudentStatus[];
 type GetGendersResponse = Gender[];
 type GetSubjectOfferingsResponse = SubjectOffering[];
+type GetClassTimesResponse = ClassTimeWithSubjectAndTutor[];
+type GetTutorsResponse = EmployeeInfo[];
+
+//////////////////////////////////////////////////////////////////
+  // CLASSES
+  //////////////////////////////////////////////////////////////////
+type CreateClassDataParams = Database["public"]["Tables"]["ClassTime"]["Insert"];
+
 
 export type {
   Location,
@@ -57,10 +80,15 @@ export type {
   Gender,
   StudentData,
   ParentInfo,
+  EmployeeInfo,
   SubjectOffering,
+  ClassTime,
+  ClassTimeWithSubjectAndTutor,
   CreateStudentDataParams,
   CreateSubjectDataParams,
   UpdateSubjectDataParams,
+  CreateClassDataParams,
+  UpdateClassDataParams,
   CreateParentDataParams,
   CreateStudentParams,
   UpdateStudentDataParams,
@@ -69,17 +97,33 @@ export type {
   GetStatusesResponse,
   GetGendersResponse,
   GetSubjectOfferingsResponse,
+  GetClassTimesResponse,
+  GetTutorsResponse,
 }
 
 export interface ApiWrapper {
+  // Subjects
   createSubjectAsync: (data: CreateSubjectDataParams) => Promise<SubjectOffering>;
+  updateSubjectAsync: (id: string, data: UpdateSubjectDataParams) => Promise<SubjectOffering>;
+  getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>;
+
+  // Classes
+  createClassAsync: (data: CreateClassDataParams) => Promise<ClassTime>;
+  updateClassAsync: (id: string, data: UpdateClassDataParams) => Promise<ClassTime>;
+  getClassTimesAsync: () => Promise<GetClassTimesResponse>;
+
+  // Students
   createStudentAsync: (data: CreateStudentParams) => Promise<StudentData>;
   getStudentByIdAsync: (id: string) => Promise<StudentData>;
   updateStudentAsync: (id: string, data: UpdateStudentDataParams) => Promise<StudentData>;
-  updateSubjectAsync: (id: string, data: UpdateSubjectDataParams) => Promise<SubjectOffering>;
-  getSubjectOfferingsAsync: () => Promise<GetSubjectOfferingsResponse>
+  searchStudentsAsync: (query: string) => Promise<SearchStudentsResponse>;
+
+  // Tutors 
+  // TODO: add createTutorsAsync, updateTutorAsync
+  getTutorsAsync: () => Promise<GetTutorsResponse>;
+
+  // Lookups
   getLocationsAsync: () => Promise<GetLocationsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;
   getGendersAsync: () => Promise<GetGendersResponse>;
 }
-

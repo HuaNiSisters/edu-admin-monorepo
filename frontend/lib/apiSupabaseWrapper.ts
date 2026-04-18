@@ -3,7 +3,6 @@ import { Constants } from "../types/database.types";
 import {
   ApiWrapper,
   StudentData,
-  CreateStudentDataParams,
   CreateSubjectDataParams,
   CreateStudentParams,
   UpdateStudentDataParams,
@@ -15,6 +14,11 @@ import {
   UpdateSubjectDataParams,
   SearchStudentsResponse,
   ParentInfo,
+  ClassTime,
+  CreateClassDataParams,
+  UpdateClassDataParams,
+  GetClassTimesResponse,
+  GetTutorsResponse,
 } from "@/types/IApiWrapper";
 
 class ApiSupabaseWrapper implements ApiWrapper {
@@ -23,6 +27,8 @@ class ApiSupabaseWrapper implements ApiWrapper {
   constructor() {
     this.supabase = createClient();
   }
+
+  // ─── Subjects ────────────────────────────────────────────────────────────────
 
   async createSubjectAsync(
     data: CreateSubjectDataParams,
@@ -49,6 +55,85 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return responseData;
   }
 
+  async getSubjectOfferingsAsync(): Promise<GetSubjectOfferingsResponse> {
+    const { data: responseData, error } = await this.supabase
+      .from("SubjectOffering")
+      .select(
+        "subject_id, subject_name, grade, location, price_per_term, tutorTutor_id",
+      )
+      .order("subject_name", { ascending: true });
+
+    if (error) throw error;
+    return responseData;
+  }
+
+  // ─── Classes ─────────────────────────────────────────────────────────────────
+
+  async createClassAsync(data: CreateClassDataParams): Promise<ClassTime> {
+    console.log({ createClassData: data });
+    const { data: responseData, error } = await this.supabase
+      .from("ClassTime")
+      .insert(data)
+      .select()
+      .single();
+
+    if (error) throw new Error("Failed to create class: " + error.message);
+    return responseData;
+  }
+
+  async updateClassAsync(
+    id: string,
+    data: UpdateClassDataParams,
+  ): Promise<ClassTime> {
+    const { data: responseData, error } = await this.supabase
+      .from("ClassTime")
+      .update(data)
+      .eq("class_id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error("Failed to update class: " + error.message);
+    return responseData;
+  }
+
+async getClassTimesAsync(): Promise<GetClassTimesResponse> {
+  const { data: responseData, error } = await this.supabase
+    .from("ClassTime")
+    .select(
+      `
+      *,
+      subject_offering:SubjectOffering (
+        subject_name,
+        grade,
+        location
+      ),
+      tutor:Tutor (
+        first_name,
+        last_name
+      )
+    `,
+    )
+    .order("day_of_week", { ascending: true });
+
+  if (error) throw new Error("Failed to fetch classes: " + error.message);
+
+  return (responseData ?? []).map((row) => {
+    const { subject_offering, tutor, ...rest } = row as typeof row & {
+      subject_offering: { subject_name: string; grade: string | null; location: string | null } | null;
+      tutor: { first_name: string; last_name: string } | null;
+    };
+    return {
+      ...rest,
+      subject_name: subject_offering?.subject_name,
+      grade: subject_offering?.grade,
+      location: subject_offering?.location,
+      tutor: tutor ? `${tutor.first_name} ${tutor.last_name}` : null,
+    };
+  });
+}
+
+  // ─── Students ────────────────────────────────────────────────────────────────
+
   async createStudentAsync(data: CreateStudentParams): Promise<StudentData> {
     console.log({ createStudentData: data });
     const { studentData, parent1Data, parent2Data } = data;
@@ -69,7 +154,6 @@ class ApiSupabaseWrapper implements ApiWrapper {
     }
 
     const {
-      data: createStudentParent1Response,
       error: createStudentParent1Error,
     } = await this.supabase.from("StudentParent").insert({
       student_id: createStudentResponse?.student_id,
@@ -94,13 +178,11 @@ class ApiSupabaseWrapper implements ApiWrapper {
         throw new Error("Failed to create parent 2: " + createParent2Error.message);
       }
 
-      const {
-        data: createStudentParent2Response,
-        error: createStudentParent2Error,
-      } = await this.supabase.from("StudentParent").insert({
-        student_id: createStudentResponse?.student_id,
-        parent_id: createParent2Response?.parent_id,
-      });
+      const { error: createStudentParent2Error } =
+        await this.supabase.from("StudentParent").insert({
+          student_id: createStudentResponse?.student_id,
+          parent_id: createParent2Response?.parent_id,
+        });
       if (!!createStudentParent2Error) {
         throw new Error("Failed to create student-parent relationship for parent 2: " + createStudentParent2Error.message);
       }
@@ -239,6 +321,21 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return searchStudentsResult;
   }
 
+  // --- Tutors (Employees) ---
+  async getTutorsAsync(): Promise<GetTutorsResponse> {
+    const { data: responseData, error } = await this.supabase
+      .from("Tutor")
+      .select(
+        "tutor_id, first_name, last_name, email, phone",
+      )
+      .order("first_name", { ascending: true });
+
+    if (error) throw error;
+    return responseData;
+  }
+
+  // ─── Lookups ─────────────────────────────────────────────────────────────────
+
   async getLocationsAsync(): Promise<GetLocationsResponse> {
     return Object.values(Constants.public.Enums.Location);
   }
@@ -249,18 +346,6 @@ class ApiSupabaseWrapper implements ApiWrapper {
 
   async getGendersAsync(): Promise<GetGendersResponse> {
     return Object.values(Constants.public.Enums.Gender);
-  }
-
-  async getSubjectOfferingsAsync(): Promise<GetSubjectOfferingsResponse> {
-    const { data: responseData, error } = await this.supabase
-      .from("SubjectOffering")
-      .select(
-        "subject_id, subject_name, grade, location, price_per_term, tutorTutor_id",
-      )
-      .order("grade", { ascending: true });
-
-    if (error) throw error;
-    return responseData;
   }
 }
 

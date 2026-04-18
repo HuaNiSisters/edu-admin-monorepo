@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAsync } from "@/hooks/use-async";
 import SubjectsList from "./_components/subjects-list";
 import { Button } from "@/components/ui/button";
@@ -12,32 +12,27 @@ import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { LoadingBar } from "@/components/loading-bar";
 
-const CreateSubjectPage = () => {
+const SubjectsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<SubjectOffering | null>(
     null,
   );
-  const [locationOptions, setLocationOptions] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+
   const [subjectOfferings, setSubjectOfferings] = useState<SubjectOffering[]>(
     [],
   );
   const { run, isPending } = useAsync();
 
-  useEffect(() => {
-    async function fetchSelectableFieldsData() {
-      const fetchedLocations = await apiWrapper.getLocationsAsync();
-      setLocationOptions([...fetchedLocations, "all"]);
-    }
-    fetchSelectableFieldsData();
-
-    const handleQuery = async () => {
+  const fetchSubjects = useCallback(() => {
+    run(async () => {
       const data = await apiWrapper.getSubjectOfferingsAsync();
       setSubjectOfferings(data);
-    };
-
-    run(handleQuery);
+    });
   }, [run]);
+
+  useEffect(() => {
+    fetchSubjects();
+  }, [fetchSubjects]);
 
   const handleAdd = () => {
     setEditingSubject(null);
@@ -60,37 +55,18 @@ const CreateSubjectPage = () => {
     setDialogOpen(true);
   };
 
-  const filteredSubjects =
-    selectedLocation === "all"
-      ? subjectOfferings
-      : subjectOfferings.filter((s) => s.location === selectedLocation);
-
   return (
     <div className="gap-y-4">
       <LoadingBar isLoading={isPending} />
 
-      <div className="flex justify-between">
-        <div className="flex items-center gap-2">
-          <Label>Location:</Label>
-          <SelectLocation
-            options={locationOptions}
-            value={selectedLocation}
-            onChange={(value) => setSelectedLocation(value)}
-          />
-        </div>
-        <div className="flex justify-end py-4">
-          <Button onClick={handleAdd} className="gap-2">
-            <Plus className="size-4" />
-            Add Subject
-          </Button>
-        </div>
+      <div className="flex justify-end">
+        <Button onClick={handleAdd} className="gap-2">
+          <Plus className="size-4" />
+          Add Subject
+        </Button>
       </div>
 
-      <SubjectsList
-        locationFilter={selectedLocation}
-        subjectOfferings={filteredSubjects}
-        onEdit={handleEdit}
-      />
+      <SubjectsList subjectOfferings={subjectOfferings} onEdit={handleEdit} />
 
       <SubjectDialog
         key={editingSubject?.subject_id}
@@ -103,4 +79,4 @@ const CreateSubjectPage = () => {
   );
 };
 
-export default CreateSubjectPage;
+export default SubjectsPage;
