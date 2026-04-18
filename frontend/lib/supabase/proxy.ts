@@ -1,15 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
+import {
+  ADMIN_ROUTE_PREFIX,
+  RECEPTION_ADMIN_ROUTES,
+  ROUTES,
+} from "@/core/routes/consts";
+import { UserRole } from "@/core/userRoles/types";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // If the env vars are not set, skip proxy check. You can remove this
-  // once you setup the project.
-  if (!hasEnvVars) {
+  // Pages that don't require authentication
+  if (
+    request.nextUrl.pathname === ROUTES.AUTH.LOGIN ||
+    request.nextUrl.pathname === ROUTES.AUTH.SIGN_UP ||
+    request.nextUrl.pathname === ROUTES.AUTH.RESET_PASSWORD
+  ) {
     return supabaseResponse;
   }
 
@@ -47,16 +56,30 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // // no user, potentially respond by redirecting the user to the login page
-    // const url = request.nextUrl.clone();
-    // url.pathname = "/auth/login";
-    // return NextResponse.redirect(url);
+  // Pages that require authentication
+  if (!user) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone();
+    url.pathname = ROUTES.AUTH.LOGIN;
+    return NextResponse.redirect(url);
+  }
+
+  // Pages that require the user to be an admin
+  if (request.nextUrl.pathname.startsWith(ADMIN_ROUTE_PREFIX)) {
+    if (
+      user.user_metadata?.role === UserRole.Receptionist &&
+      RECEPTION_ADMIN_ROUTES.includes(request.nextUrl.pathname)
+    ) {
+      return supabaseResponse;
+    }
+
+    if (user.user_metadata?.role === UserRole.Admin) {
+      return supabaseResponse;
+    }
+    // Otherwise, 403 or redirect to home page
+    const url = request.nextUrl.clone();
+    url.pathname = ROUTES.FORBIDDEN;
+    return NextResponse.redirect(url);
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

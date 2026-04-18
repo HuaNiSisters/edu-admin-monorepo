@@ -36,6 +36,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
+import { RECEPTION_ADMIN_ROUTES, ROUTES } from "@/core/routes/consts";
 
 const studentsSidebarItems = [
   {
@@ -93,12 +95,13 @@ const adminSidebarItems = [
   },
   {
     name: "Employees",
-    url: "/admin/employees",
+    url: ROUTES.ADMIN.EMPLOYEES,
     icon: IdCard,
   },
 ];
 
 export function AppSidebar() {
+  const { isUserAdmin, isUserReceptionist } = useAuth();
   const pathname = usePathname();
 
   return (
@@ -172,35 +175,50 @@ export function AppSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        <Collapsible defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel className="flex justify-between">
-              ADMIN
-              <CollapsibleTrigger>
-                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {adminSidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.url}
-                      >
-                        <Link href={item.url}>
-                          <item.icon />
-                          <div>{item.name}</div>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+        {(isUserAdmin() || isUserReceptionist()) && (
+          <>
+            <Collapsible defaultOpen className="group/collapsible">
+              <SidebarGroup>
+                <SidebarGroupLabel className="flex justify-between">
+                  ADMIN
+                  <CollapsibleTrigger>
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </CollapsibleTrigger>
+                </SidebarGroupLabel>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {adminSidebarItems
+                        .filter((item) => {
+                          if (isUserAdmin()) return true;
+                          if (
+                            isUserReceptionist() &&
+                            RECEPTION_ADMIN_ROUTES.includes(item.url)
+                          ) {
+                            return true;
+                          }
+                          return false;
+                        })
+                        .map((item) => (
+                          <SidebarMenuItem key={item.name}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={pathname === item.url}
+                            >
+                              <Link href={item.url}>
+                                <item.icon />
+                                <div>{item.name}</div>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
