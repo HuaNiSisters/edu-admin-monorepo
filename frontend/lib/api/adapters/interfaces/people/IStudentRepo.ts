@@ -2,13 +2,13 @@ import { StudentData } from "@/lib/api/types";
 
 import {
   GetStatusesResponse,
-  CreateStudentParams,
+  CreateStudentDataParams,
   UpdateStudentDataParams,
   SearchStudentsResponse,
 } from "@/lib/api/types/person/student";
 
 interface IStudentRepo {
-  createStudentAsync: (data: CreateStudentParams) => Promise<StudentData>;
+  createStudentAsync: (data: CreateStudentDataParams) => Promise<StudentData>;
   updateStudentAsync: (
     id: string,
     data: UpdateStudentDataParams,

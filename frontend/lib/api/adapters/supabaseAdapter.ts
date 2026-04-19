@@ -5,12 +5,24 @@ import {
   ICampusRepo,
   IPersonRepo,
   IStudentRepo,
+  IParentRepo,
   IEmployeeRepo,
   ISubjectRepo,
   IClassRepo,
 } from "@/lib/api/adapters/interfaces";
+import { CreateParentDataParams, UpdateParentDataParams } from "../types/person/parent";
+import { CreateStudentDataParams } from "../types/person/student";
 
-class SupabaseApiWrapper implements ISubjectRepo, IClassRepo, IStudentRepo, ICampusRepo, IPersonRepo, IEmployeeRepo {
+class SupabaseApiWrapper
+  implements
+    IPersonRepo,
+    IStudentRepo,
+    IParentRepo,
+    IEmployeeRepo,
+    ISubjectRepo,
+    IClassRepo,
+    ICampusRepo
+{
   private supabase: ReturnType<typeof createClient>;
 
   constructor() {
@@ -19,16 +31,13 @@ class SupabaseApiWrapper implements ISubjectRepo, IClassRepo, IStudentRepo, ICam
 
   // ─── Subjects ────────────────────────────────────────────────────────────────
 
-  async createSubjectAsync(
-    data: CreateSubjectDataParams,
-  ) {
+  async createSubjectAsync(data: CreateSubjectDataParams) {
     console.log({ createSubjectData: data });
     const { data: responseData } = await this.supabase
       .from("SubjectOffering")
       .insert(data)
       .select()
       .single();
-      return "kj"
     return responseData;
   }
 
@@ -125,87 +134,76 @@ class SupabaseApiWrapper implements ISubjectRepo, IClassRepo, IStudentRepo, ICam
       };
     });
   }
+  
+  // ─── Parents ────────────────────────────────────────────────────────────────
+  
+  async getParentAsync(parentId: string) {
+    const { data: responseData, error } = await this.supabase
+      .from("Parent")
+      .select()
+      .eq("parent_id", parentId)
+      .single();
 
-  // ─── Students ────────────────────────────────────────────────────────────────
+    if (error) throw new Error("Failed to fetch parent: " + error.message);
+    return responseData;
+  }
 
-  async createStudentAsync(data: CreateStudentParams): Promise<StudentData> {
-    console.log({ createStudentData: data });
-    const { studentData, parent1Data, parent2Data } = data;
-    const { data: createStudentResponse, error: createStudentError } =
-      await this.supabase.from("Student").insert(studentData).select().single();
-    if (!!createStudentError) {
-      throw new Error(
-        "Failed to create student: " + createStudentError.message,
-      );
+  async createParentAsync(data: CreateParentDataParams) {
+    console.log({ createParentData: data });
+    const { data: responseData, error } = await this.supabase
+    .from("Parent")
+    .insert(data)
+    .select()
+    .single();
+    
+    if (!!error) {
+      throw new Error("Failed to create parent: " + error.message);
     }
-
-    const { data: createParent1Response, error: createParent1Error } =
-      await this.supabase
-        .from("Parent")
-        .insert({
-          first_name: parent1Data.first_name,
-          last_name: parent1Data.last_name,
-          parent_mobile: parent1Data.parent_mobile,
-        })
-        .select()
-        .single();
-    if (!!createParent1Error) {
-      throw new Error(
-        "Failed to create parent 1: " + createParent1Error.message,
-      );
+    
+    return responseData;
+  }
+  
+  async updateParentAsync(
+    parentId: string,
+    parentData: UpdateParentDataParams,
+  ) {
+    const { data: responseData, error } = await this.supabase
+      .from("Parent")
+      .update(parentData)
+      .eq("parent_id", parentId)
+      .select()
+      .single();
+      return responseData;
     }
-
-    const { error: createStudentParent1Error } = await this.supabase
+    
+    async linkParentToStudentAsync(student_id: string, parent_id: string) {
+      const { data: responseData, error } = await this.supabase
       .from("StudentParent")
-      .insert({
-        student_id: createStudentResponse?.student_id,
-        parent_id: createParent1Response?.parent_id,
-      });
-    if (!!createStudentParent1Error) {
-      throw new Error(
-        "Failed to create student-parent relationship for parent 1: " +
-          createStudentParent1Error.message,
-      );
-    }
-
-    if (!!parent2Data?.first_name) {
-      const { data: createParent2Response, error: createParent2Error } =
-        await this.supabase
-          .from("Parent")
-          .insert({
-            first_name: parent2Data.first_name,
-            last_name: parent2Data.last_name,
-            parent_mobile: parent2Data.parent_mobile,
-          })
-          .select()
-          .single();
-      if (!!createParent2Error) {
-        throw new Error(
-          "Failed to create parent 2: " + createParent2Error.message,
-        );
+      .insert({ student_id, parent_id })
+      .select()
+      .single();
+      
+      if(!!error) {
+        throw new Error("Failed to link parent to student: " + error.message);
       }
 
-      const { error: createStudentParent2Error } = await this.supabase
-        .from("StudentParent")
-        .insert({
-          student_id: createStudentResponse?.student_id,
-          parent_id: createParent2Response?.parent_id,
-        });
-      if (!!createStudentParent2Error) {
-        throw new Error(
-          "Failed to create student-parent relationship for parent 2: " +
-            createStudentParent2Error.message,
-        );
-      }
+      return responseData;
     }
 
-    return {
-      ...createStudentResponse,
-      parent1FullName: parent1Data.first_name,
-      parent1Mobile: parent1Data.parent_mobile,
-      parent2FullName: parent2Data?.first_name,
-      parent2Mobile: parent2Data?.parent_mobile,
-    };
+    
+    // ─── Students ────────────────────────────────────────────────────────────────
+    
+    async createStudentAsync(data: CreateStudentDataParams): Promise<StudentData> {
+      console.log({ createStudentData: data });
+      const { data: createStudentResponse, error: createStudentError } =
+      await this.supabase.from("Student").insert(data).select().single();
+      if (!!createStudentError) {
+        throw new Error(
+          "Failed to create student: " + createStudentError.message,
+        );
+    }
+
+    return createStudentResponse;
   }
 
   async getStudentByIdAsync(id: string): Promise<StudentData> {
@@ -263,70 +261,8 @@ class SupabaseApiWrapper implements ISubjectRepo, IClassRepo, IStudentRepo, ICam
       );
     }
 
-    const { data: updateParent1Response, error: updateParent1Error } =
-      await this.supabase
-        .from("Parent")
-        .update(data.parent1Data)
-        .eq("parent_id", data.parent1Data?.parent_id)
-        .select()
-        .single();
-
-    if (!!updateParent1Error) {
-      throw new Error(
-        "Failed to update parent 1: " + updateParent1Error.message,
-      );
-    }
-
-    let parent2Data: ParentInfo;
-    // REPEITIVE CODE: TO REFACTOR
-    if (!data.parent2Data?.parent_id) {
-      const { data: createParent2Response, error: createParent2Error } =
-        await this.supabase
-          .from("Parent")
-          .insert({
-            first_name: data.parent2Data?.first_name,
-            last_name: data.parent2Data?.last_name,
-            parent_mobile: data.parent2Data?.parent_mobile,
-          })
-          .select()
-          .single();
-      await this.supabase.from("StudentParent").insert({
-        student_id: id,
-        parent_id: createParent2Response?.parent_id,
-      });
-      if (!!createParent2Error) {
-        throw new Error(
-          "Failed to create parent 2: " + createParent2Error.message,
-        );
-      }
-      parent2Data = createParent2Response;
-    } else {
-      const { data: updateParent2Response, error: updateParent2Error } =
-        await this.supabase
-          .from("Parent")
-          .update(data.parent2Data)
-          .eq("parent_id", data.parent2Data?.parent_id)
-          .select()
-          .single();
-      if (!!updateParent2Error) {
-        throw new Error(
-          "Failed to update parent 2: " + updateParent2Error.message,
-        );
-      }
-      parent2Data = updateParent2Response;
-    }
-
-    const responseData = {
-      ...updateStudentResponse,
-      parent1Id: data.parent1Data?.parent_id,
-      parent1FullName: updateParent1Response?.first_name,
-      parent1Mobile: updateParent1Response?.parent_mobile,
-      parent2Id: data.parent2Data?.parent_id,
-      parent2FullName: parent2Data?.first_name,
-      parent2Mobile: parent2Data?.parent_mobile,
-    };
-    console.log({ responseData });
-    return responseData;
+    console.log({ updateStudentResponse });
+    return updateStudentResponse;
   }
 
   async searchStudentsAsync(query: string): Promise<SearchStudentsResponse> {

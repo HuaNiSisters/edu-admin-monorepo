@@ -1,11 +1,11 @@
-import { ParentInfo, StudentInfo, StudentStatus } from "..";
 import { Database } from "../../../../types/database.types";
+import { ParentInfo, StudentInfo, StudentStatus } from "..";
+import { CreateParentDataParams } from "./parent";
 
 type GetStatusesResponse = StudentStatus[];
 
 type CreateStudentDataParams =
   Database["public"]["Tables"]["Student"]["Insert"];
-type CreateParentDataParams = Database["public"]["Tables"]["Parent"]["Insert"];
 type CreateStudentParams = {
   studentData: CreateStudentDataParams;
   parent1Data: CreateParentDataParams;

@@ -13,7 +13,7 @@ const ourBackendApiWrapper = ourBackendAdapter();
 
 const campusService = CampusService(supabaseApiWrapper);
 const personService = PersonService(supabaseApiWrapper);
-const studentService = StudentService(supabaseApiWrapper);
+const studentService = StudentService(supabaseApiWrapper, supabaseApiWrapper);
 const employeeService = EmployeeService(supabaseApiWrapper);
 const subjectService = SubjectService(supabaseApiWrapper);
 const classService = ClassService(supabaseApiWrapper);
