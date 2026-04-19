@@ -1,9 +1,8 @@
-import SupabaseApiWrapper from "../../api/adapters/supabaseAdapter";
-const apiWrapper = new SupabaseApiWrapper();
+import { IEmployeeRepo } from "@/lib/api/interfaces";
 
-function employeeFunctions() {
+function EmployeeService(employeeRepo: IEmployeeRepo) {
   async function getTutorsAsync() {
-    return await apiWrapper.getTutorsAsync();
+    return await employeeRepo.getTutorsAsync();
   }
 
   return {
@@ -11,5 +10,4 @@ function employeeFunctions() {
   };
 }
 
-const employeeService = employeeFunctions();
-export default employeeService;
+export default EmployeeService;

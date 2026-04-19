@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
-import apiWrapper from "@/lib/services/apiWrapper";
+import { employeeService } from "@/lib/services";
 import { useRouter } from "next/navigation";
 import { columns } from "./employees-columns";
 import { EmployeeInfo } from "@/lib/api/types/IApiWrapper";
@@ -21,7 +21,7 @@ const EmployeesPage = () => {
 
   useEffect(() => {
     const fetchEmployees = async () => {
-      const fetchedEmployees = await apiWrapper.getTutorsAsync();
+      const fetchedEmployees = await employeeService.getTutorsAsync();
       setEmployees(fetchedEmployees);
     };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import classService from "@/lib/services/classService";
+import { classService } from "@/lib/services";
 import {
   Dialog,
   DialogContent,

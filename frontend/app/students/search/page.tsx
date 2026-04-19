@@ -7,7 +7,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import apiWrapper from "@/lib/services/apiWrapper";
+import { studentService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
 import { SearchStudentsResponse } from "@/lib/api/types/IApiWrapper";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ const SearchStudentPage = () => {
     setSearchInput(event.target.value);
     if (event.target.value.length < 4) return;
     const handleQuery = async () => {
-      const result = await apiWrapper.searchStudentsAsync(event.target.value);
+      const result = await studentService.searchStudentsAsync(event.target.value);
       setSearchResults(result || []);
     };
     run(handleQuery);

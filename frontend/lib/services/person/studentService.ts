@@ -1,26 +1,28 @@
+import { IStudentRepo } from "@/lib/api/interfaces/IStudentRepo";
 import {
   UpdateStudentDataParams,
   CreateStudentParams,
 } from "../../api/types/person/student";
 
-import SupabaseApiWrapper from "../../api/adapters/supabaseAdapter";
-const apiWrapper = new SupabaseApiWrapper();
-
-function studentFunctions() {
+function StudentService(studentRepo: IStudentRepo) {
   async function getStatusesAsync() {
-    return await apiWrapper.getStatusesAsync();
+    return await studentRepo.getStatusesAsync();
   }
 
   async function createStudentAsync(data: CreateStudentParams) {
-    return await apiWrapper.createStudentAsync(data);
+    return await studentRepo.createStudentAsync(data);
   }
 
   async function updateStudentAsync(id: string, data: UpdateStudentDataParams) {
-    return await apiWrapper.updateStudentAsync(id, data);
+    return await studentRepo.updateStudentAsync(id, data);
   }
 
   async function getStudentByIdAsync(id: string) {
-    return await apiWrapper.getStudentByIdAsync(id);
+    return await studentRepo.getStudentByIdAsync(id);
+  }
+
+  async function searchStudentsAsync(query: string) {
+    return await studentRepo.searchStudentsAsync(query);
   }
 
   return {
@@ -28,8 +30,8 @@ function studentFunctions() {
     createStudentAsync,
     updateStudentAsync,
     getStudentByIdAsync,
+    searchStudentsAsync,
   };
 }
 
-const studentService = studentFunctions();
-export default studentService;
+export default StudentService;

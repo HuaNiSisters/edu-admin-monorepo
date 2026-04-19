@@ -1,35 +1,27 @@
+import { IClassRepo } from "../api/interfaces";
 import {
   CreateClassDataParams,
   UpdateClassDataParams,
 } from "../api/types/class";
 
-import SupabaseApiWrapper from "../api/adapters/supabaseAdapter";
-const apiWrapper = new SupabaseApiWrapper();
-
-function classFunctions() {
+function ClassService(classRepo: IClassRepo) {
   async function createClassAsync(data: CreateClassDataParams) {
-    return await apiWrapper.createClassAsync(data);
+    return await classRepo.createClassAsync(data);
   }
 
   async function updateClassAsync(id: string, data: UpdateClassDataParams) {
-    return await apiWrapper.updateClassAsync(id, data);
+    return await classRepo.updateClassAsync(id, data);
   }
 
   async function getClassTimesAsync() {
-    return await apiWrapper.getClassTimesAsync();
-  }
-
-  async function getLocationsAsync() {
-    return await apiWrapper.getLocationsAsync();
+    return await classRepo.getClassTimesAsync();
   }
 
   return {
     createClassAsync,
     updateClassAsync,
     getClassTimesAsync,
-    getLocationsAsync,
   };
 }
 
-const classService = classFunctions();
-export default classService;
+export default ClassService;

@@ -1,11 +1,9 @@
+import { ICampusRepo } from "../api/interfaces";
 import { GetLocationsResponse } from "../api/types/campus";
 
-import SupabaseApiWrapper from "../api/adapters/supabaseAdapter";
-const apiWrapper = new SupabaseApiWrapper();
-
-function campusFunctions() {
+function CampusService(campusRepo: ICampusRepo) {
   async function getLocationsAsync(): Promise<GetLocationsResponse> {
-    return await apiWrapper.getLocationsAsync();
+    return await campusRepo.getLocationsAsync();
   }
 
   return {
@@ -13,5 +11,4 @@ function campusFunctions() {
   };
 }
 
-const campusService = campusFunctions();
-export default campusService;
+export default CampusService;

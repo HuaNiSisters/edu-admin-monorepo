@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { StudentData } from "@/lib/api/types";
-import studentService from "@/lib/services/person/studentService";
+import { studentService } from "@/lib/services";
 import StudentDataForm from "@/components/_reusable-form-components/student-data-form";
 import { useParams } from "next/navigation";
 import { useAsync } from "@/hooks/use-async";

@@ -1,22 +1,20 @@
+import { ISubjectRepo } from "../api/interfaces";
 import {
   CreateSubjectDataParams,
   UpdateSubjectDataParams,
 } from "../api/types/subject";
 
-import SupabaseApiWrapper from "../api/adapters/supabaseAdapter";
-const apiWrapper = new SupabaseApiWrapper();
-
-function subjectFunctions() {
+function SubjectService(subjectRepo: ISubjectRepo) {
   async function createSubjectAsync(data: CreateSubjectDataParams) {
-    return await apiWrapper.createSubjectAsync(data);
+    return await subjectRepo.createSubjectAsync(data);
   }
 
   async function updateSubjectAsync(id: string, data: UpdateSubjectDataParams) {
-    return await apiWrapper.updateSubjectAsync(id, data);
+    return await subjectRepo.updateSubjectAsync(id, data);
   }
 
   async function getSubjectOfferingsAsync() {
-    return await apiWrapper.getSubjectOfferingsAsync();
+    return await subjectRepo.getSubjectOfferingsAsync();
   }
 
   return {
@@ -26,6 +24,4 @@ function subjectFunctions() {
   };
 }
 
-const subjectService = subjectFunctions();
-
-export default subjectService;
+export default SubjectService;

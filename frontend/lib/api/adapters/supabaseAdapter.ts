@@ -2,37 +2,15 @@ import { createClient } from "../supabase/client";
 import { Constants } from "../../../types/database.types";
 
 import {
-  StudentData,
-  SubjectOffering,
-  ParentInfo,
-  ClassTime,
-} from "@/lib/api/types";
+  ICampusRepo,
+  IPersonRepo,
+  IStudentRepo,
+  IEmployeeRepo,
+  ISubjectRepo,
+  IClassRepo,
+} from "@/lib/api/interfaces";
 
-
-import { GetLocationsResponse } from "@/lib/api/types/campus";
-import { GetGendersResponse } from "@/lib/api/types/person";
-import { GetTutorsResponse } from "@/lib/api/types/person/employee";
-
-import {
-  GetStatusesResponse,
-  CreateStudentParams,
-  UpdateStudentDataParams,
-  SearchStudentsResponse,
-} from "@/lib/api/types/person/student";
-
-import {
-  CreateSubjectDataParams,
-  UpdateSubjectDataParams,
-  GetSubjectOfferingsResponse,
-} from "@/lib/api/types/subject";
-
-import {
-  CreateClassDataParams,
-  UpdateClassDataParams,
-  GetClassTimesResponse,
-} from "@/lib/api/types/class";
-
-class SupabaseApiWrapper {
+class SupabaseApiWrapper implements ISubjectRepo, IClassRepo, IStudentRepo, ICampusRepo, IPersonRepo, IEmployeeRepo {
   private supabase: ReturnType<typeof createClient>;
 
   constructor() {
@@ -43,13 +21,14 @@ class SupabaseApiWrapper {
 
   async createSubjectAsync(
     data: CreateSubjectDataParams,
-  ): Promise<SubjectOffering> {
+  ) {
     console.log({ createSubjectData: data });
     const { data: responseData } = await this.supabase
       .from("SubjectOffering")
       .insert(data)
       .select()
       .single();
+      return "kj"
     return responseData;
   }
 

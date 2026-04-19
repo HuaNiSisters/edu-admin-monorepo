@@ -1,10 +1,7 @@
 "use client";
 
 import { Location, StudentStatus, Gender, StudentData } from "@/lib/api/types";
-
-import studentService from "@/lib/services/person/studentService";
-import personService from "@/lib/services/person";
-import campusService from "@/lib/services/campusService";
+import { studentService, personService, campusService } from "@/lib/services";
 
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -193,7 +190,7 @@ const StudentDataForm = ({
 
     run(async () => {
       if (isEditMode) {
-        await apiWrapper.updateStudentAsync(studentId, {
+        await studentService.updateStudentAsync(studentId, {
           studentData,
           parent1Data,
           parent2Data,
@@ -208,7 +205,7 @@ const StudentDataForm = ({
         return;
       }
 
-      const createStudentResponse = await apiWrapper.createStudentAsync({
+      const createStudentResponse = await studentService.createStudentAsync({
         studentData,
         parent1Data,
         parent2Data,

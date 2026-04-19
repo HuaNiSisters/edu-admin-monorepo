@@ -12,9 +12,9 @@ import {
   SubjectOffering,
 } from "@/lib/api/types";
 import { LoadingBar } from "@/components/loading-bar";
-import subjectService from "@/lib/services/subjectService";
-import classService from "@/lib/services/classService";
-import employeeService from "@/lib/services/person/employeeService";
+import { subjectService } from "@/lib/services";
+import { classService } from "@/lib/services";
+import { employeeService } from "@/lib/services";
 
 const ClassesPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);

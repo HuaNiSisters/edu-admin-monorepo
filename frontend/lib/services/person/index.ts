@@ -1,9 +1,8 @@
-import SupabaseApiWrapper from "../../api/adapters/supabaseAdapter";
-const apiWrapper = new SupabaseApiWrapper();
+import { IPersonRepo } from "@/lib/api/interfaces/IPersonRepo";
 
-function personFunctions() {
+function PersonService(personRepo: IPersonRepo) {
   async function getGendersAsync() {
-    return await apiWrapper.getGendersAsync();
+    return await personRepo.getGendersAsync();
   }
   
   return {
@@ -11,5 +10,4 @@ function personFunctions() {
   }
 }
 
-const personService = personFunctions();
-export default personService;
+export default PersonService;

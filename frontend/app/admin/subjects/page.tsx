@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { SubjectOffering } from "@/lib/api/types";
 import SubjectDialog from "./_components/subject-dialog";
-import subjectService from "@/lib/services/subjectService";
+import { subjectService } from "@/lib/services";
 import { LoadingBar } from "@/components/loading-bar";
 
 const SubjectsPage = () => {

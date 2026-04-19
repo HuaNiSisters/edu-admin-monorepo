@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
-import apiWrapper from "@/lib/services/apiWrapper";
-import subjectService from "@/lib/services/subjectService";
+import { campusService, subjectService } from "@/lib/services";
 import { Location, SubjectOffering } from "@/lib/api/types";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,7 +71,7 @@ const SubjectDialog = ({
 
   useEffect(() => {
     async function fetchSelectableFieldsData() {
-      const fetchedLocations = await apiWrapper.getLocationsAsync();
+      const fetchedLocations = await campusService.getLocationsAsync();
       setLocationOptions(fetchedLocations);
     }
     fetchSelectableFieldsData();
