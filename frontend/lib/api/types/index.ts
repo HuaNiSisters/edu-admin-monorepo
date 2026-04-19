@@ -8,7 +8,7 @@ type ClassTime = Database["public"]["Tables"]["ClassTime"]["Row"];
 
 type ParentInfo = Database["public"]["Tables"]["Parent"]["Row"];
 type StudentInfo = Database["public"]["Tables"]["Student"]["Row"];
-type StudentData = StudentInfo & {
+type StudentWithParents = StudentInfo & {
   parent1Id: string;
   parent1FullName: string;
   parent1Mobile: string;
@@ -36,7 +36,7 @@ export type {
   ClassTime,
   ParentInfo,
   StudentInfo,
-  StudentData,
+  StudentWithParents,
   EmployeeInfo,
   ClassTimeWithSubjectAndTutor,
 };

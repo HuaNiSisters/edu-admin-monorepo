@@ -10,8 +10,35 @@ import {
   ISubjectRepo,
   IClassRepo,
 } from "@/lib/api/adapters/interfaces";
-import { CreateParentDataParams, UpdateParentDataParams } from "../types/person/parent";
-import { CreateStudentDataParams } from "../types/person/student";
+
+import { ClassTime, ParentInfo, StudentInfo, SubjectOffering } from "../types";
+import { GetLocationsResponse } from "../types/campus";
+import { GetGendersResponse } from "../types/person";
+import { GetTutorsResponse } from "../types/person/employee";
+
+import {
+  CreateParentDataParams,
+  UpdateParentDataParams,
+} from "../types/person/parent";
+
+import {
+  CreateStudentDataParams,
+  GetStatusesResponse,
+  SearchStudentsResponse,
+  UpdateStudentDataParams,
+} from "../types/person/student";
+
+import {
+  CreateSubjectDataParams,
+  GetSubjectOfferingsResponse,
+  UpdateSubjectDataParams,
+} from "../types/subject";
+
+import {
+  CreateClassDataParams,
+  GetClassTimesResponse,
+  UpdateClassDataParams,
+} from "../types/class";
 
 class SupabaseApiWrapper
   implements
@@ -31,7 +58,9 @@ class SupabaseApiWrapper
 
   // ─── Subjects ────────────────────────────────────────────────────────────────
 
-  async createSubjectAsync(data: CreateSubjectDataParams) {
+  async createSubjectAsync(
+    data: CreateSubjectDataParams,
+  ): Promise<SubjectOffering> {
     console.log({ createSubjectData: data });
     const { data: responseData } = await this.supabase
       .from("SubjectOffering")
@@ -134,9 +163,9 @@ class SupabaseApiWrapper
       };
     });
   }
-  
+
   // ─── Parents ────────────────────────────────────────────────────────────────
-  
+
   async getParentAsync(parentId: string) {
     const { data: responseData, error } = await this.supabase
       .from("Parent")
@@ -151,18 +180,18 @@ class SupabaseApiWrapper
   async createParentAsync(data: CreateParentDataParams) {
     console.log({ createParentData: data });
     const { data: responseData, error } = await this.supabase
-    .from("Parent")
-    .insert(data)
-    .select()
-    .single();
-    
+      .from("Parent")
+      .insert(data)
+      .select()
+      .single();
+
     if (!!error) {
       throw new Error("Failed to create parent: " + error.message);
     }
-    
+
     return responseData;
   }
-  
+
   async updateParentAsync(
     parentId: string,
     parentData: UpdateParentDataParams,
@@ -173,40 +202,41 @@ class SupabaseApiWrapper
       .eq("parent_id", parentId)
       .select()
       .single();
-      return responseData;
-    }
-    
-    async linkParentToStudentAsync(student_id: string, parent_id: string) {
-      const { data: responseData, error } = await this.supabase
+    return responseData;
+  }
+
+  async linkParentToStudentAsync(student_id: string, parent_id: string) {
+    const { data: responseData, error } = await this.supabase
       .from("StudentParent")
       .insert({ student_id, parent_id })
       .select()
       .single();
-      
-      if(!!error) {
-        throw new Error("Failed to link parent to student: " + error.message);
-      }
 
-      return responseData;
+    if (!!error) {
+      throw new Error("Failed to link parent to student: " + error.message);
     }
 
-    
-    // ─── Students ────────────────────────────────────────────────────────────────
-    
-    async createStudentAsync(data: CreateStudentDataParams): Promise<StudentData> {
-      console.log({ createStudentData: data });
-      const { data: createStudentResponse, error: createStudentError } =
+    return responseData;
+  }
+
+  // ─── Students ────────────────────────────────────────────────────────────────
+
+  async createStudentAsync(
+    data: CreateStudentDataParams,
+  ): Promise<StudentInfo> {
+    console.log({ createStudentData: data });
+    const { data: createStudentResponse, error: createStudentError } =
       await this.supabase.from("Student").insert(data).select().single();
-      if (!!createStudentError) {
-        throw new Error(
-          "Failed to create student: " + createStudentError.message,
-        );
+    if (!!createStudentError) {
+      throw new Error(
+        "Failed to create student: " + createStudentError.message,
+      );
     }
 
     return createStudentResponse;
   }
 
-  async getStudentByIdAsync(id: string): Promise<StudentData> {
+  async getStudentByIdAsync(id: string): Promise<StudentInfo & { parents: ParentInfo[] }> {
     const { data: getStudentParentData, error: getStudentParentError } =
       await this.supabase
         .from("Student")
@@ -236,7 +266,7 @@ class SupabaseApiWrapper
   async updateStudentAsync(
     id: string,
     data: UpdateStudentDataParams,
-  ): Promise<StudentData> {
+  ): Promise<StudentInfo> {
     const { data: updateStudentResponse, error: updateStudentError } =
       await this.supabase
         .from("Student")

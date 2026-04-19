@@ -88,7 +88,8 @@ function StudentService(studentRepo: IStudentRepo, parentRepo: IParentRepo) {
   async function getStudentByIdAsync(id: string) {
     // Still okay that parent is fetching is still coupled with Student fetching
     const getStudentResponse = await studentRepo.getStudentByIdAsync(id);
-       const parents = getStudentResponse?.parents || [];
+    
+    const parents = getStudentResponse?.parents || [];
     delete getStudentResponse?.parents;
 
     return {
