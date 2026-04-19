@@ -228,19 +228,9 @@ class SupabaseApiWrapper
     if (!!getStudentParentError) {
       throw new Error(getStudentParentError.message);
     }
-    const parents = getStudentParentData?.parents || [];
-    delete getStudentParentData?.parents;
 
-    return {
-      ...getStudentParentData,
-      // TODO: CHECK ORDERING OF PARENTS, may need a 'primary' contact flag field
-      parent1Id: parents[0]?.Parent.parent_id,
-      parent1FullName: parents[0]?.Parent.first_name,
-      parent1Mobile: parents[0]?.Parent.parent_mobile,
-      parent2Id: parents[1]?.Parent.parent_id,
-      parent2FullName: parents[1]?.Parent.first_name,
-      parent2Mobile: parents[1]?.Parent.parent_mobile,
-    };
+    console.log({ getStudentParentData });
+    return getStudentParentData;
   }
 
   async updateStudentAsync(

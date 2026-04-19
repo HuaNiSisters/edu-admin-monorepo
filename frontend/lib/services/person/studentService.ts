@@ -86,7 +86,21 @@ function StudentService(studentRepo: IStudentRepo, parentRepo: IParentRepo) {
   }
 
   async function getStudentByIdAsync(id: string) {
-    return await studentRepo.getStudentByIdAsync(id);
+    // Still okay that parent is fetching is still coupled with Student fetching
+    const getStudentResponse = await studentRepo.getStudentByIdAsync(id);
+       const parents = getStudentResponse?.parents || [];
+    delete getStudentResponse?.parents;
+
+    return {
+      ...getStudentResponse,
+      // TODO: CHECK ORDERING OF PARENTS, may need a 'primary' contact flag field
+      parent1Id: parents[0]?.Parent.parent_id,
+      parent1FullName: parents[0]?.Parent.first_name,
+      parent1Mobile: parents[0]?.Parent.parent_mobile,
+      parent2Id: parents[1]?.Parent.parent_id,
+      parent2FullName: parents[1]?.Parent.first_name,
+      parent2Mobile: parents[1]?.Parent.parent_mobile,
+    };
   }
 
   async function searchStudentsAsync(query: string) {
