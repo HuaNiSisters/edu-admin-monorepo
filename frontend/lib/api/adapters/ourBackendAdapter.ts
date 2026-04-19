@@ -1,24 +1,13 @@
 import axios from "axios";
+import { GetSMSTemplateResponse, UpdateSMSTemplateRequest } from "../types/sms";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "http://localhost:8888/api/v1/broadcast";
 
-// TO BE SHARED
-export interface GetSMSTemplateResponse {
-  id: string;
-  name: string;
-  content: string;
-}
-
-export interface UpdateSMSTemplateRequest {
-  name: string;
-  content: string;
-}
-
-// ERROR HANDLING
-class SMSApi {
-  async getSMSTemplateByIdAsync(
+function ourBackendEndpoints() {
+  // ERROR HANDLING
+  async function getSMSTemplateByIdAsync(
     templateId: string,
   ): Promise<GetSMSTemplateResponse> {
     const response = await axios.get(
@@ -29,7 +18,7 @@ class SMSApi {
     return responseData;
   }
 
-  async updateSMSTemplateAsync(
+  async function updateSMSTemplateAsync(
     templateId: string,
     updateParams: UpdateSMSTemplateRequest,
   ): Promise<string> {
@@ -41,7 +30,7 @@ class SMSApi {
     return responseData;
   }
 
-  async sendSMSTemplateAsync(
+  async function sendSMSTemplateAsync(
     templateId: string,
     toPhoneNumber: string,
     templateVariables?: Record<string, string>,
@@ -52,6 +41,14 @@ class SMSApi {
       templateVariables,
     });
   }
+
+  return {
+    getSMSTemplateByIdAsync,
+    updateSMSTemplateAsync,
+    sendSMSTemplateAsync,
+  };
 }
 
-export const smsApi = new SMSApi();
+const ourBackendAdapter = ourBackendEndpoints();
+
+export { ourBackendAdapter };

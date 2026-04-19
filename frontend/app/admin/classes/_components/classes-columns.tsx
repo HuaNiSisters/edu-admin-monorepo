@@ -1,6 +1,6 @@
 "use client";
 
-import { ClassTimeWithSubject } from "@/types/IApiWrapper";
+import { ClassTimeWithSubject } from "@/lib/api/types/IApiWrapper";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

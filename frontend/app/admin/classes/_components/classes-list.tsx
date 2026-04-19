@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { ColumnFiltersState } from "@tanstack/react-table";
-import { ClassTimeWithSubject } from "@/types/IApiWrapper";
+import { ClassTimeWithSubject } from "@/lib/api/types/IApiWrapper";
 import { createClassColumns } from "./classes-columns";
 import FilterContent from "@/components/filter-content";
 import { Input } from "@/components/ui/input";

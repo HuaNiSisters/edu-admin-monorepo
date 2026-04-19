@@ -1,6 +1,6 @@
 "use client";
 
-import { GetTutorsResponse } from "@/types/IApiWrapper";
+import { GetTutorsResponse } from "@/lib/api/types/IApiWrapper";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";

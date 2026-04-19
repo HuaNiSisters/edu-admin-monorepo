@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useAsync } from "@/hooks/use-async";
-import { smsApi } from "@/lib/api/sms";
+import { smsApi } from "@/lib/services/smsService";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

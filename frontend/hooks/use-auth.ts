@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/api/supabase/client";
 import { UserResponse, User } from "@supabase/supabase-js";
 import { UserRole } from "@/core/userRoles/types";
 

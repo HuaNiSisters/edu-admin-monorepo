@@ -1,27 +1,38 @@
-import { createClient } from "./supabase/client";
-import { Constants } from "../types/database.types";
+import { createClient } from "../supabase/client";
+import { Constants } from "../../../types/database.types";
+
 import {
-  ApiWrapper,
   StudentData,
-  CreateSubjectDataParams,
-  CreateStudentParams,
-  UpdateStudentDataParams,
-  GetGendersResponse,
-  GetLocationsResponse,
-  GetStatusesResponse,
-  GetSubjectOfferingsResponse,
   SubjectOffering,
-  UpdateSubjectDataParams,
-  SearchStudentsResponse,
   ParentInfo,
   ClassTime,
+} from "@/lib/api/types";
+
+
+import { GetLocationsResponse } from "@/lib/api/types/campus";
+import { GetGendersResponse } from "@/lib/api/types/person";
+import { GetTutorsResponse } from "@/lib/api/types/person/employee";
+
+import {
+  GetStatusesResponse,
+  CreateStudentParams,
+  UpdateStudentDataParams,
+  SearchStudentsResponse,
+} from "@/lib/api/types/person/student";
+
+import {
+  CreateSubjectDataParams,
+  UpdateSubjectDataParams,
+  GetSubjectOfferingsResponse,
+} from "@/lib/api/types/subject";
+
+import {
   CreateClassDataParams,
   UpdateClassDataParams,
   GetClassTimesResponse,
-  GetTutorsResponse,
-} from "@/types/IApiWrapper";
+} from "@/lib/api/types/class";
 
-class ApiSupabaseWrapper implements ApiWrapper {
+class SupabaseApiWrapper {
   private supabase: ReturnType<typeof createClient>;
 
   constructor() {
@@ -96,11 +107,11 @@ class ApiSupabaseWrapper implements ApiWrapper {
     return responseData;
   }
 
-async getClassTimesAsync(): Promise<GetClassTimesResponse> {
-  const { data: responseData, error } = await this.supabase
-    .from("ClassTime")
-    .select(
-      `
+  async getClassTimesAsync(): Promise<GetClassTimesResponse> {
+    const { data: responseData, error } = await this.supabase
+      .from("ClassTime")
+      .select(
+        `
       *,
       subject_offering:SubjectOffering (
         subject_name,
@@ -112,25 +123,29 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
         last_name
       )
     `,
-    )
-    .order("day_of_week", { ascending: true });
+      )
+      .order("day_of_week", { ascending: true });
 
-  if (error) throw new Error("Failed to fetch classes: " + error.message);
+    if (error) throw new Error("Failed to fetch classes: " + error.message);
 
-  return (responseData ?? []).map((row) => {
-    const { subject_offering, tutor, ...rest } = row as typeof row & {
-      subject_offering: { subject_name: string; grade: string | null; location: string | null } | null;
-      tutor: { first_name: string; last_name: string } | null;
-    };
-    return {
-      ...rest,
-      subject_name: subject_offering?.subject_name,
-      grade: subject_offering?.grade,
-      location: subject_offering?.location,
-      tutor: tutor ? `${tutor.first_name} ${tutor.last_name}` : null,
-    };
-  });
-}
+    return (responseData ?? []).map((row) => {
+      const { subject_offering, tutor, ...rest } = row as typeof row & {
+        subject_offering: {
+          subject_name: string;
+          grade: string | null;
+          location: string | null;
+        } | null;
+        tutor: { first_name: string; last_name: string } | null;
+      };
+      return {
+        ...rest,
+        subject_name: subject_offering?.subject_name,
+        grade: subject_offering?.grade,
+        location: subject_offering?.location,
+        tutor: tutor ? `${tutor.first_name} ${tutor.last_name}` : null,
+      };
+    });
+  }
 
   // ─── Students ────────────────────────────────────────────────────────────────
 
@@ -140,27 +155,38 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
     const { data: createStudentResponse, error: createStudentError } =
       await this.supabase.from("Student").insert(studentData).select().single();
     if (!!createStudentError) {
-      throw new Error("Failed to create student: " + createStudentError.message);
+      throw new Error(
+        "Failed to create student: " + createStudentError.message,
+      );
     }
 
     const { data: createParent1Response, error: createParent1Error } =
-      await this.supabase.from("Parent").insert({
-        first_name: parent1Data.first_name,
-        last_name: parent1Data.last_name,
-        parent_mobile: parent1Data.parent_mobile,
-      }).select().single();
+      await this.supabase
+        .from("Parent")
+        .insert({
+          first_name: parent1Data.first_name,
+          last_name: parent1Data.last_name,
+          parent_mobile: parent1Data.parent_mobile,
+        })
+        .select()
+        .single();
     if (!!createParent1Error) {
-      throw new Error("Failed to create parent 1: " + createParent1Error.message);
+      throw new Error(
+        "Failed to create parent 1: " + createParent1Error.message,
+      );
     }
 
-    const {
-      error: createStudentParent1Error,
-    } = await this.supabase.from("StudentParent").insert({
-      student_id: createStudentResponse?.student_id,
-      parent_id: createParent1Response?.parent_id,
-    });
+    const { error: createStudentParent1Error } = await this.supabase
+      .from("StudentParent")
+      .insert({
+        student_id: createStudentResponse?.student_id,
+        parent_id: createParent1Response?.parent_id,
+      });
     if (!!createStudentParent1Error) {
-      throw new Error("Failed to create student-parent relationship for parent 1: " + createStudentParent1Error.message);
+      throw new Error(
+        "Failed to create student-parent relationship for parent 1: " +
+          createStudentParent1Error.message,
+      );
     }
 
     if (!!parent2Data?.first_name) {
@@ -175,16 +201,22 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
           .select()
           .single();
       if (!!createParent2Error) {
-        throw new Error("Failed to create parent 2: " + createParent2Error.message);
+        throw new Error(
+          "Failed to create parent 2: " + createParent2Error.message,
+        );
       }
 
-      const { error: createStudentParent2Error } =
-        await this.supabase.from("StudentParent").insert({
+      const { error: createStudentParent2Error } = await this.supabase
+        .from("StudentParent")
+        .insert({
           student_id: createStudentResponse?.student_id,
           parent_id: createParent2Response?.parent_id,
         });
       if (!!createStudentParent2Error) {
-        throw new Error("Failed to create student-parent relationship for parent 2: " + createStudentParent2Error.message);
+        throw new Error(
+          "Failed to create student-parent relationship for parent 2: " +
+            createStudentParent2Error.message,
+        );
       }
     }
 
@@ -247,7 +279,9 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
         .single();
 
     if (!!updateStudentError) {
-      throw new Error("Failed to update student: " + updateStudentError.message);
+      throw new Error(
+        "Failed to update student: " + updateStudentError.message,
+      );
     }
 
     const { data: updateParent1Response, error: updateParent1Error } =
@@ -259,7 +293,9 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
         .single();
 
     if (!!updateParent1Error) {
-      throw new Error("Failed to update parent 1: " + updateParent1Error.message);
+      throw new Error(
+        "Failed to update parent 1: " + updateParent1Error.message,
+      );
     }
 
     let parent2Data: ParentInfo;
@@ -280,7 +316,9 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
         parent_id: createParent2Response?.parent_id,
       });
       if (!!createParent2Error) {
-        throw new Error("Failed to create parent 2: " + createParent2Error.message);
+        throw new Error(
+          "Failed to create parent 2: " + createParent2Error.message,
+        );
       }
       parent2Data = createParent2Response;
     } else {
@@ -292,7 +330,9 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
           .select()
           .single();
       if (!!updateParent2Error) {
-        throw new Error("Failed to update parent 2: " + updateParent2Error.message);
+        throw new Error(
+          "Failed to update parent 2: " + updateParent2Error.message,
+        );
       }
       parent2Data = updateParent2Response;
     }
@@ -325,9 +365,7 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
   async getTutorsAsync(): Promise<GetTutorsResponse> {
     const { data: responseData, error } = await this.supabase
       .from("Tutor")
-      .select(
-        "tutor_id, first_name, last_name, email, phone",
-      )
+      .select("tutor_id, first_name, last_name, email, phone")
       .order("first_name", { ascending: true });
 
     if (error) throw error;
@@ -349,4 +387,4 @@ async getClassTimesAsync(): Promise<GetClassTimesResponse> {
   }
 }
 
-export default ApiSupabaseWrapper;
+export default SupabaseApiWrapper;

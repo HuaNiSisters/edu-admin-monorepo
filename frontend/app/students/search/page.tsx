@@ -7,9 +7,9 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import apiWrapper from "@/lib/apiWrapper";
+import apiWrapper from "@/lib/services/apiWrapper";
 import { useAsync } from "@/hooks/use-async";
-import { SearchStudentsResponse } from "@/types/IApiWrapper";
+import { SearchStudentsResponse } from "@/lib/api/types/IApiWrapper";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";

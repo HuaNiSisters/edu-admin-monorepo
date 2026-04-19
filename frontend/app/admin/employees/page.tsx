@@ -2,10 +2,10 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
-import apiWrapper from "@/lib/apiWrapper";
+import apiWrapper from "@/lib/services/apiWrapper";
 import { useRouter } from "next/navigation";
 import { columns } from "./employees-columns";
-import { EmployeeInfo } from "@/types/IApiWrapper";
+import { EmployeeInfo } from "@/lib/api/types/IApiWrapper";
 
 import dynamic from "next/dynamic";
 

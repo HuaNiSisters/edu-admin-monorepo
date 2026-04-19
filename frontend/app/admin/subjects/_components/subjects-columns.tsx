@@ -1,6 +1,6 @@
 "use client";
 
-import { SubjectOffering } from "@/types/IApiWrapper";
+import { SubjectOffering } from "@/lib/api/types/IApiWrapper";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Pencil } from "lucide-react";

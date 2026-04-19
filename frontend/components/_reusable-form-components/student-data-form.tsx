@@ -1,5 +1,11 @@
 "use client";
 
+import { Location, StudentStatus, Gender, StudentData } from "@/lib/api/types";
+
+import studentService from "@/lib/services/person/studentService";
+import personService from "@/lib/services/person";
+import campusService from "@/lib/services/campusService";
+
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -9,17 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
-import {
-  Location,
-  StudentStatus,
-  Gender,
-  StudentData,
-  CreateStudentDataParams,
-  CreateParentDataParams,
-} from "@/types/IApiWrapper";
 import { SelectGender } from "./select-gender";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
@@ -97,9 +94,9 @@ const StudentDataForm = ({
     async function fetchAndPopulate() {
       const [fetchedLocations, fetchedStatuses, fetchedGenders] =
         await Promise.all([
-          apiWrapper.getLocationsAsync(),
-          apiWrapper.getStatusesAsync(),
-          apiWrapper.getGendersAsync(),
+          campusService.getLocationsAsync(),
+          studentService.getStatusesAsync(),
+          personService.getGendersAsync(),
         ]);
       setLocationOptions(fetchedLocations);
       setStatusOptions(fetchedStatuses);
