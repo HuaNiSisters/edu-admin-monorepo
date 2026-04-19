@@ -1,5 +1,8 @@
 "use client";
 
+import { Location, StudentStatus, Gender, StudentWithParents } from "@/lib/api/types";
+import { studentService, personService, campusService } from "@/lib/services";
+
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -9,21 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import apiWrapper from "@/lib/apiWrapper";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
-import {
-  Location,
-  StudentStatus,
-  Gender,
-  StudentData,
-  CreateStudentDataParams,
-  CreateParentDataParams,
-} from "@/types/IApiWrapper";
 import { SelectGender } from "./select-gender";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
 import { useRouter } from "next/navigation";
+import { CreateParentDataParams } from "@/lib/api/types/person/parent";
+import { CreateStudentDataParams } from "@/lib/api/types/person/student";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -57,7 +53,7 @@ const StudentDataForm = ({
   studentData,
   isEditing,
 }: {
-  studentData?: StudentData;
+  studentData?: StudentWithParents;
   isEditing?: boolean;
 }) => {
   const isEditMode = !!studentData && isEditing;
@@ -97,9 +93,9 @@ const StudentDataForm = ({
     async function fetchAndPopulate() {
       const [fetchedLocations, fetchedStatuses, fetchedGenders] =
         await Promise.all([
-          apiWrapper.getLocationsAsync(),
-          apiWrapper.getStatusesAsync(),
-          apiWrapper.getGendersAsync(),
+          campusService.getLocationsAsync(),
+          studentService.getStatusesAsync(),
+          personService.getGendersAsync(),
         ]);
       setLocationOptions(fetchedLocations);
       setStatusOptions(fetchedStatuses);
@@ -196,7 +192,7 @@ const StudentDataForm = ({
 
     run(async () => {
       if (isEditMode) {
-        await apiWrapper.updateStudentAsync(studentId, {
+        await studentService.updateStudentAsync(studentId, {
           studentData,
           parent1Data,
           parent2Data,
@@ -211,7 +207,7 @@ const StudentDataForm = ({
         return;
       }
 
-      const createStudentResponse = await apiWrapper.createStudentAsync({
+      const createStudentResponse = await studentService.createStudentAsync({
         studentData,
         parent1Data,
         parent2Data,

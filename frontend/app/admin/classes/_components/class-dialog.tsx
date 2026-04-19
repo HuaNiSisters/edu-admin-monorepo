@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import apiWrapper from "@/lib/apiWrapper";
+import { classService } from "@/lib/services";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import {
   ClassTimeWithSubjectAndTutor,
   SubjectOffering,
   EmployeeInfo,
-} from "@/types/IApiWrapper";
+} from "@/lib/api/types";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -193,9 +193,9 @@ const ClassDialog = ({
     };
 
     if (isEditing) {
-      await apiWrapper.updateClassAsync(classTime.class_id, newClassTime);
+      await classService.updateClassAsync(classTime.class_id, newClassTime);
     } else {
-      await apiWrapper.createClassAsync(newClassTime);
+      await classService.createClassAsync(newClassTime);
     }
 
     onSave(newClassTime);

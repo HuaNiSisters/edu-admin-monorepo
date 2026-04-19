@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
-import apiWrapper from "@/lib/apiWrapper";
-import { Location } from "@/types/IApiWrapper";
-import { SubjectOffering } from "@/types/IApiWrapper";
+import { campusService, subjectService } from "@/lib/services";
+import { Location, SubjectOffering } from "@/lib/api/types";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -73,7 +71,7 @@ const SubjectDialog = ({
 
   useEffect(() => {
     async function fetchSelectableFieldsData() {
-      const fetchedLocations = await apiWrapper.getLocationsAsync();
+      const fetchedLocations = await campusService.getLocationsAsync();
       setLocationOptions(fetchedLocations);
     }
     fetchSelectableFieldsData();
@@ -97,14 +95,14 @@ const SubjectDialog = ({
 
   const onSubmit = async (data: zod.infer<typeof subjectFormSchema>) => {
     if (subject) {
-      await apiWrapper.updateSubjectAsync(subject.subject_id, {
+      await subjectService.updateSubjectAsync(subject.subject_id, {
         subject_name: data.subjectName,
         grade: Number(data.grade),
         location: data.location as Location,
         price_per_term: Number(data.pricePerTerm),
       });
     } else {
-      await apiWrapper.createSubjectAsync({
+      await subjectService.createSubjectAsync({
         subject_name: data.subjectName,
         grade: Number(data.grade),
         location: data.location as Location,

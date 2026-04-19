@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useAsync } from "@/hooks/use-async";
-import { smsApi } from "@/lib/api/sms";
+import { smsService } from "@/lib/services";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -61,7 +61,7 @@ const SMSTemplateData = ({
 
   useEffect(() => {
     setSampleContext(deepClone(actionToSampleContext[smsAction]));
-    smsApi.getSMSTemplateByIdAsync(templateId).then((template) => {
+    smsService.getSMSTemplateByIdAsync(templateId).then((template) => {
       console.log({ fetchedTemplate: template });
       setTemplateName(template.name);
       setTextAreaString(template.content);
@@ -137,7 +137,7 @@ const SMSTemplateData = ({
         throw "Please fix template errors before saving.";
       }
 
-      await smsApi.updateSMSTemplateAsync(templateId, {
+      await smsService.updateSMSTemplateAsync(templateId, {
         name: templateName,
         content: textAreaString,
       });
@@ -161,7 +161,7 @@ const SMSTemplateData = ({
     );
 
     run(async () => {
-      await smsApi.sendSMSTemplateAsync(templateId, toTestPhoneNumber, sampleVariables);
+      await smsService.sendSMSTemplateAsync(templateId, toTestPhoneNumber, sampleVariables);
       toast.success("Test SMS sent successfully!", {
         position: "top-center",
       });

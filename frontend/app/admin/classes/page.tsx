@@ -10,9 +10,11 @@ import {
   ClassTimeWithSubjectAndTutor,
   EmployeeInfo,
   SubjectOffering,
-} from "@/types/IApiWrapper";
+} from "@/lib/api/types";
 import { LoadingBar } from "@/components/loading-bar";
-import apiWrapper from "@/lib/apiWrapper";
+import { subjectService } from "@/lib/services";
+import { classService } from "@/lib/services";
+import { employeeService } from "@/lib/services";
 
 const ClassesPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -28,18 +30,18 @@ const ClassesPage = () => {
 
   const fetchClasses = useCallback(() => {
     run(async () => {
-      const data = await apiWrapper.getClassTimesAsync();
+      const data = await classService.getClassTimesAsync();
       setClasses(data);
     });
   }, [run]);
 
   useEffect(() => {
     async function fetchSubjects() {
-      const fetchedSubjects = await apiWrapper.getSubjectOfferingsAsync();
+      const fetchedSubjects = await subjectService.getSubjectOfferingsAsync();
       setSubjectOfferings(fetchedSubjects);
     }
     async function fetchTutors() {
-      const fetchedTutors = await apiWrapper.getTutorsAsync();
+      const fetchedTutors = await employeeService.getTutorsAsync();
       setTutors(fetchedTutors);
     }
 

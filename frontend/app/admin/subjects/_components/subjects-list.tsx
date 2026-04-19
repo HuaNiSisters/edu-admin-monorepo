@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { ColumnFiltersState } from "@tanstack/react-table";
-import { SubjectOffering } from "@/types/IApiWrapper";
+import { SubjectOffering } from "@/lib/api/types/IApiWrapper";
 import { createSubjectColumns } from "./subjects-columns";
 import FilterContent from "@/components/filter-content";
 import { Button } from "@/components/ui/button";

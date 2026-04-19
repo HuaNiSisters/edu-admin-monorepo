@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { StudentData } from "@/types/IApiWrapper";
+import { StudentWithParents } from "@/lib/api/types";
+import { studentService } from "@/lib/services";
 import StudentDataForm from "@/components/_reusable-form-components/student-data-form";
-import apiWrapper from "@/lib/apiWrapper";
 import { useParams } from "next/navigation";
 import { useAsync } from "@/hooks/use-async";
 
@@ -11,11 +11,11 @@ export default function StudentUpdatePage() {
   const params = useParams();
   const studentId = params.id as string;
 
-  const [studentData, setStudentData] = useState<StudentData>();
+  const [studentData, setStudentData] = useState<StudentWithParents>();
   const { run, isPending } = useAsync();
 
   const fetchStudentData = async () => {
-    const data = await apiWrapper.getStudentByIdAsync(studentId);
+    const data = await studentService.getStudentByIdAsync(studentId);
     console.log({ fetchedStudentData: data });
     setStudentData(data);
   };
@@ -27,7 +27,9 @@ export default function StudentUpdatePage() {
   return (
     <div>
       {isPending && <div></div>}
-      {!isPending && studentData && <StudentDataForm studentData={studentData} isEditing={true} />}
+      {!isPending && studentData && (
+        <StudentDataForm studentData={studentData} isEditing={true} />
+      )}
     </div>
   );
 }

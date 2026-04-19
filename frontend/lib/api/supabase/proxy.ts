@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../utils";
+import { hasEnvVars } from "../../utils";
 import {
   ADMIN_ROUTE_PREFIX,
   RECEPTION_ADMIN_ROUTES,
