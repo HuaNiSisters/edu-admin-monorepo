@@ -1,4 +1,4 @@
-import { ISMSRepo } from "../api/interfaces";
+import { ISMSRepo } from "../api/adapters/interfaces";
 import { UpdateSMSTemplateRequest } from "../api/types/sms";
 
 function SMSService(apiWrapper: ISMSRepo) {

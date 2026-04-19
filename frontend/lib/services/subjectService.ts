@@ -1,4 +1,4 @@
-import { ISubjectRepo } from "../api/interfaces";
+import { ISubjectRepo } from "../api/adapters/interfaces";
 import {
   CreateSubjectDataParams,
   UpdateSubjectDataParams,

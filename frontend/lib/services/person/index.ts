@@ -1,4 +1,4 @@
-import { IPersonRepo } from "@/lib/api/interfaces/IPersonRepo";
+import { IPersonRepo } from "@/lib/api/adapters/interfaces/people/IPersonRepo";
 
 function PersonService(personRepo: IPersonRepo) {
   async function getGendersAsync() {

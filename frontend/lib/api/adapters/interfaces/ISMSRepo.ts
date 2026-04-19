@@ -1,4 +1,4 @@
-import { GetSMSTemplateResponse, UpdateSMSTemplateRequest } from "../types/sms";
+import { GetSMSTemplateResponse, UpdateSMSTemplateRequest } from "../../types/sms";
 
 interface ISMSRepo {
   getSMSTemplateByIdAsync: (id: string) => Promise<GetSMSTemplateResponse>;

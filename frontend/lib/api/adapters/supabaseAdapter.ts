@@ -8,7 +8,7 @@ import {
   IEmployeeRepo,
   ISubjectRepo,
   IClassRepo,
-} from "@/lib/api/interfaces";
+} from "@/lib/api/adapters/interfaces";
 
 class SupabaseApiWrapper implements ISubjectRepo, IClassRepo, IStudentRepo, ICampusRepo, IPersonRepo, IEmployeeRepo {
   private supabase: ReturnType<typeof createClient>;

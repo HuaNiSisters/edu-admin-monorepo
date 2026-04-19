@@ -1,4 +1,4 @@
-import { ICampusRepo } from "../api/interfaces";
+import { ICampusRepo } from "../api/adapters/interfaces";
 import { GetLocationsResponse } from "../api/types/campus";
 
 function CampusService(campusRepo: ICampusRepo) {

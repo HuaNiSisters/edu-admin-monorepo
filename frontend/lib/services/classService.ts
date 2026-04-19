@@ -1,4 +1,4 @@
-import { IClassRepo } from "../api/interfaces";
+import { IClassRepo } from "../api/adapters/interfaces";
 import {
   CreateClassDataParams,
   UpdateClassDataParams,

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { GetSMSTemplateResponse, UpdateSMSTemplateRequest } from "../types/sms";
-import { ISMSRepo } from "../interfaces/ISMSRepo";
+import { ISMSRepo } from "./interfaces/ISMSRepo";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||

@@ -1,4 +1,4 @@
-import { IEmployeeRepo } from "@/lib/api/interfaces";
+import { IEmployeeRepo } from "@/lib/api/adapters/interfaces";
 
 function EmployeeService(employeeRepo: IEmployeeRepo) {
   async function getTutorsAsync() {

@@ -1,4 +1,4 @@
-import { IStudentRepo } from "@/lib/api/interfaces/IStudentRepo";
+import { IStudentRepo } from "@/lib/api/adapters/interfaces/people/IStudentRepo";
 import {
   UpdateStudentDataParams,
   CreateStudentParams,
