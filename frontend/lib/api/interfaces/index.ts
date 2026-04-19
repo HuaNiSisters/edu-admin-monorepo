@@ -4,6 +4,7 @@ import { IEmployeeRepo } from "./IEmployeeRepo";
 import { IStudentRepo } from "./IStudentRepo";
 import { ISubjectRepo } from "./ISubjectRepo";
 import { IClassRepo } from "./IClassRepo";
+import { ISMSRepo } from "./ISMSRepo";
 
 export type {
   ICampusRepo,
@@ -12,4 +13,5 @@ export type {
   IEmployeeRepo,
   ISubjectRepo,
   IClassRepo,
+  ISMSRepo,
 };

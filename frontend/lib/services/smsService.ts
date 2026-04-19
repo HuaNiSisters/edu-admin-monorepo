@@ -1,16 +1,16 @@
-import { ourBackendAdapter } from "../api/adapters/ourBackendAdapter";
+import { ISMSRepo } from "../api/interfaces";
 import { UpdateSMSTemplateRequest } from "../api/types/sms";
 
-function smsService() {
+function SMSService(apiWrapper: ISMSRepo) {
   async function getSMSTemplateByIdAsync(templateId: string) {
-    return await ourBackendAdapter.getSMSTemplateByIdAsync(templateId);
+    return await apiWrapper.getSMSTemplateByIdAsync(templateId);
   }
 
   async function updateSMSTemplateAsync(
     templateId: string,
     updateParams: UpdateSMSTemplateRequest,
   ) {
-    return await ourBackendAdapter.updateSMSTemplateAsync(
+    return await apiWrapper.updateSMSTemplateAsync(
       templateId,
       updateParams,
     );
@@ -21,7 +21,7 @@ function smsService() {
     toPhoneNumber: string,
     templateVariables?: Record<string, string>,
   ): Promise<void> {
-    await ourBackendAdapter.sendSMSTemplateAsync(
+    await apiWrapper.sendSMSTemplateAsync(
       templateId,
       toPhoneNumber,
       templateVariables,
@@ -35,4 +35,4 @@ function smsService() {
   };
 }
 
-export const smsApi = smsService();
+export { SMSService };

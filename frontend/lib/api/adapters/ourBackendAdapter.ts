@@ -1,11 +1,14 @@
 import axios from "axios";
 import { GetSMSTemplateResponse, UpdateSMSTemplateRequest } from "../types/sms";
+import { ISMSRepo } from "../interfaces/ISMSRepo";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "http://localhost:8888/api/v1/broadcast";
 
-function ourBackendEndpoints() {
+interface IOurApiWrapperInterface extends ISMSRepo {}
+
+function ourBackendAdapter(): IOurApiWrapperInterface {
   // ERROR HANDLING
   async function getSMSTemplateByIdAsync(
     templateId: string,
@@ -48,7 +51,5 @@ function ourBackendEndpoints() {
     sendSMSTemplateAsync,
   };
 }
-
-const ourBackendAdapter = ourBackendEndpoints();
 
 export { ourBackendAdapter };
