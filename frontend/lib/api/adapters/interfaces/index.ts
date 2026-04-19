@@ -5,6 +5,8 @@ import { IParentRepo } from "./people/IParentRepo";
 import { IEmployeeRepo } from "./people/IEmployeeRepo";
 import { ISubjectRepo } from "./ISubjectRepo";
 import { IClassRepo } from "./IClassRepo";
+import { ITermRepo } from "./ITermRepo";
+import { IEnrolmentRepo } from "./IEnrolmentRepo";
 import { ISMSRepo } from "./ISMSRepo";
 
 export type {
@@ -14,6 +16,8 @@ export type {
   IParentRepo,
   IEmployeeRepo,
   ISubjectRepo,
+  ITermRepo,
   IClassRepo,
+  IEnrolmentRepo,
   ISMSRepo,
 };

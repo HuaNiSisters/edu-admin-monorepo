@@ -9,9 +9,11 @@ import {
   IEmployeeRepo,
   ISubjectRepo,
   IClassRepo,
+  ITermRepo,
+  IEnrolmentRepo,
 } from "@/lib/api/adapters/interfaces";
 
-import { ClassTime, ParentInfo, StudentInfo, SubjectOffering } from "../types";
+import { ClassTime, ParentInfo, StudentInfo, SubjectOffering, Term } from "../types";
 import { GetLocationsResponse } from "../types/campus";
 import { GetGendersResponse } from "../types/person";
 import { GetTutorsResponse } from "../types/person/employee";
@@ -39,6 +41,7 @@ import {
   GetClassTimesResponse,
   UpdateClassDataParams,
 } from "../types/class";
+import { CreateTermDataParams, GetTermsResponse } from "../types/term";
 
 class SupabaseApiWrapper
   implements
@@ -47,7 +50,9 @@ class SupabaseApiWrapper
     IParentRepo,
     IEmployeeRepo,
     ISubjectRepo,
+    ITermRepo,
     IClassRepo,
+    IEnrolmentRepo,
     ICampusRepo
 {
   private supabase: ReturnType<typeof createClient>;
@@ -327,6 +332,31 @@ class SupabaseApiWrapper
   async getGendersAsync(): Promise<GetGendersResponse> {
     return Object.values(Constants.public.Enums.Gender);
   }
+
+
+  // --- Terms --------------------------------------
+  async getTermsAsync(): Promise<GetTermsResponse> {
+    const { data: responseData, error } = await this.supabase
+      .from("Term")
+      .select("*")
+      .order("start_date", { ascending: false });
+    if (error) throw error;
+    return responseData;
+  }
+
+  async createTermAsync(data: CreateTermDataParams): Promise<Term> {
+    console.log({ createTermData: data });
+    const { data: responseData, error } = await this.supabase
+      .from("Term")
+      .insert(data)
+      .select()
+      .single();
+    // console.log({ createTermResponse: responseData, createTermError: error });
+    if (error) throw new Error("Failed to create term: " + error.message);
+    return responseData;
+  }
+
+      
 }
 
 export default SupabaseApiWrapper;

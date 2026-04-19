@@ -6,6 +6,7 @@ import { studentService } from "@/lib/services";
 import StudentDataForm from "@/components/_reusable-form-components/student-data-form";
 import { useParams } from "next/navigation";
 import { useAsync } from "@/hooks/use-async";
+import EnrolledClasses from "../_components/enrolled-classes";
 
 export default function ViewStudentPage() {
   const params = useParams();
@@ -27,7 +28,12 @@ export default function ViewStudentPage() {
   return (
     <div>
       {isPending && <div></div>}
-      {!isPending && studentData && <StudentDataForm studentData={studentData} isEditing={false} />}
+      {!isPending && studentData && (
+        <div>
+          <StudentDataForm studentData={studentData} isEditing={false} />
+          <EnrolledClasses studentId={studentId} />
+        </div>
+      )}
     </div>
   );
 }
