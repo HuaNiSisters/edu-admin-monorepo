@@ -236,7 +236,9 @@ class SupabaseApiWrapper
     return createStudentResponse;
   }
 
-  async getStudentByIdAsync(id: string): Promise<StudentInfo & { parents: ParentInfo[] }> {
+  async getStudentByIdAsync(
+    id: string,
+  ): Promise<StudentInfo & { parents: ParentInfo[] }> {
     const { data: getStudentParentData, error: getStudentParentError } =
       await this.supabase
         .from("Student")
@@ -260,7 +262,12 @@ class SupabaseApiWrapper
     }
 
     console.log({ getStudentParentData });
-    return getStudentParentData;
+    const studentParentDataNormalised = {
+      ...getStudentParentData,
+      parents: getStudentParentData?.parents?.map((p) => p.Parent) ?? [],
+    };
+    console.log({ studentParentDataNormalised });
+    return studentParentDataNormalised;
   }
 
   async updateStudentAsync(

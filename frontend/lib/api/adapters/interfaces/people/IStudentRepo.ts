@@ -1,4 +1,4 @@
-import { StudentData } from "@/lib/api/types";
+import { ParentInfo, StudentInfo } from "@/lib/api/types";
 
 import {
   GetStatusesResponse,
@@ -8,12 +8,12 @@ import {
 } from "@/lib/api/types/person/student";
 
 interface IStudentRepo {
-  createStudentAsync: (data: CreateStudentDataParams) => Promise<StudentData>;
+  createStudentAsync: (data: CreateStudentDataParams) => Promise<StudentInfo>;
   updateStudentAsync: (
     id: string,
     data: UpdateStudentDataParams,
-  ) => Promise<StudentData>;
-  getStudentByIdAsync: (id: string) => Promise<StudentData>;
+  ) => Promise<StudentInfo>;
+  getStudentByIdAsync: (id: string) => Promise<StudentInfo & { parents: ParentInfo[] }>;
   searchStudentsAsync: (query: string) => Promise<SearchStudentsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;
 }

@@ -87,20 +87,17 @@ function StudentService(studentRepo: IStudentRepo, parentRepo: IParentRepo) {
 
   async function getStudentByIdAsync(id: string) {
     // Still okay that parent is fetching is still coupled with Student fetching
-    const getStudentResponse = await studentRepo.getStudentByIdAsync(id);
+    const { parents, ...studentData } = await studentRepo.getStudentByIdAsync(id);
     
-    const parents = getStudentResponse?.parents || [];
-    delete getStudentResponse?.parents;
-
     return {
-      ...getStudentResponse,
+      ...studentData,
       // TODO: CHECK ORDERING OF PARENTS, may need a 'primary' contact flag field
-      parent1Id: parents[0]?.Parent.parent_id,
-      parent1FullName: parents[0]?.Parent.first_name,
-      parent1Mobile: parents[0]?.Parent.parent_mobile,
-      parent2Id: parents[1]?.Parent.parent_id,
-      parent2FullName: parents[1]?.Parent.first_name,
-      parent2Mobile: parents[1]?.Parent.parent_mobile,
+      parent1Id: parents[0]?.parent_id,
+      parent1FullName: parents[0]?.first_name,
+      parent1Mobile: parents[0]?.parent_mobile,
+      parent2Id: parents[1]?.parent_id,
+      parent2FullName: parents[1]?.first_name,
+      parent2Mobile: parents[1]?.parent_mobile,
     };
   }
 
