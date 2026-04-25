@@ -29,6 +29,13 @@ type ClassTimeWithSubjectAndTutor = ClassTime & {
   tutor?: string | null;
 };
 
+type EnrolmentWithClassAndTerm = Enrolment & {
+  ClassTime: ClassTime & {
+    SubjectOffering: SubjectOffering;
+  };
+  Term: Term;
+}
+
 export type {
   Location,
   Gender,
@@ -43,4 +50,5 @@ export type {
   StudentWithParents,
   EmployeeInfo,
   ClassTimeWithSubjectAndTutor,
+  EnrolmentWithClassAndTerm,
 };

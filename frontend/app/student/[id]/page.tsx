@@ -31,6 +31,7 @@ export default function ViewStudentPage() {
       {!isPending && studentData && (
         <div>
           <StudentDataForm studentData={studentData} isEditing={false} />
+          <br />
           <EnrolledClasses studentId={studentId} />
         </div>
       )}

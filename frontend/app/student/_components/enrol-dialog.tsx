@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
 import EnrolDataForm, {
-  EnrolmentData,
   EnrolDataFormHandle,
 } from "./enrol-data-form";
 
@@ -23,8 +22,8 @@ export default function EnrolDialog({
     formRef.current?.submit();
   };
 
-  const handleFormSubmit = (data: EnrolmentData) => {
-    // call your API, close the dialog, etc.
+  const afterSubmit = () => {
+    onClose();
   };
 
   return (
@@ -37,7 +36,7 @@ export default function EnrolDialog({
     >
       <EnrolDataForm
         studentId={studentId}
-        onSubmit={handleFormSubmit}
+        afterSubmit={afterSubmit}
         ref={formRef}
       ></EnrolDataForm>
     </ReusableDialog>

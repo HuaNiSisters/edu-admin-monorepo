@@ -13,7 +13,13 @@ import {
   IEnrolmentRepo,
 } from "@/lib/api/adapters/interfaces";
 
-import { ClassTime, ParentInfo, StudentInfo, SubjectOffering, Term } from "../types";
+import {
+  ClassTime,
+  ParentInfo,
+  StudentInfo,
+  SubjectOffering,
+  Term,
+} from "../types";
 import { GetLocationsResponse } from "../types/campus";
 import { GetGendersResponse } from "../types/person";
 import { GetTutorsResponse } from "../types/person/employee";
@@ -41,7 +47,10 @@ import {
   GetClassTimesResponse,
   UpdateClassDataParams,
 } from "../types/class";
+
 import { CreateTermDataParams, GetTermsResponse } from "../types/term";
+
+import { CreateEnrolmentDataParams } from "../types/enrolment";
 
 class SupabaseApiWrapper
   implements
@@ -333,7 +342,6 @@ class SupabaseApiWrapper
     return Object.values(Constants.public.Enums.Gender);
   }
 
-
   // --- Terms --------------------------------------
   async getTermsAsync(): Promise<GetTermsResponse> {
     const { data: responseData, error } = await this.supabase
@@ -356,7 +364,66 @@ class SupabaseApiWrapper
     return responseData;
   }
 
-      
+  /**
+   * Enrolments
+   */
+  async createEnrolmentAsync(data: CreateEnrolmentDataParams) {
+    const { student_id, class_id, term_id, enrolment_date, status } = data;
+
+    const { data: responseData, error } = await this.supabase
+      .from("Enrolment")
+      .insert({
+        student_id,
+        class_id,
+        term_id,
+        enrolment_date,
+        status,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error("Failed to create enrolment: " + error.message);
+    return responseData;
+  }
+
+  async getEnrolmentsByStudentIdAsync(studentId: string) {
+    const { data: responseData, error } = await this.supabase
+      .from("Enrolment")
+      .select("*, Term(*), ClassTime(*, SubjectOffering(*))")
+      .eq("student_id", studentId);
+    if (error) throw new Error("Failed to fetch enrolments: " + error.message);
+    return responseData;
+  }
+
+  async getEnrolmentsByClassIdAsync(classId: string) {
+    const { data: responseData, error } = await this.supabase
+      .from("Enrolment")
+      .select("*")
+      .eq("class_id", classId);
+    if (error) throw new Error("Failed to fetch enrolments: " + error.message);
+    return responseData;
+  }
+
+  // async updateEnrolmentAsync(
+  //   id: string,
+  //   data: Omit<
+  //     CreateEnrolmentDataParams,
+  //     "student_id" | "class_id" | "term_id"
+  //   >,
+  // ) {
+  //   const { enrolment_date, status } = data;
+  //   const { data: responseData, error } = await this.supabase
+  //     .from("Enrolment")
+  //     .update({
+  //       enrolment_date,
+  //       status,
+  //     })
+  //     .eq("enrolment_id", id)
+  //     .select()
+  //     .single();
+  //   if (error) throw new Error("Failed to update enrolment: " + error.message);
+  //   return responseData;
+  // }
 }
 
 export default SupabaseApiWrapper;
