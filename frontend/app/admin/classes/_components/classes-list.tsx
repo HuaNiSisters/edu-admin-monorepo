@@ -1,20 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import { ColumnFiltersState } from "@tanstack/react-table";
-import { ClassTimeWithSubject } from "@/lib/api/types/IApiWrapper";
+import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
 import { createClassColumns } from "./classes-columns";
 import FilterContent from "@/components/filter-content";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
-
-const DataTable = dynamic(
-  () => import("@/components/ui/data-table").then((m) => m.DataTable),
-  { ssr: false },
-);
+import { useRouter } from "next/navigation";
+import { DataTable } from "@/components/ui/data-table";
 
 const DAY_ORDER = [
   "Monday",
@@ -27,14 +23,18 @@ const DAY_ORDER = [
 ];
 
 interface ClassesListProps {
-  classes: ClassTimeWithSubject[];
-  onEdit: (classTime: ClassTimeWithSubject) => void;
+  classes: ClassTimeWithSubjectAndTutor[];
+  onEdit?: (classTime: ClassTimeWithSubjectAndTutor) => void; // make optional
 }
 
 const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
+  const router = useRouter();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const columns = useMemo(() => createClassColumns(onEdit), [onEdit]);
+  const columns = useMemo(
+    () => createClassColumns(onEdit), // pass undefined when not provided
+    [onEdit],
+  );
 
   const subjectOptions = useMemo(
     () =>
@@ -87,6 +87,10 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
   }, [classes]);
 
   const hasActiveFilters = columnFilters.length > 0;
+
+  const onClickRow = (classId: string) => {
+    router.replace(`/student/attendance/${classId}`);
+  };
 
   return (
     <div className="space-y-3">
@@ -185,6 +189,9 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
         data={classes}
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
+        onRowClick={(row: ClassTimeWithSubjectAndTutor) =>
+          onClickRow(row.class_id)
+        }
       />
     </div>
   );

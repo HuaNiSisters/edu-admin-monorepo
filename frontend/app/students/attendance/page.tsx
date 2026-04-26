@@ -1,34 +1,33 @@
 "use client";
 
+import ClassesList from "@/app/admin/classes/_components/classes-list";
 import { MultiSelectCombobox } from "@/components/multi-select-combobox";
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useAsync } from "@/hooks/use-async";
+import { classService } from "@/lib/services";
+import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
 
 const AttendancePage = () => {
   const [selectedGrades, setSelectedGrades] = React.useState<string[]>([]);
   const [selectedSubjects, setSelectedSubjects] = React.useState<string[]>([]);
+  const { run, isPending } = useAsync();
+  const [classes, setClasses] = useState<ClassTimeWithSubjectAndTutor[]>([]);
+
+  const fetchClasses = useCallback(() => {
+    run(async () => {
+      const data = await classService.getClassTimesAsync();
+      setClasses(data);
+    });
+  }, [run]);
+
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
 
   return (
     <div>
-      <MultiSelectCombobox
-        options={[
-          { label: "Year 5", value: "5" },
-          { label: "Year 8", value: "8" },
-          { label: "Year 9", value: "9" },
-        ]}
-        placeholder="Select grades..."
-        value={selectedGrades}
-        onChange={setSelectedGrades}
-      />
-
-      {/* <MultiSelectCombobox
-        options={subjectOfferings.map((s) => ({
-          label: getSubjectLabel(s),
-          value: s.subject_id,
-        }))}
-        placeholder="Select subjects..."
-        value={selectedSubjects}
-        onChange={setSelectedSubjects}
-      /> */}
+      {/* TODO: have it so that tutor users has the tutors filter disabled and pre-selected to them */}
+      <ClassesList classes={classes} />
     </div>
   );
 };
