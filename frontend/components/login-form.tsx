@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/api/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -93,7 +93,7 @@ export function LoginForm({
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            {/* <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/sign-up"
@@ -101,7 +101,7 @@ export function LoginForm({
               >
                 Sign up
               </Link>
-            </div>
+            </div> */}
           </form>
         </CardContent>
       </Card>

@@ -5,11 +5,9 @@ import { useAsync } from "@/hooks/use-async";
 import SubjectsList from "./_components/subjects-list";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { SubjectOffering } from "@/types/IApiWrapper";
+import { SubjectOffering } from "@/lib/api/types";
 import SubjectDialog from "./_components/subject-dialog";
-import { Label } from "@/components/ui/label";
-import apiWrapper from "@/lib/apiWrapper";
-import { SelectLocation } from "@/components/_reusable-form-components/select-location";
+import { subjectService } from "@/lib/services";
 import { LoadingBar } from "@/components/loading-bar";
 
 const SubjectsPage = () => {
@@ -25,7 +23,7 @@ const SubjectsPage = () => {
 
   const fetchSubjects = useCallback(() => {
     run(async () => {
-      const data = await apiWrapper.getSubjectOfferingsAsync();
+      const data = await subjectService.getSubjectOfferingsAsync();
       setSubjectOfferings(data);
     });
   }, [run]);
