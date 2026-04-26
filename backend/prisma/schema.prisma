@@ -178,7 +178,8 @@ model Term {
   start_date DateTime
   end_date   DateTime
 
-  enrolments Enrolment[]
+  enrolments  Enrolment[]
+  attendances Attendance[]
 
   @@unique([year, name])
 }
@@ -204,14 +205,16 @@ model Attendance {
   attendance_id String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   student_id    String           @db.Uuid
   class_id      String           @db.Uuid
+  term_id       String           @db.Uuid
   week          Int // e.g. 1, 2, 3, ... 10
   status        AttendanceStatus
   notes         String?
 
   student Student   @relation(fields: [student_id], references: [student_id])
   class   ClassTime @relation(fields: [class_id], references: [class_id], onDelete: Cascade)
+  term    Term      @relation(fields: [term_id], references: [term_id], onDelete: Cascade)
 
-  @@unique([student_id, class_id, week])
+  @@unique([student_id, class_id, term_id, week])
 }
 
 ////////////////////

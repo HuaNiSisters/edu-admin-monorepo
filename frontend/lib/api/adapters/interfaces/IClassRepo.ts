@@ -1,4 +1,4 @@
-import { ClassTime } from "@/lib/api/types";
+import { ClassTime, ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
 import {
   CreateClassDataParams,
   UpdateClassDataParams,
@@ -12,6 +12,7 @@ interface IClassRepo {
     data: UpdateClassDataParams,
   ) => Promise<ClassTime>;
   getClassTimesAsync: () => Promise<GetClassTimesResponse>;
+  getClassByIdAsync: (classId: string) => Promise<ClassTimeWithSubjectAndTutor  >;
 // ENROL
 }
 

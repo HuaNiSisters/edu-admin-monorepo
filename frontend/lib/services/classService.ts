@@ -17,10 +17,15 @@ function ClassService(classRepo: IClassRepo) {
     return await classRepo.getClassTimesAsync();
   }
 
+  async function getClassByIdAsync(id: string) {
+    return await classRepo.getClassByIdAsync(id);
+  }
+
   return {
     createClassAsync,
     updateClassAsync,
     getClassTimesAsync,
+    getClassByIdAsync,
   };
 }
 

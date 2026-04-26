@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/adapters/interfaces";
 
 import {
+  AttendanceStatus,
   ClassTime,
   ParentInfo,
   StudentInfo,
@@ -177,6 +178,59 @@ class SupabaseApiWrapper
       };
     });
   }
+
+async getClassByIdAsync(classId: string) {
+  const { data: responseData, error } = await this.supabase
+    .from("ClassTime")
+    .select(
+      `
+      *,
+      subject_offering:SubjectOffering (
+        subject_name,
+        grade,
+        location
+      ),
+      tutor:Tutor (
+        first_name,
+        last_name
+      )
+    `,
+    )
+    .eq("class_id", classId)
+    .single();
+
+  if (error) throw new Error("Failed to fetch class: " + error.message);
+
+  const { subject_offering, tutor, ...rest } = responseData as typeof responseData & {
+    subject_offering: {
+      subject_name: string;
+      grade: string | null;
+      location: string | null;
+    } | null;
+    tutor: { first_name: string; last_name: string } | null;
+  };
+
+  return {
+    ...rest,
+    subject_name: subject_offering?.subject_name,
+    grade: subject_offering?.grade,
+    location: subject_offering?.location,
+    tutor: tutor ? `${tutor.first_name} ${tutor.last_name}` : null,
+  };
+}
+
+async getAttendanceByClassAndTermAsync(classId: string, termId: string) {
+  const { data, error } = await this.supabase
+    .from("Attendance")
+    .select("attendance_id, student_id, class_id, term_id, week, status, notes")
+    .eq("class_id", classId)
+    .eq("term_id", termId)
+    .order("week", { ascending: true });
+
+  if (error) throw new Error("Failed to fetch attendance: " + error.message);
+  return data ?? [];
+}
+
 
   // ─── Parents ────────────────────────────────────────────────────────────────
 

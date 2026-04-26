@@ -89,7 +89,7 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
   const hasActiveFilters = columnFilters.length > 0;
 
   const onClickRow = (classId: string) => {
-    router.replace(`/student/attendance/${classId}`);
+    router.replace(`/students/attendance/${classId}`);
   };
 
   return (
