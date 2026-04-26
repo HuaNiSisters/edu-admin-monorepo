@@ -52,7 +52,7 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
       </div>
       {isPending && <div>Loading enrolments...</div>}
       {!isPending && enrolments.length === 0 && <div>No enrolments found.</div>}
-      {!isPending && (
+      {!isPending && enrolments.length > 0 && (
         <Table>
           <TableHeader>
             <TableRow>

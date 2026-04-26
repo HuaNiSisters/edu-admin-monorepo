@@ -26,6 +26,7 @@ import { Badge } from "../ui/badge";
 import { dateIsInThePast } from "@/utils/date-utils";
 import { DateRange } from "react-day-picker";
 import { UpdateTermDataParams } from "@/lib/api/types/term";
+import { addDays } from "date-fns/addDays";
 
 const MIN_YEAR = parseInt(process.env.MIN_YEAR || "2024");
 const MAX_YEAR = parseInt(
@@ -47,8 +48,6 @@ interface SelectTermProps {
 
 const SelectTerm = (props: SelectTermProps) => {
   const { value, onChange, disabled } = props;
-
-  // Can the currently logged in user edit the term dates? Only if they are creating a new term (i.e. there isn't already a term with the same year and number)
 
   const minYear = MIN_YEAR;
   const maxYear = MAX_YEAR;
@@ -85,6 +84,13 @@ const SelectTerm = (props: SelectTermProps) => {
   const { run } = useAsync();
 
   // VALIDATE NO OVERLAPPING TERMS?
+  const getTermWithLargestDate = () => {
+    const sortedTerms = [...allTerms].sort(
+      (a, b) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime(),
+    );
+    return sortedTerms[0];
+  };
+
   const findExistingTerm = (year: number, termNumber: number) => {
     return allTerms.find(
       (term) => term.year === year && term.name === termNumber,
@@ -154,12 +160,35 @@ const SelectTerm = (props: SelectTermProps) => {
     if (!!selectedTermNumber && !!selectedYear) {
       // See if there is already a term with the year and number
       const foundTerm = findExistingTerm(selectedYear, selectedTermNumber);
+      console.log({ foundTerm });
       if (foundTerm) {
         selectSelectedTermStartDate(new Date(foundTerm.start_date));
         setSelectedTermEndDate(new Date(foundTerm.end_date));
+        onChange?.({
+          term_id: foundTerm.term_id,
+          year: selectedYear,
+          name: selectedTermNumber,
+          start_date: selectedTermStartDate?.toISOString(),
+          end_date: selectedTermEndDate?.toISOString(),
+        });
+        return;
       }
+
+      if (getTermStatus() === TermStatus.PAST) return;
+      
+      const lastTerm = getTermWithLargestDate();
+      const lastTermEndDate = lastTerm
+        ? new Date(lastTerm.end_date)
+        : new Date();
+      const defaultStartDate = new Date(selectedYear, 0, 1);
+      const defaultEndDate = new Date(selectedYear, 11, 31);
+      selectSelectedTermStartDate(
+        lastTermEndDate > defaultStartDate
+          ? addDays(lastTermEndDate, 1)
+          : defaultStartDate,
+      );
+      setSelectedTermEndDate(defaultEndDate);
       onChange?.({
-        term_id: foundTerm?.term_id,
         year: selectedYear,
         name: selectedTermNumber,
         start_date: selectedTermStartDate?.toISOString(),
@@ -167,6 +196,14 @@ const SelectTerm = (props: SelectTermProps) => {
       });
     }
   }, [selectedTermNumber, selectedYear]);
+
+
+  const disableEditTermDates = () => {
+    // only allow selecting current term for now
+    return true;
+    // Can the currently logged in user edit the term dates? Only if they are creating a new term (i.e. there isn't already a term with the same year and number)
+    return getTermStatus() === TermStatus.PAST;
+  }
 
   return (
     <div>
@@ -214,7 +251,7 @@ const SelectTerm = (props: SelectTermProps) => {
       <div className="w-2/3">
         <DateRangePicker
           className="justify-start"
-          isDisabled={getTermStatus() === TermStatus.PAST}
+          isDisabled={disableEditTermDates()}
           startDate={selectedTermStartDate}
           endDate={selectedTermEndDate}
           onChange={(dateRange: DateRange | undefined) => {
@@ -222,7 +259,8 @@ const SelectTerm = (props: SelectTermProps) => {
             selectSelectedTermStartDate(dateRange.from);
             setSelectedTermEndDate(dateRange.to);
             onChange?.({
-              term_id: findExistingTerm(selectedYear!, selectedTermNumber!)?.term_id,
+              term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
+                ?.term_id,
               year: selectedYear,
               name: selectedTermNumber,
               start_date: dateRange.from?.toISOString(),
