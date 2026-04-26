@@ -3,28 +3,37 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAsync } from "@/hooks/use-async";
-import { classService } from "@/lib/services";
-import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
-import { start } from "repl";
+import { classService, termService } from "@/lib/services";
+import { ClassTimeWithSubjectAndTutor, Term } from "@/lib/api/types";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
+import AttendanceTable, { StudentRow } from "../_components/attendance-table";
+import { SelectTerm } from "@/components/_reusable-form-components/select-term";
 
 const ViewClassAttendance = () => {
   const params = useParams();
   const classId = params.id as string;
 
   const [classData, setClassData] = useState<ClassTimeWithSubjectAndTutor>();
+  const [selectedTermId, setSelectedTermId] = useState<string>("");
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [students, setStudents] = useState<StudentRow[]>([]);
 
   const { run, isPending } = useAsync();
 
-  const fetchClassData = async () => {
-    const data = await classService.getClassByIdAsync(classId);
-    console.log({ fetchedClassData: data });
-    setClassData(data);
-  };
-
+  // Fetch class and terms on mount
   useEffect(() => {
-    run(fetchClassData);
-  }, [params.id, run]);
+    run(async () => {
+      const [selectedClass, allTerms] = await Promise.all([
+        classService.getClassByIdAsync(classId),
+        termService.getTermsAsync(),
+      ]);
+      setClassData(selectedClass);
+      setTerms(allTerms);
+      if (allTerms.length > 0) setSelectedTermId(allTerms[0].term_id);
+    });
+  }, [classId, run]);
+
+  const selectedTerm = terms.find((t) => t.term_id === selectedTermId);
 
   return (
     <>
@@ -43,6 +52,15 @@ const ViewClassAttendance = () => {
           </p>
         )}
       </div>
+      <SelectTerm
+        value={selectedTermId}
+        onChange={(termData) => {
+          if (termData.term_id) setSelectedTermId(termData.term_id);
+        }}
+        disabled={isPending}
+      />
+
+      <AttendanceTable classData={classData} term={selectedTerm} />
     </>
   );
 };

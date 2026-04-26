@@ -175,7 +175,7 @@ const SelectTerm = (props: SelectTermProps) => {
       }
 
       if (getTermStatus() === TermStatus.PAST) return;
-      
+
       const lastTerm = getTermWithLargestDate();
       const lastTermEndDate = lastTerm
         ? new Date(lastTerm.end_date)
@@ -197,13 +197,12 @@ const SelectTerm = (props: SelectTermProps) => {
     }
   }, [selectedTermNumber, selectedYear]);
 
-
   const disableEditTermDates = () => {
     // only allow selecting current term for now
     return true;
     // Can the currently logged in user edit the term dates? Only if they are creating a new term (i.e. there isn't already a term with the same year and number)
     return getTermStatus() === TermStatus.PAST;
-  }
+  };
 
   return (
     <div>

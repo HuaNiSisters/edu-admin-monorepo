@@ -71,6 +71,28 @@ class SupabaseApiWrapper
     this.supabase = createClient();
   }
 
+  private async generateAttendance(
+    studentId: string,
+    classId: string,
+    termId: string
+  ) {
+    const attendanceRows = Array.from({ length: 10 }, (_, i) => ({
+      student_id: studentId,
+      class_id: classId,
+      term_id: termId,
+      week: i + 1,
+      status: "absent" as AttendanceStatus,
+    }));
+
+    const { error } = await this.supabase
+      .from("Attendance")
+      .upsert(attendanceRows);
+
+    if (error) {
+      throw new Error("Failed to generate attendance: " + error.message);
+    }
+  }
+
   // ─── Subjects ────────────────────────────────────────────────────────────────
 
   async createSubjectAsync(
@@ -219,10 +241,11 @@ async getClassByIdAsync(classId: string) {
   };
 }
 
-async getAttendanceByClassAndTermAsync(classId: string, termId: string) {
+async getAttendanceByStudentAndClassAndTermAsync(studentId: string, classId: string, termId: string) {
   const { data, error } = await this.supabase
     .from("Attendance")
     .select("attendance_id, student_id, class_id, term_id, week, status, notes")
+    .eq("student_id", studentId)
     .eq("class_id", classId)
     .eq("term_id", termId)
     .order("week", { ascending: true });
@@ -231,6 +254,22 @@ async getAttendanceByClassAndTermAsync(classId: string, termId: string) {
   return data ?? [];
 }
 
+async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, classId: string, termId: string, week: number, attendanceStatus: AttendanceStatus ) {
+
+  const { error } = await this.supabase
+      .from("Attendance")
+      .update({ status: attendanceStatus })
+      .eq("student_id", studentId)
+      .eq("class_id", classId)
+      .eq("term_id", termId)
+      .eq("week", week)
+      .select("attendance_id, student_id, class_id, term_id, week, status")
+      .single();
+
+  if (error) {
+    throw new Error("Failed to update attendance: " + error.message);
+  }
+}
 
   // ─── Parents ────────────────────────────────────────────────────────────────
 
@@ -448,6 +487,15 @@ async getAttendanceByClassAndTermAsync(classId: string, termId: string) {
       .single();
 
     if (error) throw new Error("Failed to create enrolment: " + error.message);
+
+    // TODO: to generate attendance for future terms, assuming student remains enrolled
+    // 1. Get current term
+    // 2. Generate for CURRENT term
+    await this.generateAttendance(student_id, class_id, term_id);
+
+    // 3. Find FUTURE terms
+    // 4. Only create attendance if enrolment exists
+
     return responseData;
   }
 

@@ -8,8 +8,6 @@ import { classService } from "@/lib/services";
 import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
 
 const AttendancePage = () => {
-  const [selectedGrades, setSelectedGrades] = React.useState<string[]>([]);
-  const [selectedSubjects, setSelectedSubjects] = React.useState<string[]>([]);
   const { run, isPending } = useAsync();
   const [classes, setClasses] = useState<ClassTimeWithSubjectAndTutor[]>([]);
 
