@@ -48,7 +48,7 @@ import {
   UpdateClassDataParams,
 } from "../types/class";
 
-import { CreateTermDataParams, GetTermsResponse } from "../types/term";
+import { CreateTermDataParams, GetTermsResponse, UpdateTermDataParams } from "../types/term";
 
 import { CreateEnrolmentDataParams } from "../types/enrolment";
 
@@ -361,6 +361,17 @@ class SupabaseApiWrapper
       .single();
     // console.log({ createTermResponse: responseData, createTermError: error });
     if (error) throw new Error("Failed to create term: " + error.message);
+    return responseData;
+  }
+
+  async updateTermAsync(termId: string, data: UpdateTermDataParams): Promise<Term> {
+    const { data: responseData, error } = await this.supabase
+      .from("Term")
+      .update(data)
+      .eq("term_id", termId)
+      .select()
+      .single();
+    if (error) throw new Error("Failed to update term: " + error.message);
     return responseData;
   }
 

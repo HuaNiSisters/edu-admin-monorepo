@@ -24,6 +24,8 @@ import {
 import { Term } from "@/lib/api/types";
 import { Badge } from "../ui/badge";
 import { dateIsInThePast } from "@/utils/date-utils";
+import { DateRange } from "react-day-picker";
+import { UpdateTermDataParams } from "@/lib/api/types/term";
 
 const MIN_YEAR = parseInt(process.env.MIN_YEAR || "2024");
 const MAX_YEAR = parseInt(
@@ -39,7 +41,7 @@ enum TermStatus {
 
 interface SelectTermProps {
   value?: string;
-  onChange?: (value: string) => void;
+  onChange?: (termData: Partial<Term>) => void;
   disabled?: boolean;
 }
 
@@ -156,6 +158,13 @@ const SelectTerm = (props: SelectTermProps) => {
         selectSelectedTermStartDate(new Date(foundTerm.start_date));
         setSelectedTermEndDate(new Date(foundTerm.end_date));
       }
+      onChange?.({
+        term_id: foundTerm?.term_id,
+        year: selectedYear,
+        name: selectedTermNumber,
+        start_date: selectedTermStartDate?.toISOString(),
+        end_date: selectedTermEndDate?.toISOString(),
+      });
     }
   }, [selectedTermNumber, selectedYear]);
 
@@ -208,6 +217,18 @@ const SelectTerm = (props: SelectTermProps) => {
           isDisabled={getTermStatus() === TermStatus.PAST}
           startDate={selectedTermStartDate}
           endDate={selectedTermEndDate}
+          onChange={(dateRange: DateRange | undefined) => {
+            if (!dateRange) return;
+            selectSelectedTermStartDate(dateRange.from);
+            setSelectedTermEndDate(dateRange.to);
+            onChange?.({
+              term_id: findExistingTerm(selectedYear!, selectedTermNumber!)?.term_id,
+              year: selectedYear,
+              name: selectedTermNumber,
+              start_date: dateRange.from?.toISOString(),
+              end_date: dateRange.to?.toISOString(),
+            });
+          }}
           minDate={minDate}
           maxDate={maxDate}
         />

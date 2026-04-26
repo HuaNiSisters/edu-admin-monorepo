@@ -10,8 +10,9 @@ import { SelectClass } from "@/components/_reusable-form-components/select-class
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Field, FieldError } from "@/components/ui/field";
-import { enrolmentService } from "@/lib/services";
+import { enrolmentService, termService } from "@/lib/services";
 import { toast } from "sonner";
+import { Term } from "@/lib/api/types";
 export interface EnrolmentData {
   studentId: string;
   classId: string;
@@ -80,6 +81,24 @@ export default function EnrolDataForm({
     },
   }));
 
+  const onTermChange = async (termData: Partial<Term>) => {
+    console.log({ termData });
+
+    if(!termData.term_id) {
+      await termService.createTermAsync({
+        year: termData.year!,
+        name: termData.name!,
+        start_date: termData.start_date!,
+        end_date: termData.end_date!,
+      });
+    }
+    
+    await termService.updateTermAsync(termData.term_id!, {
+      start_date: termData.start_date!,
+      end_date: termData.end_date!,
+    });
+  };
+
   return (
     <div>
       <form id="enrol-data-form" className="w-full flex flex-col gap-4">
@@ -109,10 +128,7 @@ export default function EnrolDataForm({
                 <Field className="flex">
                   <SelectTerm
                     value={field.value}
-                    onChange={(val) => {
-                      console.log("SelectTerm onChange:", val); // What does this log?
-                      field.onChange(val);
-                    }}
+                    onChange={onTermChange}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
