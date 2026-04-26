@@ -101,7 +101,6 @@ export default function EnrolDataForm({
           </div>
         </div>
         <div className="flex gap-2 items-center w-full">
-          <span className="shrink-0">Term:</span>
           <div className="flex-1 min-w-0">
             <Controller
               name="termId"

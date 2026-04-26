@@ -117,9 +117,13 @@ export function DateRangePicker(props: DateRangePickerProps) {
             onSelect={handleSelect}
             numberOfMonths={numberOfMonths}
             disabled={isDisabled}
-            fromDate={minDate}
-            toDate={maxDate}
             showOutsideDays={false}
+            {...((!!minDate || !!maxDate) && {
+              hidden: {
+                ...(!!minDate && { before: minDate }),
+                ...(!!maxDate && { after: maxDate }),
+              },
+            })}
           />
         </PopoverContent>
       </Popover>
