@@ -1,5 +1,5 @@
-import { Database } from "../../../types/database.types";
-import { SubjectOffering } from "./IApiWrapper";
+import { Database } from "@/types/database.types";
+import { SubjectOffering } from ".";
 
 type CreateSubjectDataParams =
   Database["public"]["Tables"]["SubjectOffering"]["Insert"];

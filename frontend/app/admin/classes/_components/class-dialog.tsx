@@ -209,6 +209,7 @@ const ClassDialog = ({
           <DialogTitle>{isEditing ? "Edit Class" : "Add Class"}</DialogTitle>
         </DialogHeader>
 
+        {/* TODO: Maybe in future, put this in it's on form, and have this dialog use the form (edit: possibly a bit messy) */}
         <form
           id="class-data-form"
           onSubmit={(e) => {

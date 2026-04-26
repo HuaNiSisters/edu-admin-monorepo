@@ -12,6 +12,7 @@ interface IClassRepo {
     data: UpdateClassDataParams,
   ) => Promise<ClassTime>;
   getClassTimesAsync: () => Promise<GetClassTimesResponse>;
+// ENROL
 }
 
 export type {

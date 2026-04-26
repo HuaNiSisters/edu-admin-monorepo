@@ -1,13 +1,18 @@
 import { Database } from "../../../types/database.types";
 
 type Location = Database["public"]["Enums"]["Location"];
-type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
 type Gender = Database["public"]["Enums"]["Gender"];
-type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
-type ClassTime = Database["public"]["Tables"]["ClassTime"]["Row"];
+type StudentStatus = Database["public"]["Enums"]["StudentStatus"];
+type EnrolmentStatus = Database["public"]["Enums"]["EnrolmentStatus"];
 
+type SubjectOffering = Database["public"]["Tables"]["SubjectOffering"]["Row"];
+type Term = Database["public"]["Tables"]["Term"]["Row"];
+type Enrolment = Database["public"]["Tables"]["Enrolment"]["Row"];
+type ClassTime = Database["public"]["Tables"]["ClassTime"]["Row"];
 type ParentInfo = Database["public"]["Tables"]["Parent"]["Row"];
 type StudentInfo = Database["public"]["Tables"]["Student"]["Row"];
+type EmployeeInfo = Database["public"]["Tables"]["Tutor"]["Row"];
+
 type StudentWithParents = StudentInfo & {
   parent1Id: string;
   parent1FullName: string;
@@ -17,8 +22,6 @@ type StudentWithParents = StudentInfo & {
   parent2Mobile?: string;
 };
 
-type EmployeeInfo = Database["public"]["Tables"]["Tutor"]["Row"];
-
 type ClassTimeWithSubjectAndTutor = ClassTime & {
   subject_name?: string;
   grade?: string | null;
@@ -26,17 +29,26 @@ type ClassTimeWithSubjectAndTutor = ClassTime & {
   tutor?: string | null;
 };
 
-
+type EnrolmentWithClassAndTerm = Enrolment & {
+  ClassTime: ClassTime & {
+    SubjectOffering: SubjectOffering;
+  };
+  Term: Term;
+}
 
 export type {
   Location,
-  StudentStatus,
   Gender,
+  StudentStatus,
+  EnrolmentStatus,
   SubjectOffering,
+  Term,
+  Enrolment,
   ClassTime,
   ParentInfo,
   StudentInfo,
   StudentWithParents,
   EmployeeInfo,
   ClassTimeWithSubjectAndTutor,
+  EnrolmentWithClassAndTerm,
 };
