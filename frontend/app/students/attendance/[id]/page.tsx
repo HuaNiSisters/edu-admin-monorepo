@@ -16,7 +16,6 @@ const ViewClassAttendance = () => {
   const [classData, setClassData] = useState<ClassTimeWithSubjectAndTutor>();
   const [selectedTermId, setSelectedTermId] = useState<string>("");
   const [terms, setTerms] = useState<Term[]>([]);
-  const [students, setStudents] = useState<StudentRow[]>([]);
 
   const { run, isPending } = useAsync();
 
@@ -29,14 +28,19 @@ const ViewClassAttendance = () => {
       ]);
       setClassData(selectedClass);
       setTerms(allTerms);
-      if (allTerms.length > 0) setSelectedTermId(allTerms[0].term_id);
+      const currentTerm = allTerms.find((t) => {
+        const now = new Date();
+        return new Date(t.start_date) <= now && now <= new Date(t.end_date);
+      });
+      const defaultTerm = currentTerm ?? allTerms[0];
+      if (defaultTerm) setSelectedTermId(defaultTerm.term_id);
     });
   }, [classId, run]);
 
   const selectedTerm = terms.find((t) => t.term_id === selectedTermId);
 
   return (
-    <>
+    <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
           {isPending && !classData
@@ -61,7 +65,7 @@ const ViewClassAttendance = () => {
       />
 
       <AttendanceTable classData={classData} term={selectedTerm} />
-    </>
+    </div>
   );
 };
 

@@ -149,7 +149,6 @@ const SelectTerm = (props: SelectTermProps) => {
     if (!!selectedTermNumber && !!selectedYear) {
       // See if there is already a term with the year and number
       const foundTerm = findExistingTerm(selectedYear, selectedTermNumber);
-      console.log({ foundTerm });
       if (foundTerm) {
         selectSelectedTermStartDate(new Date(foundTerm.start_date));
         setSelectedTermEndDate(new Date(foundTerm.end_date));
