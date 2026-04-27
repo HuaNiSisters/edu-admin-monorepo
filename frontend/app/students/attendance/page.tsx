@@ -6,6 +6,7 @@ import { useAsync } from "@/hooks/use-async";
 import { classService } from "@/lib/services";
 import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
 import { LoadingBar } from "@/components/loading-bar";
+import { Suspense } from "react";
 
 const AttendancePage = () => {
   const { run, isPending } = useAsync();
@@ -23,11 +24,13 @@ const AttendancePage = () => {
   }, [fetchClasses]);
 
   return (
-    <div>
-      {/* TODO: have it so that tutor users has the tutors filter disabled and pre-selected to them */}
-      <LoadingBar isLoading={isPending} />
-      <ClassesList classes={classes} />
-    </div>
+    <Suspense fallback={<span>...</span>}>
+      <div>
+        {/* TODO: have it so that tutor users has the tutors filter disabled and pre-selected to them */}
+        <LoadingBar isLoading={isPending} />
+        <ClassesList classes={classes} />
+      </div>
+    </Suspense>
   );
 };
 
