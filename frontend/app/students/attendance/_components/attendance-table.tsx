@@ -10,12 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
-import { Term } from "@/lib/api/types";
+import {
+  ClassTimeWithSubjectAndTutor,
+  Term,
+  Attendance,
+} from "@/lib/api/types";
 import { useAsync } from "@/hooks/use-async";
-import { classService, studentService, termService } from "@/lib/services";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { classService, studentService } from "@/lib/services";
 
 export type AttendanceStatus = "present" | "absent" | null;
 
@@ -24,7 +25,7 @@ type StudentAttendanceRow = {
   firstName: string;
   lastName: string;
   gender: string | null;
-  attendanceRecords: any[];
+  attendanceRecords: Attendance[];
 };
 
 export interface AttendanceUpsert {
@@ -37,7 +38,7 @@ export interface AttendanceUpsert {
 
 interface AttendanceTableProps {
   classData: ClassTimeWithSubjectAndTutor | undefined;
-  term: Term | undefined;
+  term: Partial<Term> | undefined;
 }
 
 type WeekInfo = {
@@ -121,11 +122,6 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
     if (!term || !classData) return;
 
     run(async () => {
-      console.log(
-        "calling getEnrolmentsByClassIdAsync with classId:",
-        classData?.class_id,
-      );
-
       const enrolments = await Promise.all([
         await classService.getEnrolmentsByClassIdAsync(
           classData?.class_id || "",
@@ -140,7 +136,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
           classService.getAttendanceByStudentAndClassAndTermAsync(
             enrolment.student_id,
             classData?.class_id || "",
-            term.term_id,
+            term?.term_id || "",
           ),
         ]);
 
@@ -154,13 +150,23 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
       }
 
       console.log("studentAndAttendanceMap", studentAndAttendanceMap);
-      setStudentAndAttendanceMap(studentAndAttendanceMap);
+      setStudentAndAttendanceMap(() => {
+        const newMap = [...studentAndAttendanceMap];
+        return newMap.filter(
+          (student, index, self) =>
+            index === self.findIndex((s) => s.studentId === student.studentId),
+        );
+      });
     });
   }, [term, classData, run]);
 
   const weeks =
     term && classData
-      ? generateWeeks(term.start_date, term.end_date, classData.day_of_week)
+      ? generateWeeks(
+          term.start_date ?? "",
+          term.end_date ?? "",
+          classData.day_of_week,
+        )
       : [];
 
   const handleToggle = useCallback(
@@ -171,7 +177,10 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
       const student = studentAndAttendanceMap.find(
         (s) => s.studentId === studentId,
       );
-      const record = student?.attendanceRecords.find((r) => r.week === week);
+      const record = student?.attendanceRecords.find(
+        (r) => Number(r.week) === Number(week),
+      );
+
       const newStatus: AttendanceStatus =
         record?.status === "present" ? "absent" : "present";
 
@@ -188,16 +197,11 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
         }),
       );
 
-      console.log(
-        "about to call service with status:",
-        JSON.stringify(newStatus),
-      );
-
       // Use the captured newStatus
       await classService.updateStudentAttendanceInClassAndTermPerWeekAsync(
         studentId,
         classData.class_id,
-        term.term_id,
+        term?.term_id || "",
         week,
         newStatus,
       );
@@ -206,7 +210,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
   );
 
   return (
-    <>
+    <div className="rounded-md border p-2 bg-primary-foreground">
       <Table>
         <TableHeader>
           <TableRow>
@@ -214,9 +218,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
             {weeks.map((w) => (
               <TableHead
                 key={w.week}
-                className={`text-center ${
-                  w.isCurrentWeek ? "bg-blue-100 font-bold" : ""
-                }`}
+                className={`text-center ${w.isCurrentWeek ? "font-bold" : ""}`}
               >
                 <div>Week {w.week}</div>
                 <div className="text-xs text-gray-500">
@@ -246,12 +248,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
                 );
 
                 return (
-                  <TableCell
-                    key={w.week}
-                    className={`text-center ${
-                      w.isCurrentWeek ? "bg-blue-50" : ""
-                    }`}
-                  >
+                  <TableCell key={w.week} className={`text-center`}>
                     <Checkbox
                       checked={record?.status === "present"}
                       onCheckedChange={() => {
@@ -260,6 +257,8 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
                           student.studentId,
                           "week:",
                           w.week,
+                          "current status:",
+                          record?.status,
                         );
                         handleToggle(student.studentId, w.week);
                       }}
@@ -271,7 +270,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
           ))}
         </TableBody>
       </Table>
-    </>
+    </div>
   );
 };
 

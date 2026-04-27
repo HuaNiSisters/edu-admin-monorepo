@@ -255,7 +255,7 @@ async getAttendanceByStudentAndClassAndTermAsync(studentId: string, classId: str
 }
 
 async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, classId: string, termId: string, week: number, attendanceStatus: AttendanceStatus ) {
-
+  console.log("MLU", { studentId, classId, termId, week, attendanceStatus });
   const { error } = await this.supabase
       .from("Attendance")
       .update({ status: attendanceStatus })
@@ -263,8 +263,6 @@ async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, class
       .eq("class_id", classId)
       .eq("term_id", termId)
       .eq("week", week)
-      .select("attendance_id, student_id, class_id, term_id, week, status")
-      .single();
 
   if (error) {
     throw new Error("Failed to update attendance: " + error.message);
@@ -440,7 +438,7 @@ async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, class
     const { data: responseData, error } = await this.supabase
       .from("Term")
       .select("*")
-      .order("start_date", { ascending: false });
+      .order("start_date", { ascending: true });
     if (error) throw error;
     return responseData;
   }
