@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/types";
 import { useAsync } from "@/hooks/use-async";
 import { classService, studentService } from "@/lib/services";
+import { LoadingBar } from "@/components/loading-bar";
 
 export type AttendanceStatus = "present" | "absent" | null;
 
@@ -27,14 +28,6 @@ type StudentAttendanceRow = {
   gender: string | null;
   attendanceRecords: Attendance[];
 };
-
-export interface AttendanceUpsert {
-  student_id: string;
-  class_id: string;
-  term_id: string;
-  week: number;
-  status: AttendanceStatus;
-}
 
 interface AttendanceTableProps {
   classData: ClassTimeWithSubjectAndTutor | undefined;
@@ -136,7 +129,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
         ),
       );
     });
-  }, [term?.term_id, classData?.class_id, run]);
+  }, [term?.term_id, classData?.class_id, run, classData]);
 
   const weeks =
     term && classData
@@ -189,6 +182,7 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
 
   return (
     <div className="rounded-md border p-2 bg-primary-foreground">
+      <LoadingBar isLoading={isPending} />
       <Table>
         <TableHeader>
           <TableRow>
@@ -230,14 +224,6 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
                     <Checkbox
                       checked={record?.status === "present"}
                       onCheckedChange={() => {
-                        console.log(
-                          "Toggle attendance for studentId:",
-                          student.studentId,
-                          "week:",
-                          w.week,
-                          "current status:",
-                          record?.status,
-                        );
                         handleToggle(student.studentId, w.week);
                       }}
                     />

@@ -8,6 +8,7 @@ import { ClassTimeWithSubjectAndTutor, Term } from "@/lib/api/types";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import AttendanceTable, { StudentRow } from "../_components/attendance-table";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
+import { LoadingBar } from "@/components/loading-bar";
 
 const ViewClassAttendance = () => {
   const params = useParams();
@@ -42,13 +43,13 @@ const ViewClassAttendance = () => {
   return (
     <div className="space-y-4">
       <div>
+        <LoadingBar isLoading={isPending} />
+
         <h1 className="text-2xl font-bold text-gray-900">
-          {isPending && !classData
-            ? "Loading…"
-            : classData?.subject_name
-              ? `${classData.subject_name} - Grade ${classData.grade} ${classData.day_of_week} ${classData.start_time} –
+          {classData?.subject_name
+            ? `${classData.subject_name} - Grade ${classData.grade} ${classData.day_of_week} ${classData.start_time} –
               ${classData.end_time} (${formatValuesRemoveUnderscores(classData?.location ?? "")})`
-              : "Class Attendance"}
+            : "Class Attendance"}
         </h1>
         {classData && (
           <p className="mt-1 text-sm text-gray-500 space-x-3">
