@@ -16,7 +16,7 @@ import {
   Attendance,
 } from "@/lib/api/types";
 import { useAsync } from "@/hooks/use-async";
-import { classService, studentService } from "@/lib/services";
+import { classService } from "@/lib/services";
 import { LoadingBar } from "@/components/loading-bar";
 import Link from "next/link";
 

@@ -66,9 +66,6 @@ const SelectTerm = (props: SelectTermProps) => {
   >(undefined);
 
   const [allTerms, setAllTerms] = useState<Term[]>([]);
-  const [selectedTerm, setSelectedTerm] = useState<
-    Term & { labelText: string }
-  >();
 
   const { run } = useAsync();
 
@@ -130,7 +127,7 @@ const SelectTerm = (props: SelectTermProps) => {
           : new Date(new Date().getFullYear(), 11, 31),
       );
     });
-  }, []);
+  }, [run]);
 
   useEffect(() => {
     if (!selectedYear) return;

@@ -1,4 +1,4 @@
-import { AttendanceStatus, ClassTime, ClassTimeWithSubjectAndTutor, EnrolmentWithClassAndTerm } from "@/lib/api/types";
+import { Attendance, AttendanceStatus, ClassTime, ClassTimeWithSubjectAndTutor, EnrolmentWithClassAndTerm } from "@/lib/api/types";
 import {
   CreateClassDataParams,
   UpdateClassDataParams,
@@ -17,7 +17,7 @@ interface IClassRepo {
   getEnrolmentsByClassIdAsync: (
     classId: string,
   ) => Promise<EnrolmentWithClassAndTerm[]>;  
-  getAttendanceByStudentAndClassAndTermAsync: (studentId: string, classId: string, termId: string) => Promise<any>; // Replace 'any' with the actual return type
+  getAttendanceByStudentAndClassAndTermAsync: (studentId: string, classId: string, termId: string) => Promise<Attendance[]>;
   updateStudentAttendanceInClassAndTermPerWeekAsync: (studentId: string, classId: string, termId: string, week: number, status: AttendanceStatus) => Promise<void>; // Replace 'any' with the actual type for status
   getEnrolmentsWithAttendanceByClassAndTermAsync: (classId: string, termId: string) => Promise<StudentAttendanceRow[]>;
 // ENROL

@@ -6,7 +6,7 @@ import { useAsync } from "@/hooks/use-async";
 import { classService, termService } from "@/lib/services";
 import { ClassTimeWithSubjectAndTutor, Term } from "@/lib/api/types";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
-import AttendanceTable, { StudentRow } from "../_components/attendance-table";
+import AttendanceTable from "../_components/attendance-table";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
 import { LoadingBar } from "@/components/loading-bar";
 

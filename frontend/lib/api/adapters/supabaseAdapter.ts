@@ -14,7 +14,6 @@ import {
 } from "@/lib/api/adapters/interfaces";
 
 import {
-  Attendance,
   AttendanceStatus,
   ClassTime,
   ParentInfo,

@@ -1,4 +1,3 @@
-import { Term } from "@/lib/api/types";
 import { ITermRepo } from "../api/adapters/interfaces/ITermRepo";
 import { CreateTermDataParams, UpdateTermDataParams } from "../api/types/term";
 
