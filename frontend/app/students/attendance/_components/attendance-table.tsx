@@ -18,6 +18,7 @@ import {
 import { useAsync } from "@/hooks/use-async";
 import { classService, studentService } from "@/lib/services";
 import { LoadingBar } from "@/components/loading-bar";
+import Link from "next/link";
 
 export type AttendanceStatus = "present" | "absent" | null;
 
@@ -208,9 +209,9 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
             <TableRow key={student.studentId}>
               {/* Student column */}
               <TableCell className="py-3">
-                <div>
+                <Link href={`/student/${student.studentId}`}>
                   {student.firstName} {student.lastName}
-                </div>
+                </Link>
               </TableCell>
 
               {/* Week columns */}
