@@ -1,18 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { classService, termService } from "@/lib/services";
+import { termService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "../ui/combobox";
-import { Input } from "../ui/input";
-import { Calendar } from "../ui/calendar";
-import { CreatableSelect } from "../ui/createable-select";
+
 import { DateRangePicker } from "../ui/date-range-picker";
 import {
   Select,
@@ -25,19 +15,18 @@ import { Term } from "@/lib/api/types";
 import { Badge } from "../ui/badge";
 import { dateIsInThePast } from "@/utils/date-utils";
 import { DateRange } from "react-day-picker";
-import { UpdateTermDataParams } from "@/lib/api/types/term";
 import { addDays } from "date-fns/addDays";
 
 const MIN_YEAR = parseInt(process.env.MIN_YEAR || "2024");
 const MAX_YEAR = parseInt(
   process.env.MAX_YEAR || `${new Date().getFullYear() + 1}`,
 );
-const N_TERMS = parseInt(process.env.N_TERMS || "4");
+const N_TERMS = parseInt(process.env.N_TERMS || "5");
 
 enum TermStatus {
   NEW = "New",
   CURRENT = "Current",
-  PAST = "Historical",
+  PAST = "Past",
 }
 
 interface SelectTermProps {
@@ -245,30 +234,29 @@ const SelectTerm = (props: SelectTermProps) => {
             {getTermStatus()}
           </Badge>
         )}
-      </div>
-
-      <div className="w-2/3">
-        <DateRangePicker
-          className="justify-start"
-          isDisabled={disableEditTermDates()}
-          startDate={selectedTermStartDate}
-          endDate={selectedTermEndDate}
-          onChange={(dateRange: DateRange | undefined) => {
-            if (!dateRange) return;
-            selectSelectedTermStartDate(dateRange.from);
-            setSelectedTermEndDate(dateRange.to);
-            onChange?.({
-              term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
-                ?.term_id,
-              year: selectedYear,
-              name: selectedTermNumber,
-              start_date: dateRange.from?.toISOString(),
-              end_date: dateRange.to?.toISOString(),
-            });
-          }}
-          minDate={minDate}
-          maxDate={maxDate}
-        />
+        <div className="">
+          <DateRangePicker
+            className="justify-start"
+            isDisabled={disableEditTermDates()}
+            startDate={selectedTermStartDate}
+            endDate={selectedTermEndDate}
+            onChange={(dateRange: DateRange | undefined) => {
+              if (!dateRange) return;
+              selectSelectedTermStartDate(dateRange.from);
+              setSelectedTermEndDate(dateRange.to);
+              onChange?.({
+                term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
+                  ?.term_id,
+                year: selectedYear,
+                name: selectedTermNumber,
+                start_date: dateRange.from?.toISOString(),
+                end_date: dateRange.to?.toISOString(),
+              });
+            }}
+            minDate={minDate}
+            maxDate={maxDate}
+          />
+        </div>
       </div>
     </div>
   );
