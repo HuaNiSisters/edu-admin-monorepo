@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/adapters/interfaces";
 
 import {
+  Attendance,
   AttendanceStatus,
   ClassTime,
   ParentInfo,
@@ -255,7 +256,6 @@ async getAttendanceByStudentAndClassAndTermAsync(studentId: string, classId: str
 }
 
 async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, classId: string, termId: string, week: number, attendanceStatus: AttendanceStatus ) {
-  console.log("MLU", { studentId, classId, termId, week, attendanceStatus });
   const { error } = await this.supabase
       .from("Attendance")
       .update({ status: attendanceStatus })
@@ -267,6 +267,55 @@ async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, class
   if (error) {
     throw new Error("Failed to update attendance: " + error.message);
   }
+}
+
+async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: string) {
+  const { data, error } = await this.supabase
+    .from("Enrolment")
+    .select(`
+      student_id,
+      Student (
+        student_id,
+        first_name,
+        last_name,
+        gender
+      )
+    `)
+    .eq("class_id", classId);
+
+  if (error) throw new Error("Failed to fetch enrolments with attendance: " + error.message);
+
+  const rows = await Promise.all(
+    (data ?? []).map(async (row) => {
+      const student = row.Student as unknown as {
+        student_id: string;
+        first_name: string;
+        last_name: string;
+        gender: string | null;
+      };
+
+      const { data: attendanceData, error: attendanceError } = await this.supabase
+        .from("Attendance")
+        .select("attendance_id, week, status, notes, term_id, class_id, student_id")
+        .eq("student_id", student.student_id)
+        .eq("class_id", classId)
+        .eq("term_id", termId)
+        .order("week", { ascending: true });
+
+      if (attendanceError) throw new Error("Failed to fetch attendance: " + attendanceError.message);
+
+      return {
+        studentId: student.student_id,
+        firstName: student.first_name,
+        lastName: student.last_name,
+        gender: student.gender,
+        attendanceRecords: attendanceData ?? [],
+      };
+    })
+  );
+
+  // Dedupe by studentId
+  return rows.filter((r, i, self) => i === self.findIndex((s) => s.studentId === r.studentId));
 }
 
   // ─── Parents ────────────────────────────────────────────────────────────────

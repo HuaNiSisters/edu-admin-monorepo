@@ -3,6 +3,7 @@ import {
   CreateClassDataParams,
   UpdateClassDataParams,
   GetClassTimesResponse,
+  StudentAttendanceRow,
 } from "@/lib/api/types/class";
 
 interface IClassRepo {
@@ -18,6 +19,7 @@ interface IClassRepo {
   ) => Promise<EnrolmentWithClassAndTerm[]>;  
   getAttendanceByStudentAndClassAndTermAsync: (studentId: string, classId: string, termId: string) => Promise<any>; // Replace 'any' with the actual return type
   updateStudentAttendanceInClassAndTermPerWeekAsync: (studentId: string, classId: string, termId: string, week: number, status: AttendanceStatus) => Promise<void>; // Replace 'any' with the actual type for status
+  getEnrolmentsWithAttendanceByClassAndTermAsync: (classId: string, termId: string) => Promise<StudentAttendanceRow[]>;
 // ENROL
 }
 

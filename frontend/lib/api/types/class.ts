@@ -1,4 +1,4 @@
-import { ClassTimeWithSubjectAndTutor } from ".";
+import { Attendance, ClassTimeWithSubjectAndTutor } from ".";
 import { Database } from "../../../types/database.types";
 
 // I think we've asked this before, SHOULD CLASS HAVE A TERM ID????
@@ -12,8 +12,17 @@ type UpdateClassDataParams = Partial<Omit<CreateClassDataParams, "class_id">>;
 
 type GetClassTimesResponse = ClassTimeWithSubjectAndTutor[];
 
+type StudentAttendanceRow = {
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  gender: string | null;
+  attendanceRecords: Attendance[];
+};
+
 export type {
   CreateClassDataParams,
   UpdateClassDataParams,
   GetClassTimesResponse,
+  StudentAttendanceRow
 };

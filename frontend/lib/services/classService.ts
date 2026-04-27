@@ -40,6 +40,10 @@ async function updateStudentAttendanceInClassAndTermPerWeekAsync(
   return await classRepo.updateStudentAttendanceInClassAndTermPerWeekAsync(studentId, classId, termId, week, status );
 } 
 
+async function getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: string) {
+  return await classRepo.getEnrolmentsWithAttendanceByClassAndTermAsync(classId, termId);
+}
+
   return {
     createClassAsync,
     updateClassAsync,
@@ -48,6 +52,7 @@ async function updateStudentAttendanceInClassAndTermPerWeekAsync(
     getEnrolmentsByClassIdAsync,
     getAttendanceByStudentAndClassAndTermAsync,
     updateStudentAttendanceInClassAndTermPerWeekAsync,
+    getEnrolmentsWithAttendanceByClassAndTermAsync,
   };
 }
 

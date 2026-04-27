@@ -119,46 +119,24 @@ const AttendanceTable = ({ classData, term }: AttendanceTableProps) => {
 
   // Fetch enrolments + attendance when term changes
   useEffect(() => {
-    if (!term || !classData) return;
+    if (!term?.term_id || !classData) return;
 
     run(async () => {
-      const enrolments = await Promise.all([
-        await classService.getEnrolmentsByClassIdAsync(
-          classData?.class_id || "",
-        ),
-      ]);
-
-      const studentAndAttendanceMap: StudentAttendanceRow[] = [];
-
-      for (const enrolment of enrolments[0]) {
-        const [student, attendanceRecords] = await Promise.all([
-          studentService.getStudentByIdAsync(enrolment.student_id),
-          classService.getAttendanceByStudentAndClassAndTermAsync(
-            enrolment.student_id,
-            classData?.class_id || "",
-            term?.term_id || "",
-          ),
-        ]);
-
-        studentAndAttendanceMap.push({
-          studentId: student.student_id,
-          firstName: student.first_name,
-          lastName: student.last_name,
-          gender: student.gender,
-          attendanceRecords,
-        });
-      }
-
-      console.log("studentAndAttendanceMap", studentAndAttendanceMap);
-      setStudentAndAttendanceMap(() => {
-        const newMap = [...studentAndAttendanceMap];
-        return newMap.filter(
-          (student, index, self) =>
-            index === self.findIndex((s) => s.studentId === student.studentId),
+      const rows =
+        await classService.getEnrolmentsWithAttendanceByClassAndTermAsync(
+          classData.class_id,
+          term.term_id!,
         );
-      });
+
+      // Dedupe in case of Strict Mode double-invoke
+      setStudentAndAttendanceMap(
+        rows.filter(
+          (r, i, self) =>
+            i === self.findIndex((s) => s.studentId === r.studentId),
+        ),
+      );
     });
-  }, [term, classData, run]);
+  }, [term?.term_id, classData?.class_id, run]);
 
   const weeks =
     term && classData
