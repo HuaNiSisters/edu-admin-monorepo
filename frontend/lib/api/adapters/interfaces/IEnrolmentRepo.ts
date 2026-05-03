@@ -6,10 +6,10 @@ import {
 
 interface IEnrolmentRepo {
   createEnrolmentAsync: (data: CreateEnrolmentDataParams) => Promise<Enrolment>;
-  updateEnrolmentAsync: (
-    id: string,
-    data: UpdateEnrolmentDataParams,
-  ) => Promise<Enrolment>;
+  // updateEnrolmentAsync: (
+  //   id: string,
+  //   data: UpdateEnrolmentDataParams,
+  // ) => Promise<Enrolment>;
   getEnrolmentsByStudentIdAsync: (
     studentId: string,
   ) => Promise<EnrolmentWithClassAndTerm[]>;

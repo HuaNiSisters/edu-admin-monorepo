@@ -19,7 +19,7 @@ const personService = PersonService(supabaseApiWrapper);
 const studentService = StudentService(supabaseApiWrapper, supabaseApiWrapper);
 const employeeService = EmployeeService(supabaseApiWrapper);
 const subjectService = SubjectService(supabaseApiWrapper);
-const classService = ClassService(supabaseApiWrapper);
+const classService = ClassService(supabaseApiWrapper, supabaseApiWrapper);
 const enrolmentService = EnrolmentService(supabaseApiWrapper);
 const termService = TermService(supabaseApiWrapper);
 

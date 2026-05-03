@@ -12,6 +12,8 @@ type ClassTime = Database["public"]["Tables"]["ClassTime"]["Row"];
 type ParentInfo = Database["public"]["Tables"]["Parent"]["Row"];
 type StudentInfo = Database["public"]["Tables"]["Student"]["Row"];
 type EmployeeInfo = Database["public"]["Tables"]["Tutor"]["Row"];
+type AttendanceStatus = Database["public"]["Enums"]["AttendanceStatus"];
+type Attendance = Database["public"]["Tables"]["Attendance"]["Row"];
 
 type StudentWithParents = StudentInfo & {
   parent1Id: string;
@@ -51,4 +53,6 @@ export type {
   EmployeeInfo,
   ClassTimeWithSubjectAndTutor,
   EnrolmentWithClassAndTerm,
+  AttendanceStatus,
+  Attendance,
 };

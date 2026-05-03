@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/adapters/interfaces";
 
 import {
+  AttendanceStatus,
   ClassTime,
   ParentInfo,
   StudentInfo,
@@ -68,6 +69,28 @@ class SupabaseApiWrapper
 
   constructor() {
     this.supabase = createClient();
+  }
+
+  private async generateAttendance(
+    studentId: string,
+    classId: string,
+    termId: string
+  ) {
+    const attendanceRows = Array.from({ length: 10 }, (_, i) => ({
+      student_id: studentId,
+      class_id: classId,
+      term_id: termId,
+      week: i + 1,
+      status: "absent" as AttendanceStatus,
+    }));
+
+    const { error } = await this.supabase
+      .from("Attendance")
+      .upsert(attendanceRows);
+
+    if (error) {
+      throw new Error("Failed to generate attendance: " + error.message);
+    }
   }
 
   // ─── Subjects ────────────────────────────────────────────────────────────────
@@ -177,6 +200,122 @@ class SupabaseApiWrapper
       };
     });
   }
+
+async getClassByIdAsync(classId: string) {
+  const { data: responseData, error } = await this.supabase
+    .from("ClassTime")
+    .select(
+      `
+      *,
+      subject_offering:SubjectOffering (
+        subject_name,
+        grade,
+        location
+      ),
+      tutor:Tutor (
+        first_name,
+        last_name
+      )
+    `,
+    )
+    .eq("class_id", classId)
+    .single();
+
+  if (error) throw new Error("Failed to fetch class: " + error.message);
+
+  const { subject_offering, tutor, ...rest } = responseData as typeof responseData & {
+    subject_offering: {
+      subject_name: string;
+      grade: string | null;
+      location: string | null;
+    } | null;
+    tutor: { first_name: string; last_name: string } | null;
+  };
+
+  return {
+    ...rest,
+    subject_name: subject_offering?.subject_name,
+    grade: subject_offering?.grade,
+    location: subject_offering?.location,
+    tutor: tutor ? `${tutor.first_name} ${tutor.last_name}` : null,
+  };
+}
+
+async getAttendanceByStudentAndClassAndTermAsync(studentId: string, classId: string, termId: string) {
+  const { data, error } = await this.supabase
+    .from("Attendance")
+    .select("attendance_id, student_id, class_id, term_id, week, status, notes")
+    .eq("student_id", studentId)
+    .eq("class_id", classId)
+    .eq("term_id", termId)
+    .order("week", { ascending: true });
+
+  if (error) throw new Error("Failed to fetch attendance: " + error.message);
+  return data ?? [];
+}
+
+async updateStudentAttendanceInClassAndTermPerWeekAsync(studentId: string, classId: string, termId: string, week: number, attendanceStatus: AttendanceStatus ) {
+  const { error } = await this.supabase
+      .from("Attendance")
+      .update({ status: attendanceStatus })
+      .eq("student_id", studentId)
+      .eq("class_id", classId)
+      .eq("term_id", termId)
+      .eq("week", week)
+
+  if (error) {
+    throw new Error("Failed to update attendance: " + error.message);
+  }
+}
+
+async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: string) {
+  const { data, error } = await this.supabase
+    .from("Enrolment")
+    .select(`
+      student_id,
+      Student (
+        student_id,
+        first_name,
+        last_name,
+        gender
+      )
+    `)
+    .eq("class_id", classId);
+
+  if (error) throw new Error("Failed to fetch enrolments with attendance: " + error.message);
+
+  const rows = await Promise.all(
+    (data ?? []).map(async (row) => {
+      const student = row.Student as unknown as {
+        student_id: string;
+        first_name: string;
+        last_name: string;
+        gender: string | null;
+      };
+
+      const { data: attendanceData, error: attendanceError } = await this.supabase
+        .from("Attendance")
+        .select("attendance_id, week, status, notes, term_id, class_id, student_id")
+        .eq("student_id", student.student_id)
+        .eq("class_id", classId)
+        .eq("term_id", termId)
+        .order("week", { ascending: true });
+
+      if (attendanceError) throw new Error("Failed to fetch attendance: " + attendanceError.message);
+
+      return {
+        studentId: student.student_id,
+        firstName: student.first_name,
+        lastName: student.last_name,
+        gender: student.gender,
+        attendanceRecords: attendanceData ?? [],
+      };
+    })
+  );
+
+  // Dedupe by studentId
+  return rows.filter((r, i, self) => i === self.findIndex((s) => s.studentId === r.studentId));
+}
 
   // ─── Parents ────────────────────────────────────────────────────────────────
 
@@ -347,7 +486,7 @@ class SupabaseApiWrapper
     const { data: responseData, error } = await this.supabase
       .from("Term")
       .select("*")
-      .order("start_date", { ascending: false });
+      .order("start_date", { ascending: true });
     if (error) throw error;
     return responseData;
   }
@@ -394,6 +533,15 @@ class SupabaseApiWrapper
       .single();
 
     if (error) throw new Error("Failed to create enrolment: " + error.message);
+
+    // TODO: to generate attendance for future terms, assuming student remains enrolled
+    // 1. Get current term
+    // 2. Generate for CURRENT term
+    await this.generateAttendance(student_id, class_id, term_id);
+
+    // 3. Find FUTURE terms
+    // 4. Only create attendance if enrolment exists
+
     return responseData;
   }
 

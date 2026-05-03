@@ -1,7 +1,7 @@
 "use client";
 
-import { ClassTimeWithSubject } from "@/lib/api/types/IApiWrapper";
-import { ColumnDef } from "@tanstack/react-table";
+import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil } from "lucide-react";
@@ -28,8 +28,8 @@ export const formatTime = (time: string) => {
 };
 
 export const createClassColumns = (
-  onEdit: (classTime: ClassTimeWithSubject) => void,
-): ColumnDef<ClassTimeWithSubject>[] => [
+  onEdit?: (classTime: ClassTimeWithSubjectAndTutor) => void,
+): ColumnDef<ClassTimeWithSubjectAndTutor>[] => [
   {
     accessorKey: "day_of_week",
     size: 100,
@@ -117,20 +117,27 @@ export const createClassColumns = (
       <span className="font-medium">{row.getValue("tutor") ?? "—"}</span>
     ),
   },
-  {
-    id: "actions",
-    header: () => <div className="text-right pr-3">Actions</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-end pr-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onEdit(row.original)}
-          aria-label="Edit class"
-        >
-          <Pencil className="size-4" />
-        </Button>
-      </div>
-    ),
-  },
+  ...(onEdit
+    ? [
+        {
+          id: "actions",
+          header: () => <div className="text-right pr-3">Actions</div>,
+          cell: ({ row }: { row: Row<ClassTimeWithSubjectAndTutor> }) => (
+            <div className="flex justify-end pr-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(row.original);
+                }}
+                aria-label="Edit class"
+              >
+                <Pencil className="size-4" />
+              </Button>
+            </div>
+          ),
+        } satisfies ColumnDef<ClassTimeWithSubjectAndTutor>,
+      ]
+    : []),
 ];

@@ -1,18 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { classService, termService } from "@/lib/services";
+import { termService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "../ui/combobox";
-import { Input } from "../ui/input";
-import { Calendar } from "../ui/calendar";
-import { CreatableSelect } from "../ui/createable-select";
+
 import { DateRangePicker } from "../ui/date-range-picker";
 import {
   Select,
@@ -25,19 +15,18 @@ import { Term } from "@/lib/api/types";
 import { Badge } from "../ui/badge";
 import { dateIsInThePast } from "@/utils/date-utils";
 import { DateRange } from "react-day-picker";
-import { UpdateTermDataParams } from "@/lib/api/types/term";
 import { addDays } from "date-fns/addDays";
 
 const MIN_YEAR = parseInt(process.env.MIN_YEAR || "2024");
 const MAX_YEAR = parseInt(
   process.env.MAX_YEAR || `${new Date().getFullYear() + 1}`,
 );
-const N_TERMS = parseInt(process.env.N_TERMS || "4");
+const N_TERMS = parseInt(process.env.N_TERMS || "5");
 
 enum TermStatus {
   NEW = "New",
   CURRENT = "Current",
-  PAST = "Historical",
+  PAST = "Past",
 }
 
 interface SelectTermProps {
@@ -77,9 +66,6 @@ const SelectTerm = (props: SelectTermProps) => {
   >(undefined);
 
   const [allTerms, setAllTerms] = useState<Term[]>([]);
-  const [selectedTerm, setSelectedTerm] = useState<
-    Term & { labelText: string }
-  >();
 
   const { run } = useAsync();
 
@@ -141,7 +127,7 @@ const SelectTerm = (props: SelectTermProps) => {
           : new Date(new Date().getFullYear(), 11, 31),
       );
     });
-  }, []);
+  }, [run]);
 
   useEffect(() => {
     if (!selectedYear) return;
@@ -160,7 +146,6 @@ const SelectTerm = (props: SelectTermProps) => {
     if (!!selectedTermNumber && !!selectedYear) {
       // See if there is already a term with the year and number
       const foundTerm = findExistingTerm(selectedYear, selectedTermNumber);
-      console.log({ foundTerm });
       if (foundTerm) {
         selectSelectedTermStartDate(new Date(foundTerm.start_date));
         setSelectedTermEndDate(new Date(foundTerm.end_date));
@@ -175,7 +160,7 @@ const SelectTerm = (props: SelectTermProps) => {
       }
 
       if (getTermStatus() === TermStatus.PAST) return;
-      
+
       const lastTerm = getTermWithLargestDate();
       const lastTermEndDate = lastTerm
         ? new Date(lastTerm.end_date)
@@ -197,13 +182,12 @@ const SelectTerm = (props: SelectTermProps) => {
     }
   }, [selectedTermNumber, selectedYear]);
 
-
   const disableEditTermDates = () => {
     // only allow selecting current term for now
     return true;
     // Can the currently logged in user edit the term dates? Only if they are creating a new term (i.e. there isn't already a term with the same year and number)
     return getTermStatus() === TermStatus.PAST;
-  }
+  };
 
   return (
     <div>
@@ -246,30 +230,29 @@ const SelectTerm = (props: SelectTermProps) => {
             {getTermStatus()}
           </Badge>
         )}
-      </div>
-
-      <div className="w-2/3">
-        <DateRangePicker
-          className="justify-start"
-          isDisabled={disableEditTermDates()}
-          startDate={selectedTermStartDate}
-          endDate={selectedTermEndDate}
-          onChange={(dateRange: DateRange | undefined) => {
-            if (!dateRange) return;
-            selectSelectedTermStartDate(dateRange.from);
-            setSelectedTermEndDate(dateRange.to);
-            onChange?.({
-              term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
-                ?.term_id,
-              year: selectedYear,
-              name: selectedTermNumber,
-              start_date: dateRange.from?.toISOString(),
-              end_date: dateRange.to?.toISOString(),
-            });
-          }}
-          minDate={minDate}
-          maxDate={maxDate}
-        />
+        <div className="">
+          <DateRangePicker
+            className="justify-start"
+            isDisabled={disableEditTermDates()}
+            startDate={selectedTermStartDate}
+            endDate={selectedTermEndDate}
+            onChange={(dateRange: DateRange | undefined) => {
+              if (!dateRange) return;
+              selectSelectedTermStartDate(dateRange.from);
+              setSelectedTermEndDate(dateRange.to);
+              onChange?.({
+                term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
+                  ?.term_id,
+                year: selectedYear,
+                name: selectedTermNumber,
+                start_date: dateRange.from?.toISOString(),
+                end_date: dateRange.to?.toISOString(),
+              });
+            }}
+            minDate={minDate}
+            maxDate={maxDate}
+          />
+        </div>
       </div>
     </div>
   );
