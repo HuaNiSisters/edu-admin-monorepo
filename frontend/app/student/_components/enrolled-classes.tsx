@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 interface EnrolledClassesProps {
   studentId: string;
@@ -46,37 +47,52 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
           run(fetchEnrolments);
         }}
       />
-      <div className="flex gap-5">
+      <div className="flex gap-5 py-2 justify-between">
         <span className="text-xl font-bold">Enrolments</span>
         <Button onClick={() => setIsEnrolDialogOpen(true)}>Enrol</Button>
       </div>
       {isPending && <div>Loading enrolments...</div>}
       {!isPending && enrolments.length === 0 && <div>No enrolments found.</div>}
       {!isPending && enrolments.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Term</TableHead>
-              <TableHead>Day</TableHead>
-              <TableHead>Grade</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Location</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {enrolments.map((enrolment) => (
-              <TableRow key={enrolment.enrolment_id}>
-                <TableCell>{enrolment.Term.year} Term {enrolment.Term.name}</TableCell>
-                <TableCell>{enrolment.ClassTime.day_of_week}</TableCell>
-                <TableCell>{enrolment.ClassTime.SubjectOffering.grade}</TableCell>
-                <TableCell>{enrolment.ClassTime.SubjectOffering.subject_name}</TableCell>
-                <TableCell>{enrolment.ClassTime.start_time} - {enrolment.ClassTime.end_time}</TableCell>
-                <TableCell>{enrolment.ClassTime.SubjectOffering.location}</TableCell>
+        <div className="rounded-md border p-2 bg-primary-foreground">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Term</TableHead>
+                <TableHead>Day</TableHead>
+                <TableHead>Grade</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Location</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {enrolments.map((enrolment) => (
+                <TableRow key={enrolment.enrolment_id}>
+                  <TableCell>
+                    {enrolment.Term.year} Term {enrolment.Term.name}
+                  </TableCell>
+                  <TableCell>{enrolment.ClassTime.day_of_week}</TableCell>
+                  <TableCell>
+                    {enrolment.ClassTime.SubjectOffering.grade}
+                  </TableCell>
+                  <TableCell>
+                    {enrolment.ClassTime.SubjectOffering.subject_name}
+                  </TableCell>
+                  <TableCell>
+                    {enrolment.ClassTime.start_time} -{" "}
+                    {enrolment.ClassTime.end_time}
+                  </TableCell>
+                  <TableCell>
+                    {formatValuesRemoveUnderscores(
+                      enrolment.ClassTime.SubjectOffering.location,
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );
