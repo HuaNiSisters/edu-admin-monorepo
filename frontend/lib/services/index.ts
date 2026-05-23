@@ -6,6 +6,7 @@ import PersonService from "./person";
 import ClassService from "./classService";
 import TermService from "./termService";
 import EnrolmentService from "./enrolmentService";
+import PaymentService from "./paymentService";
 import { SMSService } from "./smsService";
 
 import SupabaseApiWrapper from "../api/adapters/supabaseAdapter";
@@ -22,6 +23,7 @@ const subjectService = SubjectService(supabaseApiWrapper);
 const classService = ClassService(supabaseApiWrapper, supabaseApiWrapper);
 const enrolmentService = EnrolmentService(supabaseApiWrapper);
 const termService = TermService(supabaseApiWrapper);
+const paymentService = PaymentService(supabaseApiWrapper);
 
 const smsService = SMSService(ourBackendApiWrapper);
 
@@ -34,5 +36,6 @@ export {
   classService,
   termService,
   enrolmentService,
+  paymentService,
   smsService,
 };

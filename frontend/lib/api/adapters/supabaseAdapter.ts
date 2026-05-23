@@ -11,12 +11,15 @@ import {
   IClassRepo,
   ITermRepo,
   IEnrolmentRepo,
+  IPaymentRepo,
 } from "@/lib/api/adapters/interfaces";
 
 import {
   AttendanceStatus,
   ClassTime,
+  Location,
   ParentInfo,
+  PaymentWithDetails,
   StudentInfo,
   SubjectOffering,
   Term,
@@ -63,6 +66,7 @@ class SupabaseApiWrapper
     ITermRepo,
     IClassRepo,
     IEnrolmentRepo,
+    IPaymentRepo,
     ICampusRepo
 {
   private supabase: ReturnType<typeof createClient>;
@@ -355,6 +359,7 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
       .eq("parent_id", parentId)
       .select()
       .single();
+    if (error) throw new Error("Failed to update parent: " + error.message);
     return responseData;
   }
 
@@ -417,7 +422,10 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
     console.log({ getStudentParentData });
     const studentParentDataNormalised = {
       ...getStudentParentData,
-      parents: getStudentParentData?.parents?.map((p) => p.Parent) ?? [],
+      parents:
+        getStudentParentData?.parents?.map(
+          (p: { Parent: ParentInfo }) => p.Parent,
+        ) ?? [],
     };
     console.log({ studentParentDataNormalised });
     return studentParentDataNormalised;
@@ -479,6 +487,136 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
 
   async getGendersAsync(): Promise<GetGendersResponse> {
     return Object.values(Constants.public.Enums.Gender);
+  }
+
+  // --- Payments --------------------------------------
+  async getPaymentsAsync(): Promise<PaymentWithDetails[]> {
+    const { data: responseData, error } = await this.supabase
+      .from("Payment")
+      .select(
+        `
+        payment_id,
+        enrolment_id,
+        amount_due,
+        amount_paid,
+        payment_date,
+        payment_type,
+        status,
+        receipt,
+        notes,
+        Enrolment (
+          enrolment_id,
+          Student (
+            student_id,
+            first_name,
+            last_name,
+            student_mobile,
+            parents:StudentParent (
+              Parent (
+                first_name,
+                last_name,
+                parent_mobile
+              )
+            )
+          ),
+          Term (
+            term_id,
+            name,
+            year
+          ),
+          ClassTime (
+            day_of_week,
+            SubjectOffering (
+              subject_name,
+              grade,
+              location
+            )
+          )
+        )
+      `,
+      )
+      .order("payment_date", { ascending: false });
+
+    if (error) throw new Error("Failed to fetch payments: " + error.message);
+
+    return (responseData ?? []).map((row) => {
+      const payment = row as typeof row & {
+        Enrolment: {
+          Student: {
+            student_id: string;
+            first_name: string;
+            last_name: string;
+            student_mobile: string;
+            parents:
+              | {
+                  Parent: {
+                    first_name: string;
+                    last_name: string;
+                    parent_mobile: string;
+                  } | null;
+                }[]
+              | null;
+          } | null;
+          Term: {
+            term_id: string;
+            name: number;
+            year: number;
+          } | null;
+          ClassTime: {
+            day_of_week: string;
+            SubjectOffering: {
+              subject_name: string;
+              grade: number;
+              location: Location;
+            } | null;
+          } | null;
+        } | null;
+      };
+
+      const enrolment = payment.Enrolment;
+      const student = enrolment?.Student;
+      const term = enrolment?.Term;
+      const classTime = enrolment?.ClassTime;
+      const subjectOffering = classTime?.SubjectOffering;
+      const amountDue = Number(payment.amount_due ?? 0);
+      const amountPaid = Number(payment.amount_paid ?? 0);
+
+      return {
+        payment_id: payment.payment_id,
+        enrolment_id: payment.enrolment_id,
+        amount_due: amountDue,
+        amount_paid: amountPaid,
+        payment_date: payment.payment_date,
+        payment_type: payment.payment_type,
+        status: payment.status,
+        receipt: payment.receipt,
+        notes: payment.notes,
+        student_id: student?.student_id ?? "",
+        student_name: student
+          ? `${student.first_name} ${student.last_name}`.trim()
+          : "Unknown student",
+        student_mobile: student?.student_mobile ?? "",
+        parents:
+          student?.parents
+            ?.flatMap((parentLink) =>
+              parentLink.Parent ? [parentLink.Parent] : [],
+            )
+            .map(
+              (parent) =>
+                `${parent.first_name} ${parent.last_name}: ${parent.parent_mobile}`,
+            )
+            .join("\n") ?? "",
+        term_id: term?.term_id ?? "",
+        term_label: term ? `Term ${term.name} ${term.year}` : "Unknown term",
+        term_name: term?.name ?? 0,
+        term_year: term?.year ?? 0,
+        subject_name: subjectOffering?.subject_name ?? "",
+        grade: subjectOffering?.grade ?? 0,
+        location: subjectOffering?.location ?? "online",
+        day_of_week: classTime?.day_of_week ?? "",
+        amount_outstanding: amountDue - amountPaid,
+      };
+    });
   }
 
   // --- Terms --------------------------------------
