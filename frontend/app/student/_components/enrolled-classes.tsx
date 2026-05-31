@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import EnrolDialog from "./enrol-dialog";
-import { EnrolmentWithClassAndTerm, Term } from "@/lib/api/types";
-import { enrolmentService } from "@/lib/services";
+import {
+  EnrolmentWithClassAndTerm,
+  PaymentWithDetails,
+  Term,
+} from "@/lib/api/types";
+import { enrolmentService, paymentService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
 import {
   Table,
@@ -21,6 +25,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "lucide-react";
+import TermPaymentsTable from "./term-payments-table";
 
 interface EnrolledClassesProps {
   studentId: string;
@@ -29,19 +34,23 @@ interface EnrolledClassesProps {
 export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
   const [isEnrolDialogOpen, setIsEnrolDialogOpen] = useState(false);
   const [enrolments, setEnrolments] = useState<EnrolmentWithClassAndTerm[]>([]);
+  const [payments, setPayments] = useState<PaymentWithDetails[]>([]);
 
   const { run, isPending } = useAsync();
 
-  const fetchEnrolments = async () => {
-    const fetchedEnrolments =
-      await enrolmentService.getEnrolmentsByStudentIdAsync(studentId);
+  const fetchEnrolments = useCallback(async () => {
+    const [fetchedEnrolments, fetchedPayments] = await Promise.all([
+      enrolmentService.getEnrolmentsByStudentIdAsync(studentId),
+      paymentService.getPaymentsByStudentIdAsync(studentId),
+    ]);
     console.log({ fetchedEnrolments });
     setEnrolments(fetchedEnrolments);
-  };
+    setPayments(fetchedPayments);
+  }, [studentId]);
 
   useEffect(() => {
     fetchEnrolments();
-  }, [studentId]);
+  }, [fetchEnrolments]);
 
   const getTermsWhereEnrolled = (enrolments: EnrolmentWithClassAndTerm[]) => {
     const uniqueTermsMap: Record<string, Term> = {};
@@ -62,6 +71,10 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
     termId: string,
   ) => {
     return enrolments.filter((enrolment) => enrolment.Term.term_id === termId);
+  };
+
+  const getPaymentsForTerm = (termId: string) => {
+    return payments.filter((payment) => payment.term_id === termId);
   };
 
   return (
@@ -88,7 +101,13 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
       {!isPending && enrolments.length === 0 && <div>No enrolments found.</div>}
       {getTermsWhereEnrolled(enrolments).length > 0 && (
         <div className="mb-4">
-          {getTermsWhereEnrolled(enrolments).map((term) => (
+          {getTermsWhereEnrolled(enrolments).map((term) => {
+            const termEnrolments = getEnrolmentsForTerm(
+              enrolments,
+              term.term_id,
+            );
+
+            return (
             <div key={term.term_id} className="mb-2">
               <Collapsible className="rounded-md data-[state=open]:bg-muted">
                 <CollapsibleTrigger asChild>
@@ -114,43 +133,48 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {getEnrolmentsForTerm(enrolments, term.term_id).map(
-                          (enrolment) => (
-                            <TableRow key={enrolment.enrolment_id}>
-                              <TableCell>
-                                {enrolment.Term.year} Term {enrolment.Term.name}
-                              </TableCell>
-                              <TableCell>
-                                {enrolment.ClassTime.day_of_week}
-                              </TableCell>
-                              <TableCell>
-                                {enrolment.ClassTime.SubjectOffering.grade}
-                              </TableCell>
-                              <TableCell>
-                                {
-                                  enrolment.ClassTime.SubjectOffering
-                                    .subject_name
-                                }
-                              </TableCell>
-                              <TableCell>
-                                {enrolment.ClassTime.start_time} -{" "}
-                                {enrolment.ClassTime.end_time}
-                              </TableCell>
-                              <TableCell>
-                                {formatValuesRemoveUnderscores(
-                                  enrolment.ClassTime.SubjectOffering.location,
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ),
-                        )}
+                        {termEnrolments.map((enrolment) => (
+                          <TableRow key={enrolment.enrolment_id}>
+                            <TableCell>
+                              {enrolment.Term.year} Term {enrolment.Term.name}
+                            </TableCell>
+                            <TableCell>
+                              {enrolment.ClassTime.day_of_week}
+                            </TableCell>
+                            <TableCell>
+                              {enrolment.ClassTime.SubjectOffering.grade}
+                            </TableCell>
+                            <TableCell>
+                              {enrolment.ClassTime.SubjectOffering.subject_name}
+                            </TableCell>
+                            <TableCell>
+                              {enrolment.ClassTime.start_time} -{" "}
+                              {enrolment.ClassTime.end_time}
+                            </TableCell>
+                            <TableCell>
+                              {formatValuesRemoveUnderscores(
+                                enrolment.ClassTime.SubjectOffering.location,
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
+
+                    <div className="mt-3">
+                      <TermPaymentsTable
+                        term={term}
+                        enrolments={termEnrolments}
+                        payments={getPaymentsForTerm(term.term_id)}
+                        onChange={() => run(fetchEnrolments)}
+                      />
+                    </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
       {/* {!isPending && enrolments.length > 0 && (

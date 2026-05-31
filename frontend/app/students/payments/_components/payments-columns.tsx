@@ -71,21 +71,6 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     ),
   },
   {
-    accessorKey: "grade",
-    size: 80,
-    header: "Grade",
-    filterFn: (row, columnId, filterValue) =>
-      String(row.getValue(columnId)) === filterValue,
-    cell: ({ row }) => (row.original.grade ? row.original.grade : "—"),
-  },
-  {
-    accessorKey: "location",
-    size: 170,
-    header: "Location",
-    filterFn: "equalsString",
-    cell: ({ row }) => formatValuesRemoveUnderscores(row.original.location),
-  },
-  {
     accessorKey: "day_of_week",
     size: 110,
     header: "Day",
@@ -96,12 +81,6 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     size: 110,
     header: "Paid",
     cell: ({ row }) => formatCurrency(row.original.amount_paid),
-  },
-  {
-    accessorKey: "amount_due",
-    size: 110,
-    header: "Due",
-    cell: ({ row }) => formatCurrency(row.original.amount_due),
   },
   {
     accessorKey: "payment_date",
@@ -116,11 +95,17 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     cell: ({ row }) => row.original.receipt || "—",
   },
   {
+    id: "receipt_status",
+    size: 140,
+    header: "Receipt Status",
+    cell: ({ row }) => (row.original.receipt ? "Receipt sent" : "Not sent"),
+  },
+  {
     accessorKey: "status",
     size: 110,
     header: "Status",
     filterFn: "equalsString",
-    cell: ({ row }) => formatValuesRemoveUnderscores(row.original.status),
+    cell: () => "Follow up",
   },
   {
     accessorKey: "payment_type",

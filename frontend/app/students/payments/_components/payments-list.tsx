@@ -263,9 +263,7 @@ const PaymentsList = ({ payments, terms }: PaymentsListProps) => {
 
         <DataTable
           columns={columns}
-          data={searchedPayments}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
+          data={summaryPayments}
         />
       </div>
     </div>
