@@ -83,9 +83,6 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
           <span className="text-xl font-bold">Enrolments</span>
           <Button onClick={() => setIsEnrolDialogOpen(true)}>Enrol</Button>
         </div>
-        <div>
-          These are the terms where the student has had a least one enrolment.
-        </div>
       </div>
 
       {isPending && <div>Loading enrolments...</div>}

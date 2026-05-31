@@ -23,9 +23,6 @@ import {
 import { paymentService } from "@/lib/services";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
-const PAYMENT_TYPES: PaymentType[] = ["cash", "bank_transfer", "other"];
-const PAYMENT_STATUSES: PaymentStatus[] = ["unpaid", "partial", "paid"];
-
 type PaymentDialogProps = {
   term: Term;
   enrolments: EnrolmentWithClassAndTerm[];
@@ -39,8 +36,8 @@ type PaymentFormState = {
   amountDue: string;
   amountPaid: string;
   paymentDate: string;
-  paymentType: PaymentType;
-  status: PaymentStatus;
+  paymentType: PaymentType | "";
+  status: PaymentStatus | "";
   receipt: string;
   notes: string;
 };
@@ -58,6 +55,9 @@ const PaymentDialog = ({
   onClose,
   onSaved,
 }: PaymentDialogProps) => {
+  const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([]);
+  const [paymentStatuses, setPaymentStatuses] = useState<PaymentStatus[]>([]);
+
   const defaultAmountDue = useMemo(
     () =>
       String(
@@ -79,8 +79,8 @@ const PaymentDialog = ({
     amountDue: defaultAmountDue,
     amountPaid: "",
     paymentDate: toDateInputValue(),
-    paymentType: "cash",
-    status: "paid",
+    paymentType: "",
+    status: "",
     receipt: "",
     notes: "",
   });
@@ -88,16 +88,42 @@ const PaymentDialog = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    const fetchPaymentOptions = async () => {
+      const [types, statuses] = await Promise.all([
+        paymentService.getPaymentTypesAsync(),
+        paymentService.getPaymentStatusesAsync(),
+      ]);
+
+      setPaymentTypes(types);
+      setPaymentStatuses(statuses);
+    };
+
+    fetchPaymentOptions();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const defaultPaymentType =
+      payment?.payment_type ?? paymentTypes[0] ?? "";
+    const defaultPaymentStatus = payment?.status ?? paymentStatuses[0] ?? "";
+
     setFormState({
       amountDue: String(payment?.amount_due ?? defaultAmountDue),
       amountPaid: String(payment?.amount_paid ?? ""),
       paymentDate: toDateInputValue(payment?.payment_date),
-      paymentType: payment?.payment_type ?? "cash",
-      status: payment?.status ?? "paid",
+      paymentType: defaultPaymentType,
+      status: defaultPaymentStatus,
       receipt: payment?.receipt ?? "",
       notes: payment?.notes ?? "",
     });
-  }, [defaultAmountDue, isOpen, payment]);
+  }, [
+    defaultAmountDue,
+    isOpen,
+    payment,
+    paymentStatuses,
+    paymentTypes,
+  ]);
 
   const updateField = <TKey extends keyof PaymentFormState>(
     key: TKey,
@@ -127,6 +153,16 @@ const PaymentDialog = ({
 
     if (!paymentAnchorEnrolmentId) {
       toast.error("A payment needs at least one enrolment in the term.");
+      return;
+    }
+
+    if (!formState.paymentType) {
+      toast.error("Payment type is required.");
+      return;
+    }
+
+    if (!formState.status) {
+      toast.error("Payment status is required.");
       return;
     }
 
@@ -229,7 +265,7 @@ const PaymentDialog = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PAYMENT_TYPES.map((paymentType) => (
+                {paymentTypes.map((paymentType) => (
                   <SelectItem key={paymentType} value={paymentType}>
                     {formatValuesRemoveUnderscores(paymentType)}
                   </SelectItem>
@@ -252,7 +288,7 @@ const PaymentDialog = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PAYMENT_STATUSES.map((status) => (
+                {paymentStatuses.map((status) => (
                   <SelectItem key={status} value={status}>
                     {formatValuesRemoveUnderscores(status)}
                   </SelectItem>

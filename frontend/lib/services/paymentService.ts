@@ -5,6 +5,14 @@ function PaymentService(paymentRepo: IPaymentRepo) {
     return await paymentRepo.getPaymentsAsync();
   }
 
+  async function getPaymentTypesAsync() {
+    return await paymentRepo.getPaymentTypesAsync();
+  }
+
+  async function getPaymentStatusesAsync() {
+    return await paymentRepo.getPaymentStatusesAsync();
+  }
+
   async function getPaymentsByStudentIdAsync(studentId: string) {
     return await paymentRepo.getPaymentsByStudentIdAsync(studentId);
   }
@@ -29,6 +37,8 @@ function PaymentService(paymentRepo: IPaymentRepo) {
   return {
     createPaymentAsync,
     deletePaymentAsync,
+    getPaymentStatusesAsync,
+    getPaymentTypesAsync,
     getPaymentsAsync,
     getPaymentsByStudentIdAsync,
     updatePaymentAsync,

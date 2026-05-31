@@ -583,6 +583,14 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
   }
 
   // --- Payments --------------------------------------
+  async getPaymentTypesAsync() {
+    return Object.values(Constants.public.Enums.PaymentType);
+  }
+
+  async getPaymentStatusesAsync() {
+    return Object.values(Constants.public.Enums.PaymentStatus);
+  }
+
   async getPaymentsAsync(): Promise<PaymentWithDetails[]> {
     const { data: responseData, error } = await this.supabase
       .from("Payment")
