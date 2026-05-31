@@ -20,34 +20,9 @@ import {
 import { paymentService } from "@/lib/services";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import PaymentDialog from "./payment-dialog";
-
-const currencyFormatter = new Intl.NumberFormat("en-AU", {
-  style: "currency",
-  currency: "AUD",
-  maximumFractionDigits: 0,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("en-AU", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-});
-
-const formatCurrency = (amount: number) => currencyFormatter.format(amount);
-
-const formatDate = (date: string | null) => {
-  if (!date) return "—";
-  return dateFormatter.format(new Date(date));
-};
-
-const formatTime = (time: string) => {
-  if (!time) return "—";
-  const [hourStr, minuteStr] = time.split(":");
-  const hour = Number(hourStr);
-  const period = hour >= 12 ? "PM" : "AM";
-  const displayHour = hour % 12 || 12;
-  return `${displayHour}:${minuteStr ?? "00"} ${period}`;
-};
+import { formatTime } from "@/utils/time-utils";
+import { formatDate } from "@/utils/date-utils";
+import { formatCurrency } from "@/utils/currency-utils";
 
 type TermPaymentsTableProps = {
   term: Term;
