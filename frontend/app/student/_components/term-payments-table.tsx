@@ -170,28 +170,16 @@ const TermPaymentsTable = ({
           </Button>
         </div>
 
-        <div className="overflow-hidden rounded-md border border-sky-200 bg-sky-50">
+        <div className="overflow-hidden rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="border-sky-200 bg-sky-100">
-                  Date Paid
-                </TableHead>
-                <TableHead className="border-sky-200 bg-sky-100">
-                  Amount
-                </TableHead>
-                <TableHead className="border-sky-200 bg-sky-100">
-                  Subject
-                </TableHead>
-                <TableHead className="border-sky-200 bg-sky-100">
-                  Payment Type
-                </TableHead>
-                <TableHead className="border-sky-200 bg-sky-100">
-                  Notes
-                </TableHead>
-                <TableHead className="border-sky-200 bg-sky-100">
-                  Actions
-                </TableHead>
+                <TableHead>Date Paid</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Payment Type</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,30 +187,21 @@ const TermPaymentsTable = ({
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="h-16 bg-sky-50 text-center text-muted-foreground"
+                    className="h-16 text-center text-muted-foreground"
                   >
                     No payments recorded for this term.
                   </TableCell>
                 </TableRow>
               ) : (
                 payments.map((payment) => (
-                  <TableRow
-                    key={payment.payment_id}
-                    className="border-sky-200 bg-sky-50 hover:bg-sky-100/70"
-                  >
-                    <TableCell className="border-sky-200">
-                      {formatDate(payment.payment_date)}
-                    </TableCell>
-                    <TableCell className="border-sky-200">
-                      {formatCurrency(payment.amount_paid)}
-                    </TableCell>
-                    <TableCell className="border-sky-200">
-                      {subjectNames || "—"}
-                    </TableCell>
-                    <TableCell className="border-sky-200">
+                  <TableRow key={payment.payment_id}>
+                    <TableCell>{formatDate(payment.payment_date)}</TableCell>
+                    <TableCell>{formatCurrency(payment.amount_paid)}</TableCell>
+                    <TableCell>{subjectNames || "—"}</TableCell>
+                    <TableCell>
                       {formatValuesRemoveUnderscores(payment.payment_type)}
                     </TableCell>
-                    <TableCell className="border-sky-200">
+                    <TableCell>
                       <div className="max-w-[420px] whitespace-normal">
                         {payment.notes || "—"}
                       </div>
