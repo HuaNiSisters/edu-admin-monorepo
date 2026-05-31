@@ -795,7 +795,7 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
   async getEnrolmentsByStudentIdAsync(studentId: string) {
     const { data: responseData, error } = await this.supabase
       .from("Enrolment")
-      .select("*, Term(*), ClassTime(*, SubjectOffering(*))")
+      .select("*, Term(*), ClassTime(*, SubjectOffering(*), Tutor(*))")
       .eq("student_id", studentId);
     if (error) throw new Error("Failed to fetch enrolments: " + error.message);
     return responseData;

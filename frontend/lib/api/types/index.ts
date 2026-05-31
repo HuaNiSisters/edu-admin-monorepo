@@ -37,6 +37,7 @@ type ClassTimeWithSubjectAndTutor = ClassTime & {
 type EnrolmentWithClassAndTerm = Enrolment & {
   ClassTime: ClassTime & {
     SubjectOffering: SubjectOffering;
+    Tutor?: EmployeeInfo | null;
   };
   Term: Term;
 }

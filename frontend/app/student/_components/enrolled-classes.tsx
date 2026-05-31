@@ -11,15 +11,6 @@ import {
 import { enrolmentService, paymentService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -108,60 +99,19 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
             );
 
             return (
-            <div key={term.term_id} className="mb-2">
-              <Collapsible className="rounded-md data-[state=open]:bg-muted">
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="group w-full text-md bg-muted"
-                  >
-                    {term.year} Term {term.name}
-                    <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="flex flex-col p-1">
-                  <div className="rounded-md border p-2 bg-primary-foreground">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Term</TableHead>
-                          <TableHead>Day</TableHead>
-                          <TableHead>Grade</TableHead>
-                          <TableHead>Subject</TableHead>
-                          <TableHead>Time</TableHead>
-                          <TableHead>Location</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {termEnrolments.map((enrolment) => (
-                          <TableRow key={enrolment.enrolment_id}>
-                            <TableCell>
-                              {enrolment.Term.year} Term {enrolment.Term.name}
-                            </TableCell>
-                            <TableCell>
-                              {enrolment.ClassTime.day_of_week}
-                            </TableCell>
-                            <TableCell>
-                              {enrolment.ClassTime.SubjectOffering.grade}
-                            </TableCell>
-                            <TableCell>
-                              {enrolment.ClassTime.SubjectOffering.subject_name}
-                            </TableCell>
-                            <TableCell>
-                              {enrolment.ClassTime.start_time} -{" "}
-                              {enrolment.ClassTime.end_time}
-                            </TableCell>
-                            <TableCell>
-                              {formatValuesRemoveUnderscores(
-                                enrolment.ClassTime.SubjectOffering.location,
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-
-                    <div className="mt-3">
+              <div key={term.term_id} className="mb-2">
+                <Collapsible className="rounded-md data-[state=open]:bg-muted">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="group w-full text-md bg-muted"
+                    >
+                      {term.year} Term {term.name}
+                      <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="flex flex-col p-1">
+                    <div className="rounded-md border p-2 bg-primary-foreground">
                       <TermPaymentsTable
                         term={term}
                         enrolments={termEnrolments}
@@ -169,55 +119,13 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
                         onChange={() => run(fetchEnrolments)}
                       />
                     </div>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             );
           })}
         </div>
       )}
-      {/* {!isPending && enrolments.length > 0 && (
-        <div className="rounded-md border p-2 bg-primary-foreground">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Term</TableHead>
-                <TableHead>Day</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Location</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {enrolments.map((enrolment) => (
-                <TableRow key={enrolment.enrolment_id}>
-                  <TableCell>
-                    {enrolment.Term.year} Term {enrolment.Term.name}
-                  </TableCell>
-                  <TableCell>{enrolment.ClassTime.day_of_week}</TableCell>
-                  <TableCell>
-                    {enrolment.ClassTime.SubjectOffering.grade}
-                  </TableCell>
-                  <TableCell>
-                    {enrolment.ClassTime.SubjectOffering.subject_name}
-                  </TableCell>
-                  <TableCell>
-                    {enrolment.ClassTime.start_time} -{" "}
-                    {enrolment.ClassTime.end_time}
-                  </TableCell>
-                  <TableCell>
-                    {formatValuesRemoveUnderscores(
-                      enrolment.ClassTime.SubjectOffering.location,
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )} */}
     </div>
   );
 }

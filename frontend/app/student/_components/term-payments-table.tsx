@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Edit, FileText, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ import PaymentDialog from "./payment-dialog";
 const currencyFormatter = new Intl.NumberFormat("en-AU", {
   style: "currency",
   currency: "AUD",
-  maximumFractionDigits: 2,
+  maximumFractionDigits: 0,
 });
 
 const dateFormatter = new Intl.DateTimeFormat("en-AU", {
@@ -38,6 +38,15 @@ const formatCurrency = (amount: number) => currencyFormatter.format(amount);
 const formatDate = (date: string | null) => {
   if (!date) return "—";
   return dateFormatter.format(new Date(date));
+};
+
+const formatTime = (time: string) => {
+  if (!time) return "—";
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = Number(hourStr);
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minuteStr ?? "00"} ${period}`;
 };
 
 type TermPaymentsTableProps = {
@@ -56,26 +65,6 @@ const TermPaymentsTable = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] =
     useState<PaymentWithDetails | null>(null);
-
-  const totals = useMemo(() => {
-    const termAmountDue =
-      payments[0]?.amount_due ??
-      enrolments.reduce(
-        (total, enrolment) =>
-          total + Number(enrolment.ClassTime.SubjectOffering.price_per_term),
-        0,
-      );
-    const amountPaid = payments.reduce(
-      (total, payment) => total + Number(payment.amount_paid ?? 0),
-      0,
-    );
-
-    return {
-      amountDue: termAmountDue,
-      amountPaid,
-      outstanding: termAmountDue - amountPaid,
-    };
-  }, [enrolments, payments]);
 
   const openCreateDialog = () => {
     setEditingPayment(null);
@@ -98,8 +87,12 @@ const TermPaymentsTable = ({
     onChange();
   };
 
+  const subjectNames = enrolments
+    .map((enrolment) => enrolment.ClassTime.SubjectOffering.subject_name)
+    .join(", ");
+
   return (
-    <div className="space-y-3 rounded-md border bg-muted/20 p-3">
+    <div className="space-y-6">
       <PaymentDialog
         term={term}
         enrolments={enrolments}
@@ -109,94 +102,170 @@ const TermPaymentsTable = ({
         onSaved={onChange}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm">
-          <span className="font-medium">Term Payments</span>
-          <span className="ml-3 text-muted-foreground">
-            Paid {formatCurrency(totals.amountPaid)} of{" "}
-            {formatCurrency(totals.amountDue)} · Outstanding{" "}
-            {formatCurrency(totals.outstanding)}
-          </span>
-        </div>
-        <Button
-          size="sm"
-          className="gap-2"
-          onClick={openCreateDialog}
-          disabled={enrolments.length === 0}
-        >
-          <Plus className="size-4" />
-          Add Payment
-        </Button>
-      </div>
-
-      <div className="overflow-hidden rounded-md border bg-primary-foreground">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Paid At</TableHead>
-              <TableHead>Amount Due</TableHead>
-              <TableHead>Amount Paid</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Receipt</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {payments.length === 0 ? (
+      <section className="space-y-3">
+        <h3 className="text-lg font-semibold tracking-normal">Subjects</h3>
+        <div className="overflow-hidden rounded-md border bg-primary-foreground">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="h-16 text-center text-muted-foreground"
-                >
-                  No payments recorded for this term.
-                </TableCell>
+                <TableHead>Grade</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Day</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Class Start Date</TableHead>
+                <TableHead>Tutor</TableHead>
+                <TableHead>Fees</TableHead>
               </TableRow>
-            ) : (
-              payments.map((payment) => (
-                <TableRow key={payment.payment_id}>
-                  <TableCell>{formatDate(payment.payment_date)}</TableCell>
-                  <TableCell>{formatCurrency(payment.amount_due)}</TableCell>
-                  <TableCell>{formatCurrency(payment.amount_paid)}</TableCell>
+            </TableHeader>
+            <TableBody>
+              {enrolments.map((enrolment) => (
+                <TableRow key={enrolment.enrolment_id}>
                   <TableCell>
-                    {formatValuesRemoveUnderscores(payment.status)}
+                    {enrolment.ClassTime.SubjectOffering.grade}
                   </TableCell>
                   <TableCell>
-                    {formatValuesRemoveUnderscores(payment.payment_type)}
+                    {enrolment.ClassTime.SubjectOffering.subject_name}
                   </TableCell>
-                  <TableCell>{payment.receipt || "—"}</TableCell>
+                  <TableCell>{enrolment.ClassTime.day_of_week}</TableCell>
                   <TableCell>
-                    <div className="max-w-[260px] whitespace-normal">
-                      {payment.notes || "—"}
-                    </div>
+                    {formatTime(enrolment.ClassTime.start_time)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(payment)}
-                        aria-label="Edit payment"
-                      >
-                        <Edit className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deletePayment(payment)}
-                        aria-label="Delete payment"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                    {formatValuesRemoveUnderscores(
+                      enrolment.ClassTime.SubjectOffering.location,
+                    )}
+                  </TableCell>
+                  <TableCell>{formatDate(term.start_date)}</TableCell>
+                  <TableCell>
+                    {enrolment.ClassTime.Tutor
+                      ? `${enrolment.ClassTime.Tutor.first_name} ${enrolment.ClassTime.Tutor.last_name}`
+                      : "—"}
+                  </TableCell>
+                  <TableCell>
+                    {formatCurrency(
+                      Number(
+                        enrolment.ClassTime.SubjectOffering.price_per_term,
+                      ),
+                    )}
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
+
+      <section className="space-y-3 border-t pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-lg font-semibold tracking-normal">Payments</h3>
+          <Button
+            size="sm"
+            className="gap-2"
+            onClick={openCreateDialog}
+            disabled={enrolments.length === 0}
+          >
+            <Plus className="size-4" />
+            Add Payment
+          </Button>
+        </div>
+
+        <div className="overflow-hidden rounded-md border border-sky-200 bg-sky-50">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="border-sky-200 bg-sky-100">
+                  Date Paid
+                </TableHead>
+                <TableHead className="border-sky-200 bg-sky-100">
+                  Amount
+                </TableHead>
+                <TableHead className="border-sky-200 bg-sky-100">
+                  Subject
+                </TableHead>
+                <TableHead className="border-sky-200 bg-sky-100">
+                  Payment Type
+                </TableHead>
+                <TableHead className="border-sky-200 bg-sky-100">
+                  Notes
+                </TableHead>
+                <TableHead className="border-sky-200 bg-sky-100">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {payments.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="h-16 bg-sky-50 text-center text-muted-foreground"
+                  >
+                    No payments recorded for this term.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                payments.map((payment) => (
+                  <TableRow
+                    key={payment.payment_id}
+                    className="border-sky-200 bg-sky-50 hover:bg-sky-100/70"
+                  >
+                    <TableCell className="border-sky-200">
+                      {formatDate(payment.payment_date)}
+                    </TableCell>
+                    <TableCell className="border-sky-200">
+                      {formatCurrency(payment.amount_paid)}
+                    </TableCell>
+                    <TableCell className="border-sky-200">
+                      {subjectNames || "—"}
+                    </TableCell>
+                    <TableCell className="border-sky-200">
+                      {formatValuesRemoveUnderscores(payment.payment_type)}
+                    </TableCell>
+                    <TableCell className="border-sky-200">
+                      <div className="max-w-[420px] whitespace-normal">
+                        {payment.notes || "—"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          className="bg-blue-600 text-white hover:bg-blue-700"
+                          size="icon"
+                          onClick={() => openEditDialog(payment)}
+                          aria-label="Edit payment"
+                        >
+                          <Edit className="size-4" />
+                        </Button>
+                        <Button
+                          className="bg-red-600 text-white hover:bg-red-700"
+                          size="icon"
+                          onClick={() => deletePayment(payment)}
+                          aria-label="Delete payment"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                        <Button
+                          className="bg-lime-600 text-white hover:bg-lime-700"
+                          size="icon"
+                          onClick={() =>
+                            toast.info(
+                              "Receipt download is not implemented yet.",
+                            )
+                          }
+                          aria-label="Receipt download not implemented"
+                        >
+                          <FileText className="size-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
     </div>
   );
 };
