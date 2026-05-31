@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PaymentsList from "./_components/payments-list";
+import PaymentsYearVisualisation from "./_components/payments-year-visualisation";
 import { LoadingBar } from "@/components/loading-bar";
 import { PaymentWithDetails, Term } from "@/lib/api/types";
 import { paymentService, termService } from "@/lib/services";
@@ -31,6 +32,7 @@ const PaymentsPage = () => {
   return (
     <div className="space-y-6">
       <LoadingBar isLoading={isPending} />
+      <PaymentsYearVisualisation payments={payments} terms={terms} />
       <PaymentsList payments={payments} terms={terms} />
     </div>
   );
