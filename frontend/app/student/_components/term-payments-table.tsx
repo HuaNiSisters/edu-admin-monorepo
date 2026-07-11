@@ -4,14 +4,9 @@ import { useState } from "react";
 import { Edit, FileText, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import ReusableTable, {
+  ReusableTableColumn,
+} from "@/components/_reusable/reusable-table";
 import {
   EnrolmentWithClassAndTerm,
   PaymentWithDetails,
@@ -66,6 +61,125 @@ const TermPaymentsTable = ({
     .map((enrolment) => enrolment.ClassTime.SubjectOffering.subject_name)
     .join(", ");
 
+  const subjectColumns: ReusableTableColumn<EnrolmentWithClassAndTerm>[] = [
+    {
+      key: "grade",
+      header: "Grade",
+      cell: (enrolment) => enrolment.ClassTime.SubjectOffering.grade,
+    },
+    {
+      key: "subject",
+      header: "Subject",
+      cell: (enrolment) => enrolment.ClassTime.SubjectOffering.subject_name,
+    },
+    {
+      key: "day",
+      header: "Day",
+      cell: (enrolment) => enrolment.ClassTime.day_of_week,
+    },
+    {
+      key: "time",
+      header: "Time",
+      cell: (enrolment) => formatTime(enrolment.ClassTime.start_time),
+    },
+    {
+      key: "location",
+      header: "Location",
+      cell: (enrolment) =>
+        formatValuesRemoveUnderscores(
+          enrolment.ClassTime.SubjectOffering.location,
+        ),
+    },
+    {
+      key: "class_start_date",
+      header: "Class Start Date",
+      cell: () => formatDate(term.start_date),
+    },
+    {
+      key: "tutor",
+      header: "Tutor",
+      cell: (enrolment) =>
+        enrolment.ClassTime.Tutor
+          ? `${enrolment.ClassTime.Tutor.first_name} ${enrolment.ClassTime.Tutor.last_name}`
+          : "—",
+    },
+    {
+      key: "fees",
+      header: "Fees",
+      cell: (enrolment) =>
+        formatCurrency(
+          Number(enrolment.ClassTime.SubjectOffering.price_per_term),
+        ),
+    },
+  ];
+
+  const paymentColumns: ReusableTableColumn<PaymentWithDetails>[] = [
+    {
+      key: "date_paid",
+      header: "Date Paid",
+      cell: (payment) => formatDate(payment.payment_date),
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      cell: (payment) => formatCurrency(payment.amount_paid),
+    },
+    {
+      key: "subject",
+      header: "Subject",
+      cell: () => subjectNames || "—",
+    },
+    {
+      key: "payment_type",
+      header: "Payment Type",
+      cell: (payment) => formatValuesRemoveUnderscores(payment.payment_type),
+    },
+    {
+      key: "notes",
+      header: "Notes",
+      className: "whitespace-normal",
+      cell: (payment) => (
+        <div className="max-w-[420px] whitespace-normal">
+          {payment.notes || "—"}
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      cell: (payment) => (
+        <div className="flex gap-2">
+          <Button
+            className="bg-blue-600 text-white hover:bg-blue-700"
+            size="icon"
+            onClick={() => openEditDialog(payment)}
+            aria-label="Edit payment"
+          >
+            <Edit className="size-4" />
+          </Button>
+          <Button
+            className="bg-red-600 text-white hover:bg-red-700"
+            size="icon"
+            onClick={() => deletePayment(payment)}
+            aria-label="Delete payment"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+          <Button
+            className="bg-lime-600 text-white hover:bg-lime-700"
+            size="icon"
+            onClick={() =>
+              toast.info("Receipt download is not implemented yet.")
+            }
+            aria-label="Receipt download not implemented"
+          >
+            <FileText className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <PaymentDialog
@@ -79,56 +193,12 @@ const TermPaymentsTable = ({
 
       <section className="space-y-3">
         <h3 className="text-lg font-semibold tracking-normal">Subjects</h3>
-        <div className="overflow-hidden rounded-md border bg-primary-foreground">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Grade</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Day</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Class Start Date</TableHead>
-                <TableHead>Tutor</TableHead>
-                <TableHead>Fees</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {enrolments.map((enrolment) => (
-                <TableRow key={enrolment.enrolment_id}>
-                  <TableCell>
-                    {enrolment.ClassTime.SubjectOffering.grade}
-                  </TableCell>
-                  <TableCell>
-                    {enrolment.ClassTime.SubjectOffering.subject_name}
-                  </TableCell>
-                  <TableCell>{enrolment.ClassTime.day_of_week}</TableCell>
-                  <TableCell>
-                    {formatTime(enrolment.ClassTime.start_time)}
-                  </TableCell>
-                  <TableCell>
-                    {formatValuesRemoveUnderscores(
-                      enrolment.ClassTime.SubjectOffering.location,
-                    )}
-                  </TableCell>
-                  <TableCell>{formatDate(term.start_date)}</TableCell>
-                  <TableCell>
-                    {enrolment.ClassTime.Tutor
-                      ? `${enrolment.ClassTime.Tutor.first_name} ${enrolment.ClassTime.Tutor.last_name}`
-                      : "—"}
-                  </TableCell>
-                  <TableCell>
-                    {formatCurrency(
-                      Number(
-                        enrolment.ClassTime.SubjectOffering.price_per_term,
-                      ),
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <ReusableTable
+          columns={subjectColumns}
+          data={enrolments}
+          getRowKey={(enrolment) => enrolment.enrolment_id}
+          emptyMessage="No subjects found for this term."
+        />
       </section>
 
       <section className="space-y-3 border-t pt-5">
@@ -145,80 +215,12 @@ const TermPaymentsTable = ({
           </Button>
         </div>
 
-        <div className="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date Paid</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="h-16 text-center text-muted-foreground"
-                  >
-                    No payments recorded for this term.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                payments.map((payment) => (
-                  <TableRow key={payment.payment_id}>
-                    <TableCell>{formatDate(payment.payment_date)}</TableCell>
-                    <TableCell>{formatCurrency(payment.amount_paid)}</TableCell>
-                    <TableCell>{subjectNames || "—"}</TableCell>
-                    <TableCell>
-                      {formatValuesRemoveUnderscores(payment.payment_type)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-[420px] whitespace-normal">
-                        {payment.notes || "—"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          className="bg-blue-600 text-white hover:bg-blue-700"
-                          size="icon"
-                          onClick={() => openEditDialog(payment)}
-                          aria-label="Edit payment"
-                        >
-                          <Edit className="size-4" />
-                        </Button>
-                        <Button
-                          className="bg-red-600 text-white hover:bg-red-700"
-                          size="icon"
-                          onClick={() => deletePayment(payment)}
-                          aria-label="Delete payment"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                        <Button
-                          className="bg-lime-600 text-white hover:bg-lime-700"
-                          size="icon"
-                          onClick={() =>
-                            toast.info(
-                              "Receipt download is not implemented yet.",
-                            )
-                          }
-                          aria-label="Receipt download not implemented"
-                        >
-                          <FileText className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <ReusableTable
+          columns={paymentColumns}
+          data={payments}
+          getRowKey={(payment) => payment.payment_id}
+          emptyMessage="No payments recorded for this term."
+        />
       </section>
     </div>
   );

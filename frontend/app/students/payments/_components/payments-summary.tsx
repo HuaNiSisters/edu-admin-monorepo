@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import ReusableTable, {
+  ReusableTableColumn,
+} from "@/components/_reusable/reusable-table";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { formatCurrency } from "./payments-columns";
 
@@ -22,35 +17,36 @@ type PaymentsSummaryProps = {
 };
 
 const PaymentsSummary = ({ summaryRows }: PaymentsSummaryProps) => {
+  const columns: ReusableTableColumn<PaymentsSummaryRow>[] = [
+    {
+      key: "payment_type",
+      header: "Payment Type",
+      cell: (row) =>
+        row.paymentType === "Total"
+          ? row.paymentType
+          : formatValuesRemoveUnderscores(row.paymentType),
+    },
+    {
+      key: "quantity",
+      header: "Total Qty.",
+      cell: (row) => row.quantity,
+    },
+    {
+      key: "amount",
+      header: "Total Amount",
+      cell: (row) => formatCurrency(row.amount),
+    },
+  ];
+
   return (
     <div className="space-y-3">
-      <div className="max-w-xl overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Payment Type</TableHead>
-              <TableHead>Total Qty.</TableHead>
-              <TableHead>Total Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {summaryRows.map((row) => (
-              <TableRow
-                key={row.paymentType}
-                className={row.paymentType === "Total" ? "font-medium" : ""}
-              >
-                <TableCell>
-                  {row.paymentType === "Total"
-                    ? row.paymentType
-                    : formatValuesRemoveUnderscores(row.paymentType)}
-                </TableCell>
-                <TableCell>{row.quantity}</TableCell>
-                <TableCell>{formatCurrency(row.amount)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <ReusableTable
+        columns={columns}
+        data={summaryRows}
+        getRowKey={(row) => row.paymentType}
+        containerClassName="max-w-xl"
+        rowClassName={(row) => (row.paymentType === "Total" ? "font-medium" : "")}
+      />
     </div>
   );
 };
