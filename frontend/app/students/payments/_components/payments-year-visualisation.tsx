@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Banknote, Landmark, WalletCards } from "lucide-react";
-import { PaymentWithDetails, Term } from "@/lib/api/types";
+import { Banknote, Landmark, MapPin, WalletCards } from "lucide-react";
+import { Location, PaymentWithDetails, Term } from "@/lib/api/types";
 import {
   Select,
   SelectContent,
@@ -19,6 +19,8 @@ const currencyFormatter = new Intl.NumberFormat("en-AU", {
 });
 
 const formatCurrency = (value: number) => currencyFormatter.format(value);
+const ALL_CAMPUSES = "all";
+type CampusFilter = Location | typeof ALL_CAMPUSES;
 
 const getPaymentYear = (payment: PaymentWithDetails) => {
   if (payment.payment_date) {
@@ -51,6 +53,8 @@ const PaymentsYearVisualisation = ({
   const [selectedYear, setSelectedYear] = useState<string>(
     String(yearOptions[0] ?? new Date().getFullYear()),
   );
+  const [selectedCampus, setSelectedCampus] =
+    useState<CampusFilter>(ALL_CAMPUSES);
 
   useEffect(() => {
     if (!yearOptions.length) return;
@@ -62,12 +66,57 @@ const PaymentsYearVisualisation = ({
 
   const yearPayments = useMemo(
     () =>
-      payments.filter((payment) => getPaymentYear(payment) === selectedYearNumber),
+      payments.filter(
+        (payment) => getPaymentYear(payment) === selectedYearNumber,
+      ),
     [payments, selectedYearNumber],
   );
 
+  const campusOptions = useMemo(
+    () =>
+      [...new Set(yearPayments.map((payment) => payment.location))]
+        .filter(Boolean)
+        .sort(),
+    [yearPayments],
+  );
+
+  useEffect(() => {
+    if (selectedCampus === ALL_CAMPUSES) return;
+    if (campusOptions.includes(selectedCampus)) return;
+    setSelectedCampus(ALL_CAMPUSES);
+  }, [campusOptions, selectedCampus]);
+
+  const filteredPayments = useMemo(
+    () =>
+      selectedCampus === ALL_CAMPUSES
+        ? yearPayments
+        : yearPayments.filter((payment) => payment.location === selectedCampus),
+    [selectedCampus, yearPayments],
+  );
+
+  const campusRows = useMemo(() => {
+    const rows = campusOptions.map((location) => {
+      const campusPayments = yearPayments.filter(
+        (payment) => payment.location === location,
+      );
+
+      return {
+        location,
+        amount: campusPayments.reduce(
+          (total, payment) => total + Number(payment.amount_paid ?? 0),
+          0,
+        ),
+        count: campusPayments.length,
+      };
+    });
+
+    return selectedCampus === ALL_CAMPUSES
+      ? rows
+      : rows.filter((row) => row.location === selectedCampus);
+  }, [campusOptions, selectedCampus, yearPayments]);
+
   const totals = useMemo(() => {
-    const byType = yearPayments.reduce(
+    const byType = filteredPayments.reduce(
       (summary, payment) => {
         summary[payment.payment_type] += Number(payment.amount_paid ?? 0);
         return summary;
@@ -84,9 +133,11 @@ const PaymentsYearVisualisation = ({
     return {
       byType,
       total,
-      count: yearPayments.length,
+      count: filteredPayments.length,
     };
-  }, [yearPayments]);
+  }, [filteredPayments]);
+
+  const maxCampusAmount = Math.max(...campusRows.map((row) => row.amount), 0);
 
   const statRows = [
     {
@@ -120,22 +171,41 @@ const PaymentsYearVisualisation = ({
             Yearly Payments
           </h2>
           <p className="text-sm text-muted-foreground">
-            Total payments received by payment type.
+            Total payments received by campus.
           </p>
         </div>
 
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {yearOptions.map((year) => (
-              <SelectItem key={year} value={String(year)}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-2">
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((year) => (
+                <SelectItem key={year} value={String(year)}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={selectedCampus}
+            onValueChange={(value: CampusFilter) => setSelectedCampus(value)}
+          >
+            <SelectTrigger className="w-[240px]">
+              <SelectValue placeholder="Campus" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_CAMPUSES}>All campuses</SelectItem>
+              {campusOptions.map((campus) => (
+                <SelectItem key={campus} value={campus}>
+                  {formatValuesRemoveUnderscores(campus)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
@@ -151,7 +221,9 @@ const PaymentsYearVisualisation = ({
 
         {statRows.map((row) => {
           const percentage =
-            totals.total > 0 ? Math.round((row.amount / totals.total) * 100) : 0;
+            totals.total > 0
+              ? Math.round((row.amount / totals.total) * 100)
+              : 0;
           const Icon = row.icon;
 
           return (
@@ -178,19 +250,68 @@ const PaymentsYearVisualisation = ({
       </div>
 
       <div className="space-y-2">
+        {campusRows.length === 0 ? (
+          <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+            No campus payments found for this year.
+          </div>
+        ) : (
+          campusRows.map((row) => {
+            const percentage =
+              maxCampusAmount > 0
+                ? Math.round((row.amount / maxCampusAmount) * 100)
+                : 0;
+
+            return (
+              <div
+                key={row.location}
+                className="grid gap-2 sm:grid-cols-[220px_1fr_120px]"
+              >
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <MapPin className="size-4 text-muted-foreground" />
+                  {formatValuesRemoveUnderscores(row.location)}
+                </div>
+                <div className="h-9 overflow-hidden rounded-md bg-muted">
+                  <div
+                    className="flex h-full items-center px-3 text-xs font-medium text-white bg-teal-600"
+                    style={{
+                      width: `${percentage}%`,
+                      minWidth: percentage ? 44 : 0,
+                    }}
+                  >
+                    {row.count} payment{row.count === 1 ? "" : "s"}
+                  </div>
+                </div>
+                <div className="text-right text-sm font-medium">
+                  {formatCurrency(row.amount)}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <div className="space-y-2 border-t pt-4">
         {statRows.map((row) => {
           const percentage =
-            totals.total > 0 ? Math.round((row.amount / totals.total) * 100) : 0;
+            totals.total > 0
+              ? Math.round((row.amount / totals.total) * 100)
+              : 0;
 
           return (
-            <div key={row.type} className="grid gap-2 sm:grid-cols-[140px_1fr_90px]">
+            <div
+              key={row.type}
+              className="grid gap-2 sm:grid-cols-[140px_1fr_90px]"
+            >
               <div className="text-sm font-medium">
                 {formatValuesRemoveUnderscores(row.type)}
               </div>
               <div className="h-8 overflow-hidden rounded-md bg-muted">
                 <div
                   className={`flex h-full items-center px-3 text-xs font-medium text-white ${row.className}`}
-                  style={{ width: `${percentage}%`, minWidth: percentage ? 36 : 0 }}
+                  style={{
+                    width: `${percentage}%`,
+                    minWidth: percentage ? 36 : 0,
+                  }}
                 >
                   {percentage > 0 ? `${percentage}%` : ""}
                 </div>
