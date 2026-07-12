@@ -14,6 +14,9 @@ type StudentInfo = Database["public"]["Tables"]["Student"]["Row"];
 type EmployeeInfo = Database["public"]["Tables"]["Tutor"]["Row"];
 type AttendanceStatus = Database["public"]["Enums"]["AttendanceStatus"];
 type Attendance = Database["public"]["Tables"]["Attendance"]["Row"];
+type Payment = Database["public"]["Tables"]["Payment"]["Row"];
+type PaymentStatus = Database["public"]["Enums"]["PaymentStatus"];
+type PaymentType = Database["public"]["Enums"]["PaymentType"];
 
 type StudentWithParents = StudentInfo & {
   parent1Id: string;
@@ -34,9 +37,26 @@ type ClassTimeWithSubjectAndTutor = ClassTime & {
 type EnrolmentWithClassAndTerm = Enrolment & {
   ClassTime: ClassTime & {
     SubjectOffering: SubjectOffering;
+    Tutor?: EmployeeInfo | null;
   };
   Term: Term;
 }
+
+type PaymentWithDetails = Payment & {
+  student_id: string;
+  student_name: string;
+  student_mobile: string;
+  parents: string;
+  term_id: string;
+  term_label: string;
+  term_name: number;
+  term_year: number;
+  subject_name: string;
+  grade: number;
+  location: Location;
+  day_of_week: string;
+  amount_outstanding: number;
+};
 
 export type {
   Location,
@@ -55,4 +75,8 @@ export type {
   EnrolmentWithClassAndTerm,
   AttendanceStatus,
   Attendance,
+  Payment,
+  PaymentStatus,
+  PaymentType,
+  PaymentWithDetails,
 };

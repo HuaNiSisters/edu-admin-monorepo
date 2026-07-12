@@ -8,6 +8,7 @@ import { IClassRepo } from "./IClassRepo";
 import { ITermRepo } from "./ITermRepo";
 import { IEnrolmentRepo } from "./IEnrolmentRepo";
 import { ISMSRepo } from "./ISMSRepo";
+import { IPaymentRepo } from "./IPaymentRepo";
 
 export type {
   ICampusRepo,
@@ -20,4 +21,5 @@ export type {
   IClassRepo,
   IEnrolmentRepo,
   ISMSRepo,
+  IPaymentRepo,
 };
