@@ -84,9 +84,9 @@ export const createClassColumns = (
     accessorKey: "location",
     size: 200,
     header: "Location",
-    filterFn: (row, columnId, filterValue: string) => {
+    filterFn: (row, columnId, filterValue: string[]) => {
       const raw = row.getValue<string>(columnId) ?? "";
-      return formatValuesRemoveUnderscores(raw) === filterValue;
+      return filterValue.includes(formatValuesRemoveUnderscores(raw));
     },
     cell: ({ row }) => (
       <span>
