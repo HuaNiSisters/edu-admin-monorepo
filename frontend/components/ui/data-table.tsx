@@ -6,6 +6,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -32,6 +33,11 @@ interface DataTableProps<TData, TValue> {
 
   columnFilters?: ColumnFiltersState;
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+
+  columnVisibility?: VisibilityState;
+  onColumnVisibilityChange?: React.Dispatch<
+    React.SetStateAction<VisibilityState>
+  >;
 }
 
 export function DataTable<TData, TValue>({
@@ -40,14 +46,21 @@ export function DataTable<TData, TValue>({
   onRowClick,
   columnFilters: externalColumnFilters,
   setColumnFilters: externalSetColumnFilters,
+  columnVisibility: externalColumnVisibility,
+  onColumnVisibilityChange: externalSetColumnVisibility,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [internalColumnFilters, setInternalColumnFilters] =
     React.useState<ColumnFiltersState>([]);
+  const [internalColumnVisibility, setInternalColumnVisibility] =
+    React.useState<VisibilityState>({});
 
   const columnFilters = externalColumnFilters ?? internalColumnFilters;
-
   const setColumnFilters = externalSetColumnFilters ?? setInternalColumnFilters;
+
+  const columnVisibility = externalColumnVisibility ?? internalColumnVisibility;
+  const setColumnVisibility =
+    externalSetColumnVisibility ?? setInternalColumnVisibility;
 
   const table = useReactTable({
     data,
@@ -59,10 +72,12 @@ export function DataTable<TData, TValue>({
 
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
 
     state: {
       sorting,
-      columnFilters, // ✅ now dynamic
+      columnFilters,
+      columnVisibility,
     },
   });
 
