@@ -54,13 +54,19 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     accessorKey: "term_label",
     size: 110,
     header: "Term",
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
+  },
+  {
+    accessorKey: "grade",
+    header: "Grade",
+    filterFn: (row, columnId, filterValue: string[]) =>
+      filterValue.includes(String(row.getValue(columnId))),
   },
   {
     accessorKey: "subject_name",
     size: 160,
     header: "Subject",
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
     cell: ({ row }) => (
       <div className="space-y-1">
         <div>{row.original.subject_name || "—"}</div>
@@ -74,7 +80,7 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     accessorKey: "day_of_week",
     size: 110,
     header: "Day",
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
   },
   {
     accessorKey: "amount_paid",
@@ -104,16 +110,15 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     accessorKey: "status",
     size: 110,
     header: "Status",
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
     cell: () => "Follow up",
   },
   {
     accessorKey: "payment_type",
     size: 140,
     header: "Type",
-    filterFn: "equalsString",
-    cell: ({ row }) =>
-      formatValuesRemoveUnderscores(row.original.payment_type),
+    filterFn: "arrIncludesSome",
+    cell: ({ row }) => formatValuesRemoveUnderscores(row.original.payment_type),
   },
   {
     accessorKey: "notes",

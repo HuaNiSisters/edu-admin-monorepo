@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import DownloadPaymentsReport from "./download-payments-report";
+import { ColumnFiltersState, VisibilityState } from "@tanstack/react-table";
 
 const DAY_ORDER = [
   "Monday",
@@ -27,12 +28,12 @@ type PaymentsListProps = {
   terms: Term[];
 };
 
-const getFilterValue = (filters: ColumnFiltersState, id: string) =>
-  filters.find((filter) => filter.id === id)?.value as string | undefined;
-
 const PaymentsList = ({ payments, terms }: PaymentsListProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [searchValue, setSearchValue] = useState("");
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    grade: false,
+  });
 
   const columns = useMemo(() => createPaymentColumns(), []);
 
@@ -113,25 +114,20 @@ const PaymentsList = ({ payments, terms }: PaymentsListProps) => {
     );
   }, [payments, searchValue]);
 
+  // Generic column-filter application — mirrors each column's own filterFn
+  // (arrIncludesSome + string coercion) instead of hardcoding a branch per field.
   const summaryPayments = useMemo(() => {
-    const term = getFilterValue(columnFilters, "term_label");
-    const location = getFilterValue(columnFilters, "location");
-    const day = getFilterValue(columnFilters, "day_of_week");
-    const grade = getFilterValue(columnFilters, "grade");
-    const subject = getFilterValue(columnFilters, "subject_name");
-    const type = getFilterValue(columnFilters, "payment_type");
-    const status = getFilterValue(columnFilters, "status");
+    if (columnFilters.length === 0) return searchedPayments;
 
-    return searchedPayments.filter((payment) => {
-      if (term && payment.term_label !== term) return false;
-      if (location && payment.location !== location) return false;
-      if (day && payment.day_of_week !== day) return false;
-      if (grade && String(payment.grade) !== grade) return false;
-      if (subject && payment.subject_name !== subject) return false;
-      if (type && payment.payment_type !== type) return false;
-      if (status && payment.status !== status) return false;
-      return true;
-    });
+    return searchedPayments.filter((payment) =>
+      columnFilters.every((filter) => {
+        const selected = filter.value as string[];
+        if (!selected?.length) return true;
+
+        const rawValue = payment[filter.id as keyof PaymentWithDetails];
+        return selected.includes(String(rawValue ?? ""));
+      }),
+    );
   }, [columnFilters, searchedPayments]);
 
   const paymentSummary = useMemo(() => {
@@ -263,7 +259,11 @@ const PaymentsList = ({ payments, terms }: PaymentsListProps) => {
 
         <DataTable
           columns={columns}
-          data={summaryPayments}
+          data={searchedPayments}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
         />
       </div>
     </div>
