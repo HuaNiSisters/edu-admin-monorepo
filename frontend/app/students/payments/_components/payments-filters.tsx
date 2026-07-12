@@ -110,8 +110,8 @@ const PaymentsFilters = ({
 
         <FilterContent
           filterValue="location"
-          filterName="Campuses"
-          placeholderName="Campus"
+          filterName="Locations"
+          placeholderName="Location"
           options={locationOptions}
           formatOption={formatValuesRemoveUnderscores}
           columnFilters={columnFilters}

@@ -165,12 +165,29 @@ async function seedSampleData() {
   })));
   await prisma.attendance.createMany({ data: attendanceRows });
 
-  await prisma.payment.createMany({ data: enrolments.map((enrolment, index) => {
-    const amountDue = classBlueprints.find((_, classIndex) => classes[classIndex]!.class_id === enrolment.class_id)?.[1] === "OC" ? 320 : 300;
-    const paymentMode = index % 10;
-    const amountPaid = paymentMode === 0 ? 0 : paymentMode < 3 ? amountDue / 2 : amountDue;
-    return { enrolment_id: enrolment.enrolment_id, amount_due: amountDue, amount_paid: amountPaid, payment_date: amountPaid ? dateInWeek(currentTerm.start_date, (index % 6) + 1) : null, payment_type: index % 3 === 0 ? "cash" : index % 3 === 1 ? "bank_transfer" : "other", status: amountPaid === 0 ? "unpaid" : amountPaid < amountDue ? "partial" : "paid", receipt: `${Math.floor(100000 + Math.random() * 900000)}`, notes: amountPaid === 0 ? "Sample outstanding balance" : null };
-  }) });
+  await prisma.payment.createMany({
+    data: enrolments.map((enrolment, index) => {
+      const amountDue =
+        classBlueprints.find(
+          (_, classIndex) => classes[classIndex]!.class_id === enrolment.class_id,
+        )?.[1] === "OC"
+          ? 320
+          : 300;
+      const amountPaid = amountDue;
+
+      return {
+        enrolment_id: enrolment.enrolment_id,
+        amount_due: amountDue,
+        amount_paid: amountPaid,
+        payment_date: dateInWeek(currentTerm.start_date, (index % 6) + 1),
+        payment_type:
+          index % 3 === 0 ? "cash" : index % 3 === 1 ? "bank_transfer" : "other",
+        status: "paid",
+        receipt: `${Math.floor(100000 + Math.random() * 900000)}`,
+        notes: null,
+      };
+    }),
+  });
 
   console.log(`Seeded ${students.length} students, ${parents.length} parents, ${classes.length} classes, ${enrolments.length} enrolments, ${attendanceRows.length} attendance records, and ${enrolments.length} payments.`);
 }
