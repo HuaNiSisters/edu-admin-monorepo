@@ -56,8 +56,6 @@ export const ModelName = {
   StudentParent: 'StudentParent',
   Tutor: 'Tutor',
   ClassTime: 'ClassTime',
-  Subject: 'Subject',
-  Grade: 'Grade',
   SubjectOffering: 'SubjectOffering',
   Term: 'Term',
   Enrolment: 'Enrolment',
@@ -147,29 +145,13 @@ export const ClassTimeScalarFieldEnum = {
 export type ClassTimeScalarFieldEnum = (typeof ClassTimeScalarFieldEnum)[keyof typeof ClassTimeScalarFieldEnum]
 
 
-export const SubjectScalarFieldEnum = {
-  subject_id: 'subject_id',
-  name: 'name'
-} as const
-
-export type SubjectScalarFieldEnum = (typeof SubjectScalarFieldEnum)[keyof typeof SubjectScalarFieldEnum]
-
-
-export const GradeScalarFieldEnum = {
-  grade_id: 'grade_id',
-  label: 'label',
-  school_year_number: 'school_year_number'
-} as const
-
-export type GradeScalarFieldEnum = (typeof GradeScalarFieldEnum)[keyof typeof GradeScalarFieldEnum]
-
-
 export const SubjectOfferingScalarFieldEnum = {
-  offering_id: 'offering_id',
   subject_id: 'subject_id',
-  grade_id: 'grade_id',
+  subject_name: 'subject_name',
+  grade: 'grade',
   location: 'location',
-  price_per_term: 'price_per_term'
+  price_per_term: 'price_per_term',
+  tutorTutor_id: 'tutorTutor_id'
 } as const
 
 export type SubjectOfferingScalarFieldEnum = (typeof SubjectOfferingScalarFieldEnum)[keyof typeof SubjectOfferingScalarFieldEnum]
@@ -202,6 +184,7 @@ export const AttendanceScalarFieldEnum = {
   attendance_id: 'attendance_id',
   student_id: 'student_id',
   class_id: 'class_id',
+  term_id: 'term_id',
   week: 'week',
   status: 'status',
   notes: 'notes'

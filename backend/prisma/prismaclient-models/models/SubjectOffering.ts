@@ -27,69 +27,79 @@ export type AggregateSubjectOffering = {
 }
 
 export type SubjectOfferingAvgAggregateOutputType = {
+  grade: number | null
   price_per_term: runtime.Decimal | null
 }
 
 export type SubjectOfferingSumAggregateOutputType = {
+  grade: number | null
   price_per_term: runtime.Decimal | null
 }
 
 export type SubjectOfferingMinAggregateOutputType = {
-  offering_id: string | null
   subject_id: string | null
-  grade_id: string | null
+  subject_name: string | null
+  grade: number | null
   location: $Enums.Location | null
   price_per_term: runtime.Decimal | null
+  tutorTutor_id: string | null
 }
 
 export type SubjectOfferingMaxAggregateOutputType = {
-  offering_id: string | null
   subject_id: string | null
-  grade_id: string | null
+  subject_name: string | null
+  grade: number | null
   location: $Enums.Location | null
   price_per_term: runtime.Decimal | null
+  tutorTutor_id: string | null
 }
 
 export type SubjectOfferingCountAggregateOutputType = {
-  offering_id: number
   subject_id: number
-  grade_id: number
+  subject_name: number
+  grade: number
   location: number
   price_per_term: number
+  tutorTutor_id: number
   _all: number
 }
 
 
 export type SubjectOfferingAvgAggregateInputType = {
+  grade?: true
   price_per_term?: true
 }
 
 export type SubjectOfferingSumAggregateInputType = {
+  grade?: true
   price_per_term?: true
 }
 
 export type SubjectOfferingMinAggregateInputType = {
-  offering_id?: true
   subject_id?: true
-  grade_id?: true
+  subject_name?: true
+  grade?: true
   location?: true
   price_per_term?: true
+  tutorTutor_id?: true
 }
 
 export type SubjectOfferingMaxAggregateInputType = {
-  offering_id?: true
   subject_id?: true
-  grade_id?: true
+  subject_name?: true
+  grade?: true
   location?: true
   price_per_term?: true
+  tutorTutor_id?: true
 }
 
 export type SubjectOfferingCountAggregateInputType = {
-  offering_id?: true
   subject_id?: true
-  grade_id?: true
+  subject_name?: true
+  grade?: true
   location?: true
   price_per_term?: true
+  tutorTutor_id?: true
   _all?: true
 }
 
@@ -180,11 +190,12 @@ export type SubjectOfferingGroupByArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 export type SubjectOfferingGroupByOutputType = {
-  offering_id: string
   subject_id: string
-  grade_id: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal
+  tutorTutor_id: string | null
   _count: SubjectOfferingCountAggregateOutputType | null
   _avg: SubjectOfferingAvgAggregateOutputType | null
   _sum: SubjectOfferingSumAggregateOutputType | null
@@ -211,48 +222,49 @@ export type SubjectOfferingWhereInput = {
   AND?: Prisma.SubjectOfferingWhereInput | Prisma.SubjectOfferingWhereInput[]
   OR?: Prisma.SubjectOfferingWhereInput[]
   NOT?: Prisma.SubjectOfferingWhereInput | Prisma.SubjectOfferingWhereInput[]
-  offering_id?: Prisma.UuidFilter<"SubjectOffering"> | string
   subject_id?: Prisma.UuidFilter<"SubjectOffering"> | string
-  grade_id?: Prisma.UuidFilter<"SubjectOffering"> | string
+  subject_name?: Prisma.StringFilter<"SubjectOffering"> | string
+  grade?: Prisma.IntFilter<"SubjectOffering"> | number
   location?: Prisma.EnumLocationFilter<"SubjectOffering"> | $Enums.Location
   price_per_term?: Prisma.DecimalFilter<"SubjectOffering"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject?: Prisma.XOR<Prisma.SubjectScalarRelationFilter, Prisma.SubjectWhereInput>
-  grade?: Prisma.XOR<Prisma.GradeScalarRelationFilter, Prisma.GradeWhereInput>
+  tutorTutor_id?: Prisma.UuidNullableFilter<"SubjectOffering"> | string | null
   classTimes?: Prisma.ClassTimeListRelationFilter
+  tutor?: Prisma.XOR<Prisma.TutorNullableScalarRelationFilter, Prisma.TutorWhereInput> | null
 }
 
 export type SubjectOfferingOrderByWithRelationInput = {
-  offering_id?: Prisma.SortOrder
   subject_id?: Prisma.SortOrder
-  grade_id?: Prisma.SortOrder
+  subject_name?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
   location?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
-  subject?: Prisma.SubjectOrderByWithRelationInput
-  grade?: Prisma.GradeOrderByWithRelationInput
+  tutorTutor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   classTimes?: Prisma.ClassTimeOrderByRelationAggregateInput
+  tutor?: Prisma.TutorOrderByWithRelationInput
 }
 
 export type SubjectOfferingWhereUniqueInput = Prisma.AtLeast<{
-  offering_id?: string
-  subject_id_grade_id_location?: Prisma.SubjectOfferingSubject_idGrade_idLocationCompoundUniqueInput
+  subject_id?: string
+  subject_name_grade_location?: Prisma.SubjectOfferingSubject_nameGradeLocationCompoundUniqueInput
   AND?: Prisma.SubjectOfferingWhereInput | Prisma.SubjectOfferingWhereInput[]
   OR?: Prisma.SubjectOfferingWhereInput[]
   NOT?: Prisma.SubjectOfferingWhereInput | Prisma.SubjectOfferingWhereInput[]
-  subject_id?: Prisma.UuidFilter<"SubjectOffering"> | string
-  grade_id?: Prisma.UuidFilter<"SubjectOffering"> | string
+  subject_name?: Prisma.StringFilter<"SubjectOffering"> | string
+  grade?: Prisma.IntFilter<"SubjectOffering"> | number
   location?: Prisma.EnumLocationFilter<"SubjectOffering"> | $Enums.Location
   price_per_term?: Prisma.DecimalFilter<"SubjectOffering"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject?: Prisma.XOR<Prisma.SubjectScalarRelationFilter, Prisma.SubjectWhereInput>
-  grade?: Prisma.XOR<Prisma.GradeScalarRelationFilter, Prisma.GradeWhereInput>
+  tutorTutor_id?: Prisma.UuidNullableFilter<"SubjectOffering"> | string | null
   classTimes?: Prisma.ClassTimeListRelationFilter
-}, "offering_id" | "subject_id_grade_id_location">
+  tutor?: Prisma.XOR<Prisma.TutorNullableScalarRelationFilter, Prisma.TutorWhereInput> | null
+}, "subject_id" | "subject_name_grade_location">
 
 export type SubjectOfferingOrderByWithAggregationInput = {
-  offering_id?: Prisma.SortOrder
   subject_id?: Prisma.SortOrder
-  grade_id?: Prisma.SortOrder
+  subject_name?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
   location?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
+  tutorTutor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SubjectOfferingCountOrderByAggregateInput
   _avg?: Prisma.SubjectOfferingAvgOrderByAggregateInput
   _max?: Prisma.SubjectOfferingMaxOrderByAggregateInput
@@ -264,74 +276,78 @@ export type SubjectOfferingScalarWhereWithAggregatesInput = {
   AND?: Prisma.SubjectOfferingScalarWhereWithAggregatesInput | Prisma.SubjectOfferingScalarWhereWithAggregatesInput[]
   OR?: Prisma.SubjectOfferingScalarWhereWithAggregatesInput[]
   NOT?: Prisma.SubjectOfferingScalarWhereWithAggregatesInput | Prisma.SubjectOfferingScalarWhereWithAggregatesInput[]
-  offering_id?: Prisma.UuidWithAggregatesFilter<"SubjectOffering"> | string
   subject_id?: Prisma.UuidWithAggregatesFilter<"SubjectOffering"> | string
-  grade_id?: Prisma.UuidWithAggregatesFilter<"SubjectOffering"> | string
+  subject_name?: Prisma.StringWithAggregatesFilter<"SubjectOffering"> | string
+  grade?: Prisma.IntWithAggregatesFilter<"SubjectOffering"> | number
   location?: Prisma.EnumLocationWithAggregatesFilter<"SubjectOffering"> | $Enums.Location
   price_per_term?: Prisma.DecimalWithAggregatesFilter<"SubjectOffering"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  tutorTutor_id?: Prisma.UuidNullableWithAggregatesFilter<"SubjectOffering"> | string | null
 }
 
 export type SubjectOfferingCreateInput = {
-  offering_id?: string
+  subject_id?: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject: Prisma.SubjectCreateNestedOneWithoutOfferingsInput
-  grade: Prisma.GradeCreateNestedOneWithoutOfferingsInput
-  classTimes?: Prisma.ClassTimeCreateNestedManyWithoutOfferingInput
+  classTimes?: Prisma.ClassTimeCreateNestedManyWithoutSubject_offeringInput
+  tutor?: Prisma.TutorCreateNestedOneWithoutSubject_offeringsInput
 }
 
 export type SubjectOfferingUncheckedCreateInput = {
-  offering_id?: string
-  subject_id: string
-  grade_id: string
+  subject_id?: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  classTimes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutOfferingInput
+  tutorTutor_id?: string | null
+  classTimes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutSubject_offeringInput
 }
 
 export type SubjectOfferingUpdateInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject?: Prisma.SubjectUpdateOneRequiredWithoutOfferingsNestedInput
-  grade?: Prisma.GradeUpdateOneRequiredWithoutOfferingsNestedInput
-  classTimes?: Prisma.ClassTimeUpdateManyWithoutOfferingNestedInput
+  classTimes?: Prisma.ClassTimeUpdateManyWithoutSubject_offeringNestedInput
+  tutor?: Prisma.TutorUpdateOneWithoutSubject_offeringsNestedInput
 }
 
 export type SubjectOfferingUncheckedUpdateInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
   subject_id?: Prisma.StringFieldUpdateOperationsInput | string
-  grade_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  classTimes?: Prisma.ClassTimeUncheckedUpdateManyWithoutOfferingNestedInput
+  tutorTutor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classTimes?: Prisma.ClassTimeUncheckedUpdateManyWithoutSubject_offeringNestedInput
 }
 
 export type SubjectOfferingCreateManyInput = {
-  offering_id?: string
-  subject_id: string
-  grade_id: string
+  subject_id?: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
+  tutorTutor_id?: string | null
 }
 
 export type SubjectOfferingUpdateManyMutationInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type SubjectOfferingUncheckedUpdateManyInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
   subject_id?: Prisma.StringFieldUpdateOperationsInput | string
-  grade_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type SubjectOfferingScalarRelationFilter = {
-  is?: Prisma.SubjectOfferingWhereInput
-  isNot?: Prisma.SubjectOfferingWhereInput
+  tutorTutor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type SubjectOfferingListRelationFilter = {
@@ -344,42 +360,94 @@ export type SubjectOfferingOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type SubjectOfferingSubject_idGrade_idLocationCompoundUniqueInput = {
-  subject_id: string
-  grade_id: string
+export type SubjectOfferingScalarRelationFilter = {
+  is?: Prisma.SubjectOfferingWhereInput
+  isNot?: Prisma.SubjectOfferingWhereInput
+}
+
+export type SubjectOfferingSubject_nameGradeLocationCompoundUniqueInput = {
+  subject_name: string
+  grade: number
   location: $Enums.Location
 }
 
 export type SubjectOfferingCountOrderByAggregateInput = {
-  offering_id?: Prisma.SortOrder
   subject_id?: Prisma.SortOrder
-  grade_id?: Prisma.SortOrder
+  subject_name?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
   location?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
+  tutorTutor_id?: Prisma.SortOrder
 }
 
 export type SubjectOfferingAvgOrderByAggregateInput = {
+  grade?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
 }
 
 export type SubjectOfferingMaxOrderByAggregateInput = {
-  offering_id?: Prisma.SortOrder
   subject_id?: Prisma.SortOrder
-  grade_id?: Prisma.SortOrder
+  subject_name?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
   location?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
+  tutorTutor_id?: Prisma.SortOrder
 }
 
 export type SubjectOfferingMinOrderByAggregateInput = {
-  offering_id?: Prisma.SortOrder
   subject_id?: Prisma.SortOrder
-  grade_id?: Prisma.SortOrder
+  subject_name?: Prisma.SortOrder
+  grade?: Prisma.SortOrder
   location?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
+  tutorTutor_id?: Prisma.SortOrder
 }
 
 export type SubjectOfferingSumOrderByAggregateInput = {
+  grade?: Prisma.SortOrder
   price_per_term?: Prisma.SortOrder
+}
+
+export type SubjectOfferingCreateNestedManyWithoutTutorInput = {
+  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutTutorInput, Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput> | Prisma.SubjectOfferingCreateWithoutTutorInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput[]
+  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput | Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput[]
+  createMany?: Prisma.SubjectOfferingCreateManyTutorInputEnvelope
+  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+}
+
+export type SubjectOfferingUncheckedCreateNestedManyWithoutTutorInput = {
+  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutTutorInput, Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput> | Prisma.SubjectOfferingCreateWithoutTutorInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput[]
+  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput | Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput[]
+  createMany?: Prisma.SubjectOfferingCreateManyTutorInputEnvelope
+  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+}
+
+export type SubjectOfferingUpdateManyWithoutTutorNestedInput = {
+  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutTutorInput, Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput> | Prisma.SubjectOfferingCreateWithoutTutorInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput[]
+  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput | Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput[]
+  upsert?: Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutTutorInput | Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutTutorInput[]
+  createMany?: Prisma.SubjectOfferingCreateManyTutorInputEnvelope
+  set?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  disconnect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  delete?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  update?: Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutTutorInput | Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutTutorInput[]
+  updateMany?: Prisma.SubjectOfferingUpdateManyWithWhereWithoutTutorInput | Prisma.SubjectOfferingUpdateManyWithWhereWithoutTutorInput[]
+  deleteMany?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
+}
+
+export type SubjectOfferingUncheckedUpdateManyWithoutTutorNestedInput = {
+  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutTutorInput, Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput> | Prisma.SubjectOfferingCreateWithoutTutorInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput[]
+  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput | Prisma.SubjectOfferingCreateOrConnectWithoutTutorInput[]
+  upsert?: Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutTutorInput | Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutTutorInput[]
+  createMany?: Prisma.SubjectOfferingCreateManyTutorInputEnvelope
+  set?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  disconnect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  delete?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
+  update?: Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutTutorInput | Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutTutorInput[]
+  updateMany?: Prisma.SubjectOfferingUpdateManyWithWhereWithoutTutorInput | Prisma.SubjectOfferingUpdateManyWithWhereWithoutTutorInput[]
+  deleteMany?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
 }
 
 export type SubjectOfferingCreateNestedOneWithoutClassTimesInput = {
@@ -396,90 +464,6 @@ export type SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SubjectOfferingUpdateToOneWithWhereWithoutClassTimesInput, Prisma.SubjectOfferingUpdateWithoutClassTimesInput>, Prisma.SubjectOfferingUncheckedUpdateWithoutClassTimesInput>
 }
 
-export type SubjectOfferingCreateNestedManyWithoutSubjectInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput> | Prisma.SubjectOfferingCreateWithoutSubjectInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput | Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput[]
-  createMany?: Prisma.SubjectOfferingCreateManySubjectInputEnvelope
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-}
-
-export type SubjectOfferingUncheckedCreateNestedManyWithoutSubjectInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput> | Prisma.SubjectOfferingCreateWithoutSubjectInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput | Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput[]
-  createMany?: Prisma.SubjectOfferingCreateManySubjectInputEnvelope
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-}
-
-export type SubjectOfferingUpdateManyWithoutSubjectNestedInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput> | Prisma.SubjectOfferingCreateWithoutSubjectInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput | Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput[]
-  upsert?: Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutSubjectInput | Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutSubjectInput[]
-  createMany?: Prisma.SubjectOfferingCreateManySubjectInputEnvelope
-  set?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  disconnect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  delete?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  update?: Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutSubjectInput | Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutSubjectInput[]
-  updateMany?: Prisma.SubjectOfferingUpdateManyWithWhereWithoutSubjectInput | Prisma.SubjectOfferingUpdateManyWithWhereWithoutSubjectInput[]
-  deleteMany?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
-}
-
-export type SubjectOfferingUncheckedUpdateManyWithoutSubjectNestedInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput> | Prisma.SubjectOfferingCreateWithoutSubjectInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput | Prisma.SubjectOfferingCreateOrConnectWithoutSubjectInput[]
-  upsert?: Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutSubjectInput | Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutSubjectInput[]
-  createMany?: Prisma.SubjectOfferingCreateManySubjectInputEnvelope
-  set?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  disconnect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  delete?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  update?: Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutSubjectInput | Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutSubjectInput[]
-  updateMany?: Prisma.SubjectOfferingUpdateManyWithWhereWithoutSubjectInput | Prisma.SubjectOfferingUpdateManyWithWhereWithoutSubjectInput[]
-  deleteMany?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
-}
-
-export type SubjectOfferingCreateNestedManyWithoutGradeInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutGradeInput, Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput> | Prisma.SubjectOfferingCreateWithoutGradeInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput | Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput[]
-  createMany?: Prisma.SubjectOfferingCreateManyGradeInputEnvelope
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-}
-
-export type SubjectOfferingUncheckedCreateNestedManyWithoutGradeInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutGradeInput, Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput> | Prisma.SubjectOfferingCreateWithoutGradeInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput | Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput[]
-  createMany?: Prisma.SubjectOfferingCreateManyGradeInputEnvelope
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-}
-
-export type SubjectOfferingUpdateManyWithoutGradeNestedInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutGradeInput, Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput> | Prisma.SubjectOfferingCreateWithoutGradeInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput | Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput[]
-  upsert?: Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutGradeInput | Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutGradeInput[]
-  createMany?: Prisma.SubjectOfferingCreateManyGradeInputEnvelope
-  set?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  disconnect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  delete?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  update?: Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutGradeInput | Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutGradeInput[]
-  updateMany?: Prisma.SubjectOfferingUpdateManyWithWhereWithoutGradeInput | Prisma.SubjectOfferingUpdateManyWithWhereWithoutGradeInput[]
-  deleteMany?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
-}
-
-export type SubjectOfferingUncheckedUpdateManyWithoutGradeNestedInput = {
-  create?: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutGradeInput, Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput> | Prisma.SubjectOfferingCreateWithoutGradeInput[] | Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput[]
-  connectOrCreate?: Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput | Prisma.SubjectOfferingCreateOrConnectWithoutGradeInput[]
-  upsert?: Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutGradeInput | Prisma.SubjectOfferingUpsertWithWhereUniqueWithoutGradeInput[]
-  createMany?: Prisma.SubjectOfferingCreateManyGradeInputEnvelope
-  set?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  disconnect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  delete?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  connect?: Prisma.SubjectOfferingWhereUniqueInput | Prisma.SubjectOfferingWhereUniqueInput[]
-  update?: Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutGradeInput | Prisma.SubjectOfferingUpdateWithWhereUniqueWithoutGradeInput[]
-  updateMany?: Prisma.SubjectOfferingUpdateManyWithWhereWithoutGradeInput | Prisma.SubjectOfferingUpdateManyWithWhereWithoutGradeInput[]
-  deleteMany?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
-}
-
 export type DecimalFieldUpdateOperationsInput = {
   set?: runtime.Decimal | runtime.DecimalJsLike | number | string
   increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -488,20 +472,78 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
-export type SubjectOfferingCreateWithoutClassTimesInput = {
-  offering_id?: string
+export type SubjectOfferingCreateWithoutTutorInput = {
+  subject_id?: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject: Prisma.SubjectCreateNestedOneWithoutOfferingsInput
-  grade: Prisma.GradeCreateNestedOneWithoutOfferingsInput
+  classTimes?: Prisma.ClassTimeCreateNestedManyWithoutSubject_offeringInput
+}
+
+export type SubjectOfferingUncheckedCreateWithoutTutorInput = {
+  subject_id?: string
+  subject_name: string
+  grade: number
+  location: $Enums.Location
+  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
+  classTimes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutSubject_offeringInput
+}
+
+export type SubjectOfferingCreateOrConnectWithoutTutorInput = {
+  where: Prisma.SubjectOfferingWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutTutorInput, Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput>
+}
+
+export type SubjectOfferingCreateManyTutorInputEnvelope = {
+  data: Prisma.SubjectOfferingCreateManyTutorInput | Prisma.SubjectOfferingCreateManyTutorInput[]
+  skipDuplicates?: boolean
+}
+
+export type SubjectOfferingUpsertWithWhereUniqueWithoutTutorInput = {
+  where: Prisma.SubjectOfferingWhereUniqueInput
+  update: Prisma.XOR<Prisma.SubjectOfferingUpdateWithoutTutorInput, Prisma.SubjectOfferingUncheckedUpdateWithoutTutorInput>
+  create: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutTutorInput, Prisma.SubjectOfferingUncheckedCreateWithoutTutorInput>
+}
+
+export type SubjectOfferingUpdateWithWhereUniqueWithoutTutorInput = {
+  where: Prisma.SubjectOfferingWhereUniqueInput
+  data: Prisma.XOR<Prisma.SubjectOfferingUpdateWithoutTutorInput, Prisma.SubjectOfferingUncheckedUpdateWithoutTutorInput>
+}
+
+export type SubjectOfferingUpdateManyWithWhereWithoutTutorInput = {
+  where: Prisma.SubjectOfferingScalarWhereInput
+  data: Prisma.XOR<Prisma.SubjectOfferingUpdateManyMutationInput, Prisma.SubjectOfferingUncheckedUpdateManyWithoutTutorInput>
+}
+
+export type SubjectOfferingScalarWhereInput = {
+  AND?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
+  OR?: Prisma.SubjectOfferingScalarWhereInput[]
+  NOT?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
+  subject_id?: Prisma.UuidFilter<"SubjectOffering"> | string
+  subject_name?: Prisma.StringFilter<"SubjectOffering"> | string
+  grade?: Prisma.IntFilter<"SubjectOffering"> | number
+  location?: Prisma.EnumLocationFilter<"SubjectOffering"> | $Enums.Location
+  price_per_term?: Prisma.DecimalFilter<"SubjectOffering"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  tutorTutor_id?: Prisma.UuidNullableFilter<"SubjectOffering"> | string | null
+}
+
+export type SubjectOfferingCreateWithoutClassTimesInput = {
+  subject_id?: string
+  subject_name: string
+  grade: number
+  location: $Enums.Location
+  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
+  tutor?: Prisma.TutorCreateNestedOneWithoutSubject_offeringsInput
 }
 
 export type SubjectOfferingUncheckedCreateWithoutClassTimesInput = {
-  offering_id?: string
-  subject_id: string
-  grade_id: string
+  subject_id?: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
+  tutorTutor_id?: string | null
 }
 
 export type SubjectOfferingCreateOrConnectWithoutClassTimesInput = {
@@ -521,172 +563,53 @@ export type SubjectOfferingUpdateToOneWithWhereWithoutClassTimesInput = {
 }
 
 export type SubjectOfferingUpdateWithoutClassTimesInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject?: Prisma.SubjectUpdateOneRequiredWithoutOfferingsNestedInput
-  grade?: Prisma.GradeUpdateOneRequiredWithoutOfferingsNestedInput
+  tutor?: Prisma.TutorUpdateOneWithoutSubject_offeringsNestedInput
 }
 
 export type SubjectOfferingUncheckedUpdateWithoutClassTimesInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
   subject_id?: Prisma.StringFieldUpdateOperationsInput | string
-  grade_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  tutorTutor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type SubjectOfferingCreateWithoutSubjectInput = {
-  offering_id?: string
-  location: $Enums.Location
-  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  grade: Prisma.GradeCreateNestedOneWithoutOfferingsInput
-  classTimes?: Prisma.ClassTimeCreateNestedManyWithoutOfferingInput
-}
-
-export type SubjectOfferingUncheckedCreateWithoutSubjectInput = {
-  offering_id?: string
-  grade_id: string
-  location: $Enums.Location
-  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  classTimes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutOfferingInput
-}
-
-export type SubjectOfferingCreateOrConnectWithoutSubjectInput = {
-  where: Prisma.SubjectOfferingWhereUniqueInput
-  create: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput>
-}
-
-export type SubjectOfferingCreateManySubjectInputEnvelope = {
-  data: Prisma.SubjectOfferingCreateManySubjectInput | Prisma.SubjectOfferingCreateManySubjectInput[]
-  skipDuplicates?: boolean
-}
-
-export type SubjectOfferingUpsertWithWhereUniqueWithoutSubjectInput = {
-  where: Prisma.SubjectOfferingWhereUniqueInput
-  update: Prisma.XOR<Prisma.SubjectOfferingUpdateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedUpdateWithoutSubjectInput>
-  create: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedCreateWithoutSubjectInput>
-}
-
-export type SubjectOfferingUpdateWithWhereUniqueWithoutSubjectInput = {
-  where: Prisma.SubjectOfferingWhereUniqueInput
-  data: Prisma.XOR<Prisma.SubjectOfferingUpdateWithoutSubjectInput, Prisma.SubjectOfferingUncheckedUpdateWithoutSubjectInput>
-}
-
-export type SubjectOfferingUpdateManyWithWhereWithoutSubjectInput = {
-  where: Prisma.SubjectOfferingScalarWhereInput
-  data: Prisma.XOR<Prisma.SubjectOfferingUpdateManyMutationInput, Prisma.SubjectOfferingUncheckedUpdateManyWithoutSubjectInput>
-}
-
-export type SubjectOfferingScalarWhereInput = {
-  AND?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
-  OR?: Prisma.SubjectOfferingScalarWhereInput[]
-  NOT?: Prisma.SubjectOfferingScalarWhereInput | Prisma.SubjectOfferingScalarWhereInput[]
-  offering_id?: Prisma.UuidFilter<"SubjectOffering"> | string
-  subject_id?: Prisma.UuidFilter<"SubjectOffering"> | string
-  grade_id?: Prisma.UuidFilter<"SubjectOffering"> | string
-  location?: Prisma.EnumLocationFilter<"SubjectOffering"> | $Enums.Location
-  price_per_term?: Prisma.DecimalFilter<"SubjectOffering"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type SubjectOfferingCreateWithoutGradeInput = {
-  offering_id?: string
-  location: $Enums.Location
-  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject: Prisma.SubjectCreateNestedOneWithoutOfferingsInput
-  classTimes?: Prisma.ClassTimeCreateNestedManyWithoutOfferingInput
-}
-
-export type SubjectOfferingUncheckedCreateWithoutGradeInput = {
-  offering_id?: string
-  subject_id: string
-  location: $Enums.Location
-  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-  classTimes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutOfferingInput
-}
-
-export type SubjectOfferingCreateOrConnectWithoutGradeInput = {
-  where: Prisma.SubjectOfferingWhereUniqueInput
-  create: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutGradeInput, Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput>
-}
-
-export type SubjectOfferingCreateManyGradeInputEnvelope = {
-  data: Prisma.SubjectOfferingCreateManyGradeInput | Prisma.SubjectOfferingCreateManyGradeInput[]
-  skipDuplicates?: boolean
-}
-
-export type SubjectOfferingUpsertWithWhereUniqueWithoutGradeInput = {
-  where: Prisma.SubjectOfferingWhereUniqueInput
-  update: Prisma.XOR<Prisma.SubjectOfferingUpdateWithoutGradeInput, Prisma.SubjectOfferingUncheckedUpdateWithoutGradeInput>
-  create: Prisma.XOR<Prisma.SubjectOfferingCreateWithoutGradeInput, Prisma.SubjectOfferingUncheckedCreateWithoutGradeInput>
-}
-
-export type SubjectOfferingUpdateWithWhereUniqueWithoutGradeInput = {
-  where: Prisma.SubjectOfferingWhereUniqueInput
-  data: Prisma.XOR<Prisma.SubjectOfferingUpdateWithoutGradeInput, Prisma.SubjectOfferingUncheckedUpdateWithoutGradeInput>
-}
-
-export type SubjectOfferingUpdateManyWithWhereWithoutGradeInput = {
-  where: Prisma.SubjectOfferingScalarWhereInput
-  data: Prisma.XOR<Prisma.SubjectOfferingUpdateManyMutationInput, Prisma.SubjectOfferingUncheckedUpdateManyWithoutGradeInput>
-}
-
-export type SubjectOfferingCreateManySubjectInput = {
-  offering_id?: string
-  grade_id: string
+export type SubjectOfferingCreateManyTutorInput = {
+  subject_id?: string
+  subject_name: string
+  grade: number
   location: $Enums.Location
   price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
-export type SubjectOfferingUpdateWithoutSubjectInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
-  location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
-  price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  grade?: Prisma.GradeUpdateOneRequiredWithoutOfferingsNestedInput
-  classTimes?: Prisma.ClassTimeUpdateManyWithoutOfferingNestedInput
-}
-
-export type SubjectOfferingUncheckedUpdateWithoutSubjectInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
-  grade_id?: Prisma.StringFieldUpdateOperationsInput | string
-  location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
-  price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  classTimes?: Prisma.ClassTimeUncheckedUpdateManyWithoutOfferingNestedInput
-}
-
-export type SubjectOfferingUncheckedUpdateManyWithoutSubjectInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
-  grade_id?: Prisma.StringFieldUpdateOperationsInput | string
-  location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
-  price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type SubjectOfferingCreateManyGradeInput = {
-  offering_id?: string
-  subject_id: string
-  location: $Enums.Location
-  price_per_term: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type SubjectOfferingUpdateWithoutGradeInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
-  location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
-  price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subject?: Prisma.SubjectUpdateOneRequiredWithoutOfferingsNestedInput
-  classTimes?: Prisma.ClassTimeUpdateManyWithoutOfferingNestedInput
-}
-
-export type SubjectOfferingUncheckedUpdateWithoutGradeInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
+export type SubjectOfferingUpdateWithoutTutorInput = {
   subject_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  classTimes?: Prisma.ClassTimeUncheckedUpdateManyWithoutOfferingNestedInput
+  classTimes?: Prisma.ClassTimeUpdateManyWithoutSubject_offeringNestedInput
 }
 
-export type SubjectOfferingUncheckedUpdateManyWithoutGradeInput = {
-  offering_id?: Prisma.StringFieldUpdateOperationsInput | string
+export type SubjectOfferingUncheckedUpdateWithoutTutorInput = {
   subject_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
+  location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
+  price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  classTimes?: Prisma.ClassTimeUncheckedUpdateManyWithoutSubject_offeringNestedInput
+}
+
+export type SubjectOfferingUncheckedUpdateManyWithoutTutorInput = {
+  subject_id?: Prisma.StringFieldUpdateOperationsInput | string
+  subject_name?: Prisma.StringFieldUpdateOperationsInput | string
+  grade?: Prisma.IntFieldUpdateOperationsInput | number
   location?: Prisma.EnumLocationFieldUpdateOperationsInput | $Enums.Location
   price_per_term?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
 }
@@ -723,74 +646,72 @@ export type SubjectOfferingCountOutputTypeCountClassTimesArgs<ExtArgs extends ru
 
 
 export type SubjectOfferingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  offering_id?: boolean
   subject_id?: boolean
-  grade_id?: boolean
+  subject_name?: boolean
+  grade?: boolean
   location?: boolean
   price_per_term?: boolean
-  subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
-  grade?: boolean | Prisma.GradeDefaultArgs<ExtArgs>
+  tutorTutor_id?: boolean
   classTimes?: boolean | Prisma.SubjectOffering$classTimesArgs<ExtArgs>
+  tutor?: boolean | Prisma.SubjectOffering$tutorArgs<ExtArgs>
   _count?: boolean | Prisma.SubjectOfferingCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subjectOffering"]>
 
 export type SubjectOfferingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  offering_id?: boolean
   subject_id?: boolean
-  grade_id?: boolean
+  subject_name?: boolean
+  grade?: boolean
   location?: boolean
   price_per_term?: boolean
-  subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
-  grade?: boolean | Prisma.GradeDefaultArgs<ExtArgs>
+  tutorTutor_id?: boolean
+  tutor?: boolean | Prisma.SubjectOffering$tutorArgs<ExtArgs>
 }, ExtArgs["result"]["subjectOffering"]>
 
 export type SubjectOfferingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  offering_id?: boolean
   subject_id?: boolean
-  grade_id?: boolean
+  subject_name?: boolean
+  grade?: boolean
   location?: boolean
   price_per_term?: boolean
-  subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
-  grade?: boolean | Prisma.GradeDefaultArgs<ExtArgs>
+  tutorTutor_id?: boolean
+  tutor?: boolean | Prisma.SubjectOffering$tutorArgs<ExtArgs>
 }, ExtArgs["result"]["subjectOffering"]>
 
 export type SubjectOfferingSelectScalar = {
-  offering_id?: boolean
   subject_id?: boolean
-  grade_id?: boolean
+  subject_name?: boolean
+  grade?: boolean
   location?: boolean
   price_per_term?: boolean
+  tutorTutor_id?: boolean
 }
 
-export type SubjectOfferingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"offering_id" | "subject_id" | "grade_id" | "location" | "price_per_term", ExtArgs["result"]["subjectOffering"]>
+export type SubjectOfferingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"subject_id" | "subject_name" | "grade" | "location" | "price_per_term" | "tutorTutor_id", ExtArgs["result"]["subjectOffering"]>
 export type SubjectOfferingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
-  grade?: boolean | Prisma.GradeDefaultArgs<ExtArgs>
   classTimes?: boolean | Prisma.SubjectOffering$classTimesArgs<ExtArgs>
+  tutor?: boolean | Prisma.SubjectOffering$tutorArgs<ExtArgs>
   _count?: boolean | Prisma.SubjectOfferingCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SubjectOfferingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
-  grade?: boolean | Prisma.GradeDefaultArgs<ExtArgs>
+  tutor?: boolean | Prisma.SubjectOffering$tutorArgs<ExtArgs>
 }
 export type SubjectOfferingIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
-  grade?: boolean | Prisma.GradeDefaultArgs<ExtArgs>
+  tutor?: boolean | Prisma.SubjectOffering$tutorArgs<ExtArgs>
 }
 
 export type $SubjectOfferingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SubjectOffering"
   objects: {
-    subject: Prisma.$SubjectPayload<ExtArgs>
-    grade: Prisma.$GradePayload<ExtArgs>
     classTimes: Prisma.$ClassTimePayload<ExtArgs>[]
+    tutor: Prisma.$TutorPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    offering_id: string
     subject_id: string
-    grade_id: string
+    subject_name: string
+    grade: number
     location: $Enums.Location
     price_per_term: runtime.Decimal
+    tutorTutor_id: string | null
   }, ExtArgs["result"]["subjectOffering"]>
   composites: {}
 }
@@ -874,8 +795,8 @@ export interface SubjectOfferingDelegate<ExtArgs extends runtime.Types.Extension
    * // Get first 10 SubjectOfferings
    * const subjectOfferings = await prisma.subjectOffering.findMany({ take: 10 })
    * 
-   * // Only select the `offering_id`
-   * const subjectOfferingWithOffering_idOnly = await prisma.subjectOffering.findMany({ select: { offering_id: true } })
+   * // Only select the `subject_id`
+   * const subjectOfferingWithSubject_idOnly = await prisma.subjectOffering.findMany({ select: { subject_id: true } })
    * 
    */
   findMany<T extends SubjectOfferingFindManyArgs>(args?: Prisma.SelectSubset<T, SubjectOfferingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubjectOfferingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -919,9 +840,9 @@ export interface SubjectOfferingDelegate<ExtArgs extends runtime.Types.Extension
    *   ]
    * })
    * 
-   * // Create many SubjectOfferings and only return the `offering_id`
-   * const subjectOfferingWithOffering_idOnly = await prisma.subjectOffering.createManyAndReturn({
-   *   select: { offering_id: true },
+   * // Create many SubjectOfferings and only return the `subject_id`
+   * const subjectOfferingWithSubject_idOnly = await prisma.subjectOffering.createManyAndReturn({
+   *   select: { subject_id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -1010,9 +931,9 @@ export interface SubjectOfferingDelegate<ExtArgs extends runtime.Types.Extension
    *   ]
    * })
    * 
-   * // Update zero or more SubjectOfferings and only return the `offering_id`
-   * const subjectOfferingWithOffering_idOnly = await prisma.subjectOffering.updateManyAndReturn({
-   *   select: { offering_id: true },
+   * // Update zero or more SubjectOfferings and only return the `subject_id`
+   * const subjectOfferingWithSubject_idOnly = await prisma.subjectOffering.updateManyAndReturn({
+   *   select: { subject_id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1185,9 +1106,8 @@ readonly fields: SubjectOfferingFieldRefs;
  */
 export interface Prisma__SubjectOfferingClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  subject<T extends Prisma.SubjectDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SubjectDefaultArgs<ExtArgs>>): Prisma.Prisma__SubjectClient<runtime.Types.Result.GetResult<Prisma.$SubjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  grade<T extends Prisma.GradeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GradeDefaultArgs<ExtArgs>>): Prisma.Prisma__GradeClient<runtime.Types.Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   classTimes<T extends Prisma.SubjectOffering$classTimesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SubjectOffering$classTimesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassTimePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tutor<T extends Prisma.SubjectOffering$tutorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SubjectOffering$tutorArgs<ExtArgs>>): Prisma.Prisma__TutorClient<runtime.Types.Result.GetResult<Prisma.$TutorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1217,11 +1137,12 @@ export interface Prisma__SubjectOfferingClient<T, Null = never, ExtArgs extends 
  * Fields of the SubjectOffering model
  */
 export interface SubjectOfferingFieldRefs {
-  readonly offering_id: Prisma.FieldRef<"SubjectOffering", 'String'>
   readonly subject_id: Prisma.FieldRef<"SubjectOffering", 'String'>
-  readonly grade_id: Prisma.FieldRef<"SubjectOffering", 'String'>
+  readonly subject_name: Prisma.FieldRef<"SubjectOffering", 'String'>
+  readonly grade: Prisma.FieldRef<"SubjectOffering", 'Int'>
   readonly location: Prisma.FieldRef<"SubjectOffering", 'Location'>
   readonly price_per_term: Prisma.FieldRef<"SubjectOffering", 'Decimal'>
+  readonly tutorTutor_id: Prisma.FieldRef<"SubjectOffering", 'String'>
 }
     
 
@@ -1639,6 +1560,25 @@ export type SubjectOffering$classTimesArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.ClassTimeScalarFieldEnum | Prisma.ClassTimeScalarFieldEnum[]
+}
+
+/**
+ * SubjectOffering.tutor
+ */
+export type SubjectOffering$tutorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Tutor
+   */
+  select?: Prisma.TutorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Tutor
+   */
+  omit?: Prisma.TutorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TutorInclude<ExtArgs> | null
+  where?: Prisma.TutorWhereInput
 }
 
 /**
