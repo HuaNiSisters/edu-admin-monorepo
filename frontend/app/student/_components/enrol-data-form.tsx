@@ -84,7 +84,7 @@ export default function EnrolDataForm({
   const onTermChange = async (termData: Partial<Term>) => {
     console.log({ termData });
     let termId = termData.term_id;
-    if(!termId) {
+    if (!termId) {
       const newlyCreatedTerm = await termService.createTermAsync({
         year: termData.year!,
         name: termData.name!,
@@ -96,7 +96,7 @@ export default function EnrolDataForm({
       await termService.updateTermAsync(termData.term_id!, {
         start_date: termData.start_date!,
         end_date: termData.end_date!,
-      });      
+      });
     }
     form.setValue("termId", termId);
   };
@@ -128,10 +128,7 @@ export default function EnrolDataForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field className="flex">
-                  <SelectTerm
-                    value={field.value}
-                    onChange={onTermChange}
-                  />
+                  <SelectTerm value={field.value} onChange={onTermChange} />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}

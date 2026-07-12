@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
-import EnrolDataForm, {
-  EnrolDataFormHandle,
-} from "./enrol-data-form";
+import EnrolDataForm, { EnrolDataFormHandle } from "./enrol-data-form";
 
 interface EnrolDialogProps {
   studentId: string;

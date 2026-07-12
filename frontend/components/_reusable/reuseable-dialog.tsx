@@ -33,12 +33,15 @@ export const ReusableDialog = ({
 }: ReusableDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent showCloseButton={canClose}>
+      <DialogContent
+        showCloseButton={canClose}
+        className="max-w-lg overflow-x-hidden"
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        {children}
+        <div className="min-w-0">{children}</div>
 
         <DialogFooter>
           {canCancel && (

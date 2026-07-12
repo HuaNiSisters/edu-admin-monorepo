@@ -191,13 +191,13 @@ const SelectTerm = (props: SelectTermProps) => {
 
   return (
     <div>
-      <div className="flex gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center">
         <span className="shrink-0">Year:</span>
         <Select
           value={`${selectedYear}`}
           onValueChange={(yearStr) => setSelectedYear(parseInt(yearStr))}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-[100px]">
             <SelectValue placeholder="Select a year" />
           </SelectTrigger>
           <SelectContent>
@@ -213,7 +213,7 @@ const SelectTerm = (props: SelectTermProps) => {
           value={`${selectedTermNumber}`}
           onValueChange={(value) => setSelectedTermNumber(parseInt(value))}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-[90px]">
             <SelectValue placeholder="Select a term number" />
           </SelectTrigger>
           <SelectContent>
@@ -226,13 +226,13 @@ const SelectTerm = (props: SelectTermProps) => {
         </Select>
 
         {!getTermStatus() ? null : (
-          <Badge variant="outline" className="text-xs py-0">
+          <Badge variant="outline" className="text-xs py-0 shrink-0">
             {getTermStatus()}
           </Badge>
         )}
-        <div className="">
+        <div className="min-w-0 basis-full sm:basis-auto">
           <DateRangePicker
-            className="justify-start"
+            className="justify-start w-full sm:w-auto"
             isDisabled={disableEditTermDates()}
             startDate={selectedTermStartDate}
             endDate={selectedTermEndDate}
