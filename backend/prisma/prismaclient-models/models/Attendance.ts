@@ -38,6 +38,7 @@ export type AttendanceMinAggregateOutputType = {
   attendance_id: string | null
   student_id: string | null
   class_id: string | null
+  term_id: string | null
   week: number | null
   status: $Enums.AttendanceStatus | null
   notes: string | null
@@ -47,6 +48,7 @@ export type AttendanceMaxAggregateOutputType = {
   attendance_id: string | null
   student_id: string | null
   class_id: string | null
+  term_id: string | null
   week: number | null
   status: $Enums.AttendanceStatus | null
   notes: string | null
@@ -56,6 +58,7 @@ export type AttendanceCountAggregateOutputType = {
   attendance_id: number
   student_id: number
   class_id: number
+  term_id: number
   week: number
   status: number
   notes: number
@@ -75,6 +78,7 @@ export type AttendanceMinAggregateInputType = {
   attendance_id?: true
   student_id?: true
   class_id?: true
+  term_id?: true
   week?: true
   status?: true
   notes?: true
@@ -84,6 +88,7 @@ export type AttendanceMaxAggregateInputType = {
   attendance_id?: true
   student_id?: true
   class_id?: true
+  term_id?: true
   week?: true
   status?: true
   notes?: true
@@ -93,6 +98,7 @@ export type AttendanceCountAggregateInputType = {
   attendance_id?: true
   student_id?: true
   class_id?: true
+  term_id?: true
   week?: true
   status?: true
   notes?: true
@@ -189,6 +195,7 @@ export type AttendanceGroupByOutputType = {
   attendance_id: string
   student_id: string
   class_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes: string | null
@@ -221,43 +228,50 @@ export type AttendanceWhereInput = {
   attendance_id?: Prisma.UuidFilter<"Attendance"> | string
   student_id?: Prisma.UuidFilter<"Attendance"> | string
   class_id?: Prisma.UuidFilter<"Attendance"> | string
+  term_id?: Prisma.UuidFilter<"Attendance"> | string
   week?: Prisma.IntFilter<"Attendance"> | number
   status?: Prisma.EnumAttendanceStatusFilter<"Attendance"> | $Enums.AttendanceStatus
   notes?: Prisma.StringNullableFilter<"Attendance"> | string | null
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
   class?: Prisma.XOR<Prisma.ClassTimeScalarRelationFilter, Prisma.ClassTimeWhereInput>
+  term?: Prisma.XOR<Prisma.TermScalarRelationFilter, Prisma.TermWhereInput>
 }
 
 export type AttendanceOrderByWithRelationInput = {
   attendance_id?: Prisma.SortOrder
   student_id?: Prisma.SortOrder
   class_id?: Prisma.SortOrder
+  term_id?: Prisma.SortOrder
   week?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   student?: Prisma.StudentOrderByWithRelationInput
   class?: Prisma.ClassTimeOrderByWithRelationInput
+  term?: Prisma.TermOrderByWithRelationInput
 }
 
 export type AttendanceWhereUniqueInput = Prisma.AtLeast<{
   attendance_id?: string
-  student_id_class_id_week?: Prisma.AttendanceStudent_idClass_idWeekCompoundUniqueInput
+  student_id_class_id_term_id_week?: Prisma.AttendanceStudent_idClass_idTerm_idWeekCompoundUniqueInput
   AND?: Prisma.AttendanceWhereInput | Prisma.AttendanceWhereInput[]
   OR?: Prisma.AttendanceWhereInput[]
   NOT?: Prisma.AttendanceWhereInput | Prisma.AttendanceWhereInput[]
   student_id?: Prisma.UuidFilter<"Attendance"> | string
   class_id?: Prisma.UuidFilter<"Attendance"> | string
+  term_id?: Prisma.UuidFilter<"Attendance"> | string
   week?: Prisma.IntFilter<"Attendance"> | number
   status?: Prisma.EnumAttendanceStatusFilter<"Attendance"> | $Enums.AttendanceStatus
   notes?: Prisma.StringNullableFilter<"Attendance"> | string | null
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
   class?: Prisma.XOR<Prisma.ClassTimeScalarRelationFilter, Prisma.ClassTimeWhereInput>
-}, "attendance_id" | "student_id_class_id_week">
+  term?: Prisma.XOR<Prisma.TermScalarRelationFilter, Prisma.TermWhereInput>
+}, "attendance_id" | "student_id_class_id_term_id_week">
 
 export type AttendanceOrderByWithAggregationInput = {
   attendance_id?: Prisma.SortOrder
   student_id?: Prisma.SortOrder
   class_id?: Prisma.SortOrder
+  term_id?: Prisma.SortOrder
   week?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -275,6 +289,7 @@ export type AttendanceScalarWhereWithAggregatesInput = {
   attendance_id?: Prisma.UuidWithAggregatesFilter<"Attendance"> | string
   student_id?: Prisma.UuidWithAggregatesFilter<"Attendance"> | string
   class_id?: Prisma.UuidWithAggregatesFilter<"Attendance"> | string
+  term_id?: Prisma.UuidWithAggregatesFilter<"Attendance"> | string
   week?: Prisma.IntWithAggregatesFilter<"Attendance"> | number
   status?: Prisma.EnumAttendanceStatusWithAggregatesFilter<"Attendance"> | $Enums.AttendanceStatus
   notes?: Prisma.StringNullableWithAggregatesFilter<"Attendance"> | string | null
@@ -287,12 +302,14 @@ export type AttendanceCreateInput = {
   notes?: string | null
   student: Prisma.StudentCreateNestedOneWithoutAttendancesInput
   class: Prisma.ClassTimeCreateNestedOneWithoutAttendanceInput
+  term: Prisma.TermCreateNestedOneWithoutAttendancesInput
 }
 
 export type AttendanceUncheckedCreateInput = {
   attendance_id?: string
   student_id: string
   class_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes?: string | null
@@ -305,12 +322,14 @@ export type AttendanceUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.StudentUpdateOneRequiredWithoutAttendancesNestedInput
   class?: Prisma.ClassTimeUpdateOneRequiredWithoutAttendanceNestedInput
+  term?: Prisma.TermUpdateOneRequiredWithoutAttendancesNestedInput
 }
 
 export type AttendanceUncheckedUpdateInput = {
   attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
   student_id?: Prisma.StringFieldUpdateOperationsInput | string
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
   week?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -320,6 +339,7 @@ export type AttendanceCreateManyInput = {
   attendance_id?: string
   student_id: string
   class_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes?: string | null
@@ -336,6 +356,7 @@ export type AttendanceUncheckedUpdateManyInput = {
   attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
   student_id?: Prisma.StringFieldUpdateOperationsInput | string
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
   week?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -351,9 +372,10 @@ export type AttendanceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type AttendanceStudent_idClass_idWeekCompoundUniqueInput = {
+export type AttendanceStudent_idClass_idTerm_idWeekCompoundUniqueInput = {
   student_id: string
   class_id: string
+  term_id: string
   week: number
 }
 
@@ -361,6 +383,7 @@ export type AttendanceCountOrderByAggregateInput = {
   attendance_id?: Prisma.SortOrder
   student_id?: Prisma.SortOrder
   class_id?: Prisma.SortOrder
+  term_id?: Prisma.SortOrder
   week?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -374,6 +397,7 @@ export type AttendanceMaxOrderByAggregateInput = {
   attendance_id?: Prisma.SortOrder
   student_id?: Prisma.SortOrder
   class_id?: Prisma.SortOrder
+  term_id?: Prisma.SortOrder
   week?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -383,6 +407,7 @@ export type AttendanceMinOrderByAggregateInput = {
   attendance_id?: Prisma.SortOrder
   student_id?: Prisma.SortOrder
   class_id?: Prisma.SortOrder
+  term_id?: Prisma.SortOrder
   week?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -476,6 +501,48 @@ export type AttendanceUncheckedUpdateManyWithoutClassNestedInput = {
   deleteMany?: Prisma.AttendanceScalarWhereInput | Prisma.AttendanceScalarWhereInput[]
 }
 
+export type AttendanceCreateNestedManyWithoutTermInput = {
+  create?: Prisma.XOR<Prisma.AttendanceCreateWithoutTermInput, Prisma.AttendanceUncheckedCreateWithoutTermInput> | Prisma.AttendanceCreateWithoutTermInput[] | Prisma.AttendanceUncheckedCreateWithoutTermInput[]
+  connectOrCreate?: Prisma.AttendanceCreateOrConnectWithoutTermInput | Prisma.AttendanceCreateOrConnectWithoutTermInput[]
+  createMany?: Prisma.AttendanceCreateManyTermInputEnvelope
+  connect?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+}
+
+export type AttendanceUncheckedCreateNestedManyWithoutTermInput = {
+  create?: Prisma.XOR<Prisma.AttendanceCreateWithoutTermInput, Prisma.AttendanceUncheckedCreateWithoutTermInput> | Prisma.AttendanceCreateWithoutTermInput[] | Prisma.AttendanceUncheckedCreateWithoutTermInput[]
+  connectOrCreate?: Prisma.AttendanceCreateOrConnectWithoutTermInput | Prisma.AttendanceCreateOrConnectWithoutTermInput[]
+  createMany?: Prisma.AttendanceCreateManyTermInputEnvelope
+  connect?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+}
+
+export type AttendanceUpdateManyWithoutTermNestedInput = {
+  create?: Prisma.XOR<Prisma.AttendanceCreateWithoutTermInput, Prisma.AttendanceUncheckedCreateWithoutTermInput> | Prisma.AttendanceCreateWithoutTermInput[] | Prisma.AttendanceUncheckedCreateWithoutTermInput[]
+  connectOrCreate?: Prisma.AttendanceCreateOrConnectWithoutTermInput | Prisma.AttendanceCreateOrConnectWithoutTermInput[]
+  upsert?: Prisma.AttendanceUpsertWithWhereUniqueWithoutTermInput | Prisma.AttendanceUpsertWithWhereUniqueWithoutTermInput[]
+  createMany?: Prisma.AttendanceCreateManyTermInputEnvelope
+  set?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  disconnect?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  delete?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  connect?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  update?: Prisma.AttendanceUpdateWithWhereUniqueWithoutTermInput | Prisma.AttendanceUpdateWithWhereUniqueWithoutTermInput[]
+  updateMany?: Prisma.AttendanceUpdateManyWithWhereWithoutTermInput | Prisma.AttendanceUpdateManyWithWhereWithoutTermInput[]
+  deleteMany?: Prisma.AttendanceScalarWhereInput | Prisma.AttendanceScalarWhereInput[]
+}
+
+export type AttendanceUncheckedUpdateManyWithoutTermNestedInput = {
+  create?: Prisma.XOR<Prisma.AttendanceCreateWithoutTermInput, Prisma.AttendanceUncheckedCreateWithoutTermInput> | Prisma.AttendanceCreateWithoutTermInput[] | Prisma.AttendanceUncheckedCreateWithoutTermInput[]
+  connectOrCreate?: Prisma.AttendanceCreateOrConnectWithoutTermInput | Prisma.AttendanceCreateOrConnectWithoutTermInput[]
+  upsert?: Prisma.AttendanceUpsertWithWhereUniqueWithoutTermInput | Prisma.AttendanceUpsertWithWhereUniqueWithoutTermInput[]
+  createMany?: Prisma.AttendanceCreateManyTermInputEnvelope
+  set?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  disconnect?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  delete?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  connect?: Prisma.AttendanceWhereUniqueInput | Prisma.AttendanceWhereUniqueInput[]
+  update?: Prisma.AttendanceUpdateWithWhereUniqueWithoutTermInput | Prisma.AttendanceUpdateWithWhereUniqueWithoutTermInput[]
+  updateMany?: Prisma.AttendanceUpdateManyWithWhereWithoutTermInput | Prisma.AttendanceUpdateManyWithWhereWithoutTermInput[]
+  deleteMany?: Prisma.AttendanceScalarWhereInput | Prisma.AttendanceScalarWhereInput[]
+}
+
 export type EnumAttendanceStatusFieldUpdateOperationsInput = {
   set?: $Enums.AttendanceStatus
 }
@@ -486,11 +553,13 @@ export type AttendanceCreateWithoutStudentInput = {
   status: $Enums.AttendanceStatus
   notes?: string | null
   class: Prisma.ClassTimeCreateNestedOneWithoutAttendanceInput
+  term: Prisma.TermCreateNestedOneWithoutAttendancesInput
 }
 
 export type AttendanceUncheckedCreateWithoutStudentInput = {
   attendance_id?: string
   class_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes?: string | null
@@ -529,6 +598,7 @@ export type AttendanceScalarWhereInput = {
   attendance_id?: Prisma.UuidFilter<"Attendance"> | string
   student_id?: Prisma.UuidFilter<"Attendance"> | string
   class_id?: Prisma.UuidFilter<"Attendance"> | string
+  term_id?: Prisma.UuidFilter<"Attendance"> | string
   week?: Prisma.IntFilter<"Attendance"> | number
   status?: Prisma.EnumAttendanceStatusFilter<"Attendance"> | $Enums.AttendanceStatus
   notes?: Prisma.StringNullableFilter<"Attendance"> | string | null
@@ -540,11 +610,13 @@ export type AttendanceCreateWithoutClassInput = {
   status: $Enums.AttendanceStatus
   notes?: string | null
   student: Prisma.StudentCreateNestedOneWithoutAttendancesInput
+  term: Prisma.TermCreateNestedOneWithoutAttendancesInput
 }
 
 export type AttendanceUncheckedCreateWithoutClassInput = {
   attendance_id?: string
   student_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes?: string | null
@@ -576,9 +648,54 @@ export type AttendanceUpdateManyWithWhereWithoutClassInput = {
   data: Prisma.XOR<Prisma.AttendanceUpdateManyMutationInput, Prisma.AttendanceUncheckedUpdateManyWithoutClassInput>
 }
 
+export type AttendanceCreateWithoutTermInput = {
+  attendance_id?: string
+  week: number
+  status: $Enums.AttendanceStatus
+  notes?: string | null
+  student: Prisma.StudentCreateNestedOneWithoutAttendancesInput
+  class: Prisma.ClassTimeCreateNestedOneWithoutAttendanceInput
+}
+
+export type AttendanceUncheckedCreateWithoutTermInput = {
+  attendance_id?: string
+  student_id: string
+  class_id: string
+  week: number
+  status: $Enums.AttendanceStatus
+  notes?: string | null
+}
+
+export type AttendanceCreateOrConnectWithoutTermInput = {
+  where: Prisma.AttendanceWhereUniqueInput
+  create: Prisma.XOR<Prisma.AttendanceCreateWithoutTermInput, Prisma.AttendanceUncheckedCreateWithoutTermInput>
+}
+
+export type AttendanceCreateManyTermInputEnvelope = {
+  data: Prisma.AttendanceCreateManyTermInput | Prisma.AttendanceCreateManyTermInput[]
+  skipDuplicates?: boolean
+}
+
+export type AttendanceUpsertWithWhereUniqueWithoutTermInput = {
+  where: Prisma.AttendanceWhereUniqueInput
+  update: Prisma.XOR<Prisma.AttendanceUpdateWithoutTermInput, Prisma.AttendanceUncheckedUpdateWithoutTermInput>
+  create: Prisma.XOR<Prisma.AttendanceCreateWithoutTermInput, Prisma.AttendanceUncheckedCreateWithoutTermInput>
+}
+
+export type AttendanceUpdateWithWhereUniqueWithoutTermInput = {
+  where: Prisma.AttendanceWhereUniqueInput
+  data: Prisma.XOR<Prisma.AttendanceUpdateWithoutTermInput, Prisma.AttendanceUncheckedUpdateWithoutTermInput>
+}
+
+export type AttendanceUpdateManyWithWhereWithoutTermInput = {
+  where: Prisma.AttendanceScalarWhereInput
+  data: Prisma.XOR<Prisma.AttendanceUpdateManyMutationInput, Prisma.AttendanceUncheckedUpdateManyWithoutTermInput>
+}
+
 export type AttendanceCreateManyStudentInput = {
   attendance_id?: string
   class_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes?: string | null
@@ -590,11 +707,13 @@ export type AttendanceUpdateWithoutStudentInput = {
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   class?: Prisma.ClassTimeUpdateOneRequiredWithoutAttendanceNestedInput
+  term?: Prisma.TermUpdateOneRequiredWithoutAttendancesNestedInput
 }
 
 export type AttendanceUncheckedUpdateWithoutStudentInput = {
   attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
   week?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -603,6 +722,7 @@ export type AttendanceUncheckedUpdateWithoutStudentInput = {
 export type AttendanceUncheckedUpdateManyWithoutStudentInput = {
   attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
   week?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -611,6 +731,7 @@ export type AttendanceUncheckedUpdateManyWithoutStudentInput = {
 export type AttendanceCreateManyClassInput = {
   attendance_id?: string
   student_id: string
+  term_id: string
   week: number
   status: $Enums.AttendanceStatus
   notes?: string | null
@@ -622,11 +743,13 @@ export type AttendanceUpdateWithoutClassInput = {
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.StudentUpdateOneRequiredWithoutAttendancesNestedInput
+  term?: Prisma.TermUpdateOneRequiredWithoutAttendancesNestedInput
 }
 
 export type AttendanceUncheckedUpdateWithoutClassInput = {
   attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
   student_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
   week?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -635,6 +758,43 @@ export type AttendanceUncheckedUpdateWithoutClassInput = {
 export type AttendanceUncheckedUpdateManyWithoutClassInput = {
   attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
   student_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
+  week?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type AttendanceCreateManyTermInput = {
+  attendance_id?: string
+  student_id: string
+  class_id: string
+  week: number
+  status: $Enums.AttendanceStatus
+  notes?: string | null
+}
+
+export type AttendanceUpdateWithoutTermInput = {
+  attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
+  week?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  student?: Prisma.StudentUpdateOneRequiredWithoutAttendancesNestedInput
+  class?: Prisma.ClassTimeUpdateOneRequiredWithoutAttendanceNestedInput
+}
+
+export type AttendanceUncheckedUpdateWithoutTermInput = {
+  attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
+  student_id?: Prisma.StringFieldUpdateOperationsInput | string
+  class_id?: Prisma.StringFieldUpdateOperationsInput | string
+  week?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type AttendanceUncheckedUpdateManyWithoutTermInput = {
+  attendance_id?: Prisma.StringFieldUpdateOperationsInput | string
+  student_id?: Prisma.StringFieldUpdateOperationsInput | string
+  class_id?: Prisma.StringFieldUpdateOperationsInput | string
   week?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumAttendanceStatusFieldUpdateOperationsInput | $Enums.AttendanceStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -646,56 +806,66 @@ export type AttendanceSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   attendance_id?: boolean
   student_id?: boolean
   class_id?: boolean
+  term_id?: boolean
   week?: boolean
   status?: boolean
   notes?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
+  term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attendance"]>
 
 export type AttendanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   attendance_id?: boolean
   student_id?: boolean
   class_id?: boolean
+  term_id?: boolean
   week?: boolean
   status?: boolean
   notes?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
+  term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attendance"]>
 
 export type AttendanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   attendance_id?: boolean
   student_id?: boolean
   class_id?: boolean
+  term_id?: boolean
   week?: boolean
   status?: boolean
   notes?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
+  term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attendance"]>
 
 export type AttendanceSelectScalar = {
   attendance_id?: boolean
   student_id?: boolean
   class_id?: boolean
+  term_id?: boolean
   week?: boolean
   status?: boolean
   notes?: boolean
 }
 
-export type AttendanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"attendance_id" | "student_id" | "class_id" | "week" | "status" | "notes", ExtArgs["result"]["attendance"]>
+export type AttendanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"attendance_id" | "student_id" | "class_id" | "term_id" | "week" | "status" | "notes", ExtArgs["result"]["attendance"]>
 export type AttendanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
+  term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
 }
 export type AttendanceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
+  term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
 }
 export type AttendanceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
+  term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
 }
 
 export type $AttendancePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -703,11 +873,13 @@ export type $AttendancePayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     student: Prisma.$StudentPayload<ExtArgs>
     class: Prisma.$ClassTimePayload<ExtArgs>
+    term: Prisma.$TermPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     attendance_id: string
     student_id: string
     class_id: string
+    term_id: string
     week: number
     status: $Enums.AttendanceStatus
     notes: string | null
@@ -1107,6 +1279,7 @@ export interface Prisma__AttendanceClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   student<T extends Prisma.StudentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StudentDefaultArgs<ExtArgs>>): Prisma.Prisma__StudentClient<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   class<T extends Prisma.ClassTimeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClassTimeDefaultArgs<ExtArgs>>): Prisma.Prisma__ClassTimeClient<runtime.Types.Result.GetResult<Prisma.$ClassTimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  term<T extends Prisma.TermDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TermDefaultArgs<ExtArgs>>): Prisma.Prisma__TermClient<runtime.Types.Result.GetResult<Prisma.$TermPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1139,6 +1312,7 @@ export interface AttendanceFieldRefs {
   readonly attendance_id: Prisma.FieldRef<"Attendance", 'String'>
   readonly student_id: Prisma.FieldRef<"Attendance", 'String'>
   readonly class_id: Prisma.FieldRef<"Attendance", 'String'>
+  readonly term_id: Prisma.FieldRef<"Attendance", 'String'>
   readonly week: Prisma.FieldRef<"Attendance", 'Int'>
   readonly status: Prisma.FieldRef<"Attendance", 'AttendanceStatus'>
   readonly notes: Prisma.FieldRef<"Attendance", 'String'>

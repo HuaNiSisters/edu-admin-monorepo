@@ -235,15 +235,6 @@ model Payment {
   enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id])
 }
 
-generator typescriptInterfaces {
-  provider    = "prisma-generator-typescript-interfaces"
-  output      = "./../types/interfaces/models.ts"
-  dateType    = "string"
-  bigIntType  = "string"
-  decimalType = "string"
-  bytesType   = "number[]"
-}
-
 generator prismabox {
   provider = "prisma-client"
   // you can optionally specify the output location. Defaults to ./prismabox

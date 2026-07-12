@@ -242,7 +242,7 @@ export type ClassTimeWhereInput = {
   end_time?: Prisma.StringFilter<"ClassTime"> | string
   capacity?: Prisma.IntNullableFilter<"ClassTime"> | number | null
   active?: Prisma.BoolFilter<"ClassTime"> | boolean
-  offering?: Prisma.XOR<Prisma.SubjectOfferingScalarRelationFilter, Prisma.SubjectOfferingWhereInput>
+  subject_offering?: Prisma.XOR<Prisma.SubjectOfferingScalarRelationFilter, Prisma.SubjectOfferingWhereInput>
   enrolments?: Prisma.EnrolmentListRelationFilter
   attendance?: Prisma.AttendanceListRelationFilter
   tutor?: Prisma.XOR<Prisma.TutorNullableScalarRelationFilter, Prisma.TutorWhereInput> | null
@@ -257,7 +257,7 @@ export type ClassTimeOrderByWithRelationInput = {
   end_time?: Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
-  offering?: Prisma.SubjectOfferingOrderByWithRelationInput
+  subject_offering?: Prisma.SubjectOfferingOrderByWithRelationInput
   enrolments?: Prisma.EnrolmentOrderByRelationAggregateInput
   attendance?: Prisma.AttendanceOrderByRelationAggregateInput
   tutor?: Prisma.TutorOrderByWithRelationInput
@@ -275,7 +275,7 @@ export type ClassTimeWhereUniqueInput = Prisma.AtLeast<{
   end_time?: Prisma.StringFilter<"ClassTime"> | string
   capacity?: Prisma.IntNullableFilter<"ClassTime"> | number | null
   active?: Prisma.BoolFilter<"ClassTime"> | boolean
-  offering?: Prisma.XOR<Prisma.SubjectOfferingScalarRelationFilter, Prisma.SubjectOfferingWhereInput>
+  subject_offering?: Prisma.XOR<Prisma.SubjectOfferingScalarRelationFilter, Prisma.SubjectOfferingWhereInput>
   enrolments?: Prisma.EnrolmentListRelationFilter
   attendance?: Prisma.AttendanceListRelationFilter
   tutor?: Prisma.XOR<Prisma.TutorNullableScalarRelationFilter, Prisma.TutorWhereInput> | null
@@ -318,7 +318,7 @@ export type ClassTimeCreateInput = {
   end_time: string
   capacity?: number | null
   active?: boolean
-  offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
+  subject_offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
   enrolments?: Prisma.EnrolmentCreateNestedManyWithoutClassInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutClassInput
   tutor?: Prisma.TutorCreateNestedOneWithoutClassesInput
@@ -344,7 +344,7 @@ export type ClassTimeUpdateInput = {
   end_time?: Prisma.StringFieldUpdateOperationsInput | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
+  subject_offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
   enrolments?: Prisma.EnrolmentUpdateManyWithoutClassNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutClassNestedInput
   tutor?: Prisma.TutorUpdateOneWithoutClassesNestedInput
@@ -504,45 +504,45 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
-export type ClassTimeCreateNestedManyWithoutOfferingInput = {
-  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutOfferingInput, Prisma.ClassTimeUncheckedCreateWithoutOfferingInput> | Prisma.ClassTimeCreateWithoutOfferingInput[] | Prisma.ClassTimeUncheckedCreateWithoutOfferingInput[]
-  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutOfferingInput | Prisma.ClassTimeCreateOrConnectWithoutOfferingInput[]
-  createMany?: Prisma.ClassTimeCreateManyOfferingInputEnvelope
+export type ClassTimeCreateNestedManyWithoutSubject_offeringInput = {
+  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput> | Prisma.ClassTimeCreateWithoutSubject_offeringInput[] | Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput[]
+  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput | Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput[]
+  createMany?: Prisma.ClassTimeCreateManySubject_offeringInputEnvelope
   connect?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
 }
 
-export type ClassTimeUncheckedCreateNestedManyWithoutOfferingInput = {
-  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutOfferingInput, Prisma.ClassTimeUncheckedCreateWithoutOfferingInput> | Prisma.ClassTimeCreateWithoutOfferingInput[] | Prisma.ClassTimeUncheckedCreateWithoutOfferingInput[]
-  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutOfferingInput | Prisma.ClassTimeCreateOrConnectWithoutOfferingInput[]
-  createMany?: Prisma.ClassTimeCreateManyOfferingInputEnvelope
+export type ClassTimeUncheckedCreateNestedManyWithoutSubject_offeringInput = {
+  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput> | Prisma.ClassTimeCreateWithoutSubject_offeringInput[] | Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput[]
+  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput | Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput[]
+  createMany?: Prisma.ClassTimeCreateManySubject_offeringInputEnvelope
   connect?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
 }
 
-export type ClassTimeUpdateManyWithoutOfferingNestedInput = {
-  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutOfferingInput, Prisma.ClassTimeUncheckedCreateWithoutOfferingInput> | Prisma.ClassTimeCreateWithoutOfferingInput[] | Prisma.ClassTimeUncheckedCreateWithoutOfferingInput[]
-  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutOfferingInput | Prisma.ClassTimeCreateOrConnectWithoutOfferingInput[]
-  upsert?: Prisma.ClassTimeUpsertWithWhereUniqueWithoutOfferingInput | Prisma.ClassTimeUpsertWithWhereUniqueWithoutOfferingInput[]
-  createMany?: Prisma.ClassTimeCreateManyOfferingInputEnvelope
+export type ClassTimeUpdateManyWithoutSubject_offeringNestedInput = {
+  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput> | Prisma.ClassTimeCreateWithoutSubject_offeringInput[] | Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput[]
+  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput | Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput[]
+  upsert?: Prisma.ClassTimeUpsertWithWhereUniqueWithoutSubject_offeringInput | Prisma.ClassTimeUpsertWithWhereUniqueWithoutSubject_offeringInput[]
+  createMany?: Prisma.ClassTimeCreateManySubject_offeringInputEnvelope
   set?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
   disconnect?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
   delete?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
   connect?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
-  update?: Prisma.ClassTimeUpdateWithWhereUniqueWithoutOfferingInput | Prisma.ClassTimeUpdateWithWhereUniqueWithoutOfferingInput[]
-  updateMany?: Prisma.ClassTimeUpdateManyWithWhereWithoutOfferingInput | Prisma.ClassTimeUpdateManyWithWhereWithoutOfferingInput[]
+  update?: Prisma.ClassTimeUpdateWithWhereUniqueWithoutSubject_offeringInput | Prisma.ClassTimeUpdateWithWhereUniqueWithoutSubject_offeringInput[]
+  updateMany?: Prisma.ClassTimeUpdateManyWithWhereWithoutSubject_offeringInput | Prisma.ClassTimeUpdateManyWithWhereWithoutSubject_offeringInput[]
   deleteMany?: Prisma.ClassTimeScalarWhereInput | Prisma.ClassTimeScalarWhereInput[]
 }
 
-export type ClassTimeUncheckedUpdateManyWithoutOfferingNestedInput = {
-  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutOfferingInput, Prisma.ClassTimeUncheckedCreateWithoutOfferingInput> | Prisma.ClassTimeCreateWithoutOfferingInput[] | Prisma.ClassTimeUncheckedCreateWithoutOfferingInput[]
-  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutOfferingInput | Prisma.ClassTimeCreateOrConnectWithoutOfferingInput[]
-  upsert?: Prisma.ClassTimeUpsertWithWhereUniqueWithoutOfferingInput | Prisma.ClassTimeUpsertWithWhereUniqueWithoutOfferingInput[]
-  createMany?: Prisma.ClassTimeCreateManyOfferingInputEnvelope
+export type ClassTimeUncheckedUpdateManyWithoutSubject_offeringNestedInput = {
+  create?: Prisma.XOR<Prisma.ClassTimeCreateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput> | Prisma.ClassTimeCreateWithoutSubject_offeringInput[] | Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput[]
+  connectOrCreate?: Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput | Prisma.ClassTimeCreateOrConnectWithoutSubject_offeringInput[]
+  upsert?: Prisma.ClassTimeUpsertWithWhereUniqueWithoutSubject_offeringInput | Prisma.ClassTimeUpsertWithWhereUniqueWithoutSubject_offeringInput[]
+  createMany?: Prisma.ClassTimeCreateManySubject_offeringInputEnvelope
   set?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
   disconnect?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
   delete?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
   connect?: Prisma.ClassTimeWhereUniqueInput | Prisma.ClassTimeWhereUniqueInput[]
-  update?: Prisma.ClassTimeUpdateWithWhereUniqueWithoutOfferingInput | Prisma.ClassTimeUpdateWithWhereUniqueWithoutOfferingInput[]
-  updateMany?: Prisma.ClassTimeUpdateManyWithWhereWithoutOfferingInput | Prisma.ClassTimeUpdateManyWithWhereWithoutOfferingInput[]
+  update?: Prisma.ClassTimeUpdateWithWhereUniqueWithoutSubject_offeringInput | Prisma.ClassTimeUpdateWithWhereUniqueWithoutSubject_offeringInput[]
+  updateMany?: Prisma.ClassTimeUpdateManyWithWhereWithoutSubject_offeringInput | Prisma.ClassTimeUpdateManyWithWhereWithoutSubject_offeringInput[]
   deleteMany?: Prisma.ClassTimeScalarWhereInput | Prisma.ClassTimeScalarWhereInput[]
 }
 
@@ -581,7 +581,7 @@ export type ClassTimeCreateWithoutTutorInput = {
   end_time: string
   capacity?: number | null
   active?: boolean
-  offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
+  subject_offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
   enrolments?: Prisma.EnrolmentCreateNestedManyWithoutClassInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutClassInput
 }
@@ -638,7 +638,7 @@ export type ClassTimeScalarWhereInput = {
   active?: Prisma.BoolFilter<"ClassTime"> | boolean
 }
 
-export type ClassTimeCreateWithoutOfferingInput = {
+export type ClassTimeCreateWithoutSubject_offeringInput = {
   class_id?: string
   day_of_week: string
   start_time: string
@@ -650,7 +650,7 @@ export type ClassTimeCreateWithoutOfferingInput = {
   tutor?: Prisma.TutorCreateNestedOneWithoutClassesInput
 }
 
-export type ClassTimeUncheckedCreateWithoutOfferingInput = {
+export type ClassTimeUncheckedCreateWithoutSubject_offeringInput = {
   class_id?: string
   tutor_id?: string | null
   day_of_week: string
@@ -662,30 +662,30 @@ export type ClassTimeUncheckedCreateWithoutOfferingInput = {
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutClassInput
 }
 
-export type ClassTimeCreateOrConnectWithoutOfferingInput = {
+export type ClassTimeCreateOrConnectWithoutSubject_offeringInput = {
   where: Prisma.ClassTimeWhereUniqueInput
-  create: Prisma.XOR<Prisma.ClassTimeCreateWithoutOfferingInput, Prisma.ClassTimeUncheckedCreateWithoutOfferingInput>
+  create: Prisma.XOR<Prisma.ClassTimeCreateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput>
 }
 
-export type ClassTimeCreateManyOfferingInputEnvelope = {
-  data: Prisma.ClassTimeCreateManyOfferingInput | Prisma.ClassTimeCreateManyOfferingInput[]
+export type ClassTimeCreateManySubject_offeringInputEnvelope = {
+  data: Prisma.ClassTimeCreateManySubject_offeringInput | Prisma.ClassTimeCreateManySubject_offeringInput[]
   skipDuplicates?: boolean
 }
 
-export type ClassTimeUpsertWithWhereUniqueWithoutOfferingInput = {
+export type ClassTimeUpsertWithWhereUniqueWithoutSubject_offeringInput = {
   where: Prisma.ClassTimeWhereUniqueInput
-  update: Prisma.XOR<Prisma.ClassTimeUpdateWithoutOfferingInput, Prisma.ClassTimeUncheckedUpdateWithoutOfferingInput>
-  create: Prisma.XOR<Prisma.ClassTimeCreateWithoutOfferingInput, Prisma.ClassTimeUncheckedCreateWithoutOfferingInput>
+  update: Prisma.XOR<Prisma.ClassTimeUpdateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedUpdateWithoutSubject_offeringInput>
+  create: Prisma.XOR<Prisma.ClassTimeCreateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedCreateWithoutSubject_offeringInput>
 }
 
-export type ClassTimeUpdateWithWhereUniqueWithoutOfferingInput = {
+export type ClassTimeUpdateWithWhereUniqueWithoutSubject_offeringInput = {
   where: Prisma.ClassTimeWhereUniqueInput
-  data: Prisma.XOR<Prisma.ClassTimeUpdateWithoutOfferingInput, Prisma.ClassTimeUncheckedUpdateWithoutOfferingInput>
+  data: Prisma.XOR<Prisma.ClassTimeUpdateWithoutSubject_offeringInput, Prisma.ClassTimeUncheckedUpdateWithoutSubject_offeringInput>
 }
 
-export type ClassTimeUpdateManyWithWhereWithoutOfferingInput = {
+export type ClassTimeUpdateManyWithWhereWithoutSubject_offeringInput = {
   where: Prisma.ClassTimeScalarWhereInput
-  data: Prisma.XOR<Prisma.ClassTimeUpdateManyMutationInput, Prisma.ClassTimeUncheckedUpdateManyWithoutOfferingInput>
+  data: Prisma.XOR<Prisma.ClassTimeUpdateManyMutationInput, Prisma.ClassTimeUncheckedUpdateManyWithoutSubject_offeringInput>
 }
 
 export type ClassTimeCreateWithoutEnrolmentsInput = {
@@ -695,7 +695,7 @@ export type ClassTimeCreateWithoutEnrolmentsInput = {
   end_time: string
   capacity?: number | null
   active?: boolean
-  offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
+  subject_offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutClassInput
   tutor?: Prisma.TutorCreateNestedOneWithoutClassesInput
 }
@@ -735,7 +735,7 @@ export type ClassTimeUpdateWithoutEnrolmentsInput = {
   end_time?: Prisma.StringFieldUpdateOperationsInput | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
+  subject_offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutClassNestedInput
   tutor?: Prisma.TutorUpdateOneWithoutClassesNestedInput
 }
@@ -759,7 +759,7 @@ export type ClassTimeCreateWithoutAttendanceInput = {
   end_time: string
   capacity?: number | null
   active?: boolean
-  offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
+  subject_offering: Prisma.SubjectOfferingCreateNestedOneWithoutClassTimesInput
   enrolments?: Prisma.EnrolmentCreateNestedManyWithoutClassInput
   tutor?: Prisma.TutorCreateNestedOneWithoutClassesInput
 }
@@ -799,7 +799,7 @@ export type ClassTimeUpdateWithoutAttendanceInput = {
   end_time?: Prisma.StringFieldUpdateOperationsInput | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
+  subject_offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
   enrolments?: Prisma.EnrolmentUpdateManyWithoutClassNestedInput
   tutor?: Prisma.TutorUpdateOneWithoutClassesNestedInput
 }
@@ -833,7 +833,7 @@ export type ClassTimeUpdateWithoutTutorInput = {
   end_time?: Prisma.StringFieldUpdateOperationsInput | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
+  subject_offering?: Prisma.SubjectOfferingUpdateOneRequiredWithoutClassTimesNestedInput
   enrolments?: Prisma.EnrolmentUpdateManyWithoutClassNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutClassNestedInput
 }
@@ -860,7 +860,7 @@ export type ClassTimeUncheckedUpdateManyWithoutTutorInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
-export type ClassTimeCreateManyOfferingInput = {
+export type ClassTimeCreateManySubject_offeringInput = {
   class_id?: string
   tutor_id?: string | null
   day_of_week: string
@@ -870,7 +870,7 @@ export type ClassTimeCreateManyOfferingInput = {
   active?: boolean
 }
 
-export type ClassTimeUpdateWithoutOfferingInput = {
+export type ClassTimeUpdateWithoutSubject_offeringInput = {
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
   day_of_week?: Prisma.StringFieldUpdateOperationsInput | string
   start_time?: Prisma.StringFieldUpdateOperationsInput | string
@@ -882,7 +882,7 @@ export type ClassTimeUpdateWithoutOfferingInput = {
   tutor?: Prisma.TutorUpdateOneWithoutClassesNestedInput
 }
 
-export type ClassTimeUncheckedUpdateWithoutOfferingInput = {
+export type ClassTimeUncheckedUpdateWithoutSubject_offeringInput = {
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
   tutor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   day_of_week?: Prisma.StringFieldUpdateOperationsInput | string
@@ -894,7 +894,7 @@ export type ClassTimeUncheckedUpdateWithoutOfferingInput = {
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutClassNestedInput
 }
 
-export type ClassTimeUncheckedUpdateManyWithoutOfferingInput = {
+export type ClassTimeUncheckedUpdateManyWithoutSubject_offeringInput = {
   class_id?: Prisma.StringFieldUpdateOperationsInput | string
   tutor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   day_of_week?: Prisma.StringFieldUpdateOperationsInput | string
@@ -953,7 +953,7 @@ export type ClassTimeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   end_time?: boolean
   capacity?: boolean
   active?: boolean
-  offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
+  subject_offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
   enrolments?: boolean | Prisma.ClassTime$enrolmentsArgs<ExtArgs>
   attendance?: boolean | Prisma.ClassTime$attendanceArgs<ExtArgs>
   tutor?: boolean | Prisma.ClassTime$tutorArgs<ExtArgs>
@@ -969,7 +969,7 @@ export type ClassTimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   end_time?: boolean
   capacity?: boolean
   active?: boolean
-  offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
+  subject_offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
   tutor?: boolean | Prisma.ClassTime$tutorArgs<ExtArgs>
 }, ExtArgs["result"]["classTime"]>
 
@@ -982,7 +982,7 @@ export type ClassTimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   end_time?: boolean
   capacity?: boolean
   active?: boolean
-  offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
+  subject_offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
   tutor?: boolean | Prisma.ClassTime$tutorArgs<ExtArgs>
 }, ExtArgs["result"]["classTime"]>
 
@@ -999,25 +999,25 @@ export type ClassTimeSelectScalar = {
 
 export type ClassTimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"class_id" | "offering_id" | "tutor_id" | "day_of_week" | "start_time" | "end_time" | "capacity" | "active", ExtArgs["result"]["classTime"]>
 export type ClassTimeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
+  subject_offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
   enrolments?: boolean | Prisma.ClassTime$enrolmentsArgs<ExtArgs>
   attendance?: boolean | Prisma.ClassTime$attendanceArgs<ExtArgs>
   tutor?: boolean | Prisma.ClassTime$tutorArgs<ExtArgs>
   _count?: boolean | Prisma.ClassTimeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClassTimeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
+  subject_offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
   tutor?: boolean | Prisma.ClassTime$tutorArgs<ExtArgs>
 }
 export type ClassTimeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
+  subject_offering?: boolean | Prisma.SubjectOfferingDefaultArgs<ExtArgs>
   tutor?: boolean | Prisma.ClassTime$tutorArgs<ExtArgs>
 }
 
 export type $ClassTimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ClassTime"
   objects: {
-    offering: Prisma.$SubjectOfferingPayload<ExtArgs>
+    subject_offering: Prisma.$SubjectOfferingPayload<ExtArgs>
     enrolments: Prisma.$EnrolmentPayload<ExtArgs>[]
     attendance: Prisma.$AttendancePayload<ExtArgs>[]
     tutor: Prisma.$TutorPayload<ExtArgs> | null
@@ -1425,7 +1425,7 @@ readonly fields: ClassTimeFieldRefs;
  */
 export interface Prisma__ClassTimeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  offering<T extends Prisma.SubjectOfferingDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SubjectOfferingDefaultArgs<ExtArgs>>): Prisma.Prisma__SubjectOfferingClient<runtime.Types.Result.GetResult<Prisma.$SubjectOfferingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  subject_offering<T extends Prisma.SubjectOfferingDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SubjectOfferingDefaultArgs<ExtArgs>>): Prisma.Prisma__SubjectOfferingClient<runtime.Types.Result.GetResult<Prisma.$SubjectOfferingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   enrolments<T extends Prisma.ClassTime$enrolmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClassTime$enrolmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrolmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attendance<T extends Prisma.ClassTime$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClassTime$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tutor<T extends Prisma.ClassTime$tutorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClassTime$tutorArgs<ExtArgs>>): Prisma.Prisma__TutorClient<runtime.Types.Result.GetResult<Prisma.$TutorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>

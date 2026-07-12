@@ -34,22 +34,6 @@ export const Location = {
 export type Location = (typeof Location)[keyof typeof Location]
 
 
-export const SubjectType = {
-  primary: 'primary',
-  selective: 'selective',
-  oc: 'oc',
-  mathematics: 'mathematics',
-  english: 'english',
-  science: 'science',
-  biology: 'biology',
-  chemistry: 'chemistry',
-  physics: 'physics',
-  economics: 'economics'
-} as const
-
-export type SubjectType = (typeof SubjectType)[keyof typeof SubjectType]
-
-
 export const AttendanceStatus = {
   present: 'present',
   absent: 'absent'

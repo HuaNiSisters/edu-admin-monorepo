@@ -45,16 +45,6 @@ export type Tutor = Prisma.TutorModel
  */
 export type ClassTime = Prisma.ClassTimeModel
 /**
- * Model Subject
- * 
- */
-export type Subject = Prisma.SubjectModel
-/**
- * Model Grade
- * 
- */
-export type Grade = Prisma.GradeModel
-/**
  * Model SubjectOffering
  * 
  */

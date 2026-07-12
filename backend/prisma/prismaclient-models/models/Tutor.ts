@@ -183,7 +183,7 @@ export type TutorWhereInput = {
   phone?: Prisma.StringFilter<"Tutor"> | string
   email?: Prisma.StringNullableFilter<"Tutor"> | string | null
   classes?: Prisma.ClassTimeListRelationFilter
-  subjects?: Prisma.SubjectListRelationFilter
+  subject_offerings?: Prisma.SubjectOfferingListRelationFilter
 }
 
 export type TutorOrderByWithRelationInput = {
@@ -193,7 +193,7 @@ export type TutorOrderByWithRelationInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   classes?: Prisma.ClassTimeOrderByRelationAggregateInput
-  subjects?: Prisma.SubjectOrderByRelationAggregateInput
+  subject_offerings?: Prisma.SubjectOfferingOrderByRelationAggregateInput
 }
 
 export type TutorWhereUniqueInput = Prisma.AtLeast<{
@@ -206,7 +206,7 @@ export type TutorWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringFilter<"Tutor"> | string
   email?: Prisma.StringNullableFilter<"Tutor"> | string | null
   classes?: Prisma.ClassTimeListRelationFilter
-  subjects?: Prisma.SubjectListRelationFilter
+  subject_offerings?: Prisma.SubjectOfferingListRelationFilter
 }, "tutor_id">
 
 export type TutorOrderByWithAggregationInput = {
@@ -238,7 +238,7 @@ export type TutorCreateInput = {
   phone: string
   email?: string | null
   classes?: Prisma.ClassTimeCreateNestedManyWithoutTutorInput
-  subjects?: Prisma.SubjectCreateNestedManyWithoutTutorsInput
+  subject_offerings?: Prisma.SubjectOfferingCreateNestedManyWithoutTutorInput
 }
 
 export type TutorUncheckedCreateInput = {
@@ -248,7 +248,7 @@ export type TutorUncheckedCreateInput = {
   phone: string
   email?: string | null
   classes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutTutorInput
-  subjects?: Prisma.SubjectUncheckedCreateNestedManyWithoutTutorsInput
+  subject_offerings?: Prisma.SubjectOfferingUncheckedCreateNestedManyWithoutTutorInput
 }
 
 export type TutorUpdateInput = {
@@ -258,7 +258,7 @@ export type TutorUpdateInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classes?: Prisma.ClassTimeUpdateManyWithoutTutorNestedInput
-  subjects?: Prisma.SubjectUpdateManyWithoutTutorsNestedInput
+  subject_offerings?: Prisma.SubjectOfferingUpdateManyWithoutTutorNestedInput
 }
 
 export type TutorUncheckedUpdateInput = {
@@ -268,7 +268,7 @@ export type TutorUncheckedUpdateInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classes?: Prisma.ClassTimeUncheckedUpdateManyWithoutTutorNestedInput
-  subjects?: Prisma.SubjectUncheckedUpdateManyWithoutTutorsNestedInput
+  subject_offerings?: Prisma.SubjectOfferingUncheckedUpdateManyWithoutTutorNestedInput
 }
 
 export type TutorCreateManyInput = {
@@ -324,16 +324,6 @@ export type TutorNullableScalarRelationFilter = {
   isNot?: Prisma.TutorWhereInput | null
 }
 
-export type TutorListRelationFilter = {
-  every?: Prisma.TutorWhereInput
-  some?: Prisma.TutorWhereInput
-  none?: Prisma.TutorWhereInput
-}
-
-export type TutorOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type TutorCreateNestedOneWithoutClassesInput = {
   create?: Prisma.XOR<Prisma.TutorCreateWithoutClassesInput, Prisma.TutorUncheckedCreateWithoutClassesInput>
   connectOrCreate?: Prisma.TutorCreateOrConnectWithoutClassesInput
@@ -350,42 +340,20 @@ export type TutorUpdateOneWithoutClassesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TutorUpdateToOneWithWhereWithoutClassesInput, Prisma.TutorUpdateWithoutClassesInput>, Prisma.TutorUncheckedUpdateWithoutClassesInput>
 }
 
-export type TutorCreateNestedManyWithoutSubjectsInput = {
-  create?: Prisma.XOR<Prisma.TutorCreateWithoutSubjectsInput, Prisma.TutorUncheckedCreateWithoutSubjectsInput> | Prisma.TutorCreateWithoutSubjectsInput[] | Prisma.TutorUncheckedCreateWithoutSubjectsInput[]
-  connectOrCreate?: Prisma.TutorCreateOrConnectWithoutSubjectsInput | Prisma.TutorCreateOrConnectWithoutSubjectsInput[]
-  connect?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
+export type TutorCreateNestedOneWithoutSubject_offeringsInput = {
+  create?: Prisma.XOR<Prisma.TutorCreateWithoutSubject_offeringsInput, Prisma.TutorUncheckedCreateWithoutSubject_offeringsInput>
+  connectOrCreate?: Prisma.TutorCreateOrConnectWithoutSubject_offeringsInput
+  connect?: Prisma.TutorWhereUniqueInput
 }
 
-export type TutorUncheckedCreateNestedManyWithoutSubjectsInput = {
-  create?: Prisma.XOR<Prisma.TutorCreateWithoutSubjectsInput, Prisma.TutorUncheckedCreateWithoutSubjectsInput> | Prisma.TutorCreateWithoutSubjectsInput[] | Prisma.TutorUncheckedCreateWithoutSubjectsInput[]
-  connectOrCreate?: Prisma.TutorCreateOrConnectWithoutSubjectsInput | Prisma.TutorCreateOrConnectWithoutSubjectsInput[]
-  connect?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-}
-
-export type TutorUpdateManyWithoutSubjectsNestedInput = {
-  create?: Prisma.XOR<Prisma.TutorCreateWithoutSubjectsInput, Prisma.TutorUncheckedCreateWithoutSubjectsInput> | Prisma.TutorCreateWithoutSubjectsInput[] | Prisma.TutorUncheckedCreateWithoutSubjectsInput[]
-  connectOrCreate?: Prisma.TutorCreateOrConnectWithoutSubjectsInput | Prisma.TutorCreateOrConnectWithoutSubjectsInput[]
-  upsert?: Prisma.TutorUpsertWithWhereUniqueWithoutSubjectsInput | Prisma.TutorUpsertWithWhereUniqueWithoutSubjectsInput[]
-  set?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  disconnect?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  delete?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  connect?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  update?: Prisma.TutorUpdateWithWhereUniqueWithoutSubjectsInput | Prisma.TutorUpdateWithWhereUniqueWithoutSubjectsInput[]
-  updateMany?: Prisma.TutorUpdateManyWithWhereWithoutSubjectsInput | Prisma.TutorUpdateManyWithWhereWithoutSubjectsInput[]
-  deleteMany?: Prisma.TutorScalarWhereInput | Prisma.TutorScalarWhereInput[]
-}
-
-export type TutorUncheckedUpdateManyWithoutSubjectsNestedInput = {
-  create?: Prisma.XOR<Prisma.TutorCreateWithoutSubjectsInput, Prisma.TutorUncheckedCreateWithoutSubjectsInput> | Prisma.TutorCreateWithoutSubjectsInput[] | Prisma.TutorUncheckedCreateWithoutSubjectsInput[]
-  connectOrCreate?: Prisma.TutorCreateOrConnectWithoutSubjectsInput | Prisma.TutorCreateOrConnectWithoutSubjectsInput[]
-  upsert?: Prisma.TutorUpsertWithWhereUniqueWithoutSubjectsInput | Prisma.TutorUpsertWithWhereUniqueWithoutSubjectsInput[]
-  set?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  disconnect?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  delete?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  connect?: Prisma.TutorWhereUniqueInput | Prisma.TutorWhereUniqueInput[]
-  update?: Prisma.TutorUpdateWithWhereUniqueWithoutSubjectsInput | Prisma.TutorUpdateWithWhereUniqueWithoutSubjectsInput[]
-  updateMany?: Prisma.TutorUpdateManyWithWhereWithoutSubjectsInput | Prisma.TutorUpdateManyWithWhereWithoutSubjectsInput[]
-  deleteMany?: Prisma.TutorScalarWhereInput | Prisma.TutorScalarWhereInput[]
+export type TutorUpdateOneWithoutSubject_offeringsNestedInput = {
+  create?: Prisma.XOR<Prisma.TutorCreateWithoutSubject_offeringsInput, Prisma.TutorUncheckedCreateWithoutSubject_offeringsInput>
+  connectOrCreate?: Prisma.TutorCreateOrConnectWithoutSubject_offeringsInput
+  upsert?: Prisma.TutorUpsertWithoutSubject_offeringsInput
+  disconnect?: Prisma.TutorWhereInput | boolean
+  delete?: Prisma.TutorWhereInput | boolean
+  connect?: Prisma.TutorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TutorUpdateToOneWithWhereWithoutSubject_offeringsInput, Prisma.TutorUpdateWithoutSubject_offeringsInput>, Prisma.TutorUncheckedUpdateWithoutSubject_offeringsInput>
 }
 
 export type TutorCreateWithoutClassesInput = {
@@ -394,7 +362,7 @@ export type TutorCreateWithoutClassesInput = {
   last_name: string
   phone: string
   email?: string | null
-  subjects?: Prisma.SubjectCreateNestedManyWithoutTutorsInput
+  subject_offerings?: Prisma.SubjectOfferingCreateNestedManyWithoutTutorInput
 }
 
 export type TutorUncheckedCreateWithoutClassesInput = {
@@ -403,7 +371,7 @@ export type TutorUncheckedCreateWithoutClassesInput = {
   last_name: string
   phone: string
   email?: string | null
-  subjects?: Prisma.SubjectUncheckedCreateNestedManyWithoutTutorsInput
+  subject_offerings?: Prisma.SubjectOfferingUncheckedCreateNestedManyWithoutTutorInput
 }
 
 export type TutorCreateOrConnectWithoutClassesInput = {
@@ -428,7 +396,7 @@ export type TutorUpdateWithoutClassesInput = {
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  subjects?: Prisma.SubjectUpdateManyWithoutTutorsNestedInput
+  subject_offerings?: Prisma.SubjectOfferingUpdateManyWithoutTutorNestedInput
 }
 
 export type TutorUncheckedUpdateWithoutClassesInput = {
@@ -437,10 +405,10 @@ export type TutorUncheckedUpdateWithoutClassesInput = {
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  subjects?: Prisma.SubjectUncheckedUpdateManyWithoutTutorsNestedInput
+  subject_offerings?: Prisma.SubjectOfferingUncheckedUpdateManyWithoutTutorNestedInput
 }
 
-export type TutorCreateWithoutSubjectsInput = {
+export type TutorCreateWithoutSubject_offeringsInput = {
   tutor_id?: string
   first_name: string
   last_name: string
@@ -449,7 +417,7 @@ export type TutorCreateWithoutSubjectsInput = {
   classes?: Prisma.ClassTimeCreateNestedManyWithoutTutorInput
 }
 
-export type TutorUncheckedCreateWithoutSubjectsInput = {
+export type TutorUncheckedCreateWithoutSubject_offeringsInput = {
   tutor_id?: string
   first_name: string
   last_name: string
@@ -458,39 +426,23 @@ export type TutorUncheckedCreateWithoutSubjectsInput = {
   classes?: Prisma.ClassTimeUncheckedCreateNestedManyWithoutTutorInput
 }
 
-export type TutorCreateOrConnectWithoutSubjectsInput = {
+export type TutorCreateOrConnectWithoutSubject_offeringsInput = {
   where: Prisma.TutorWhereUniqueInput
-  create: Prisma.XOR<Prisma.TutorCreateWithoutSubjectsInput, Prisma.TutorUncheckedCreateWithoutSubjectsInput>
+  create: Prisma.XOR<Prisma.TutorCreateWithoutSubject_offeringsInput, Prisma.TutorUncheckedCreateWithoutSubject_offeringsInput>
 }
 
-export type TutorUpsertWithWhereUniqueWithoutSubjectsInput = {
-  where: Prisma.TutorWhereUniqueInput
-  update: Prisma.XOR<Prisma.TutorUpdateWithoutSubjectsInput, Prisma.TutorUncheckedUpdateWithoutSubjectsInput>
-  create: Prisma.XOR<Prisma.TutorCreateWithoutSubjectsInput, Prisma.TutorUncheckedCreateWithoutSubjectsInput>
+export type TutorUpsertWithoutSubject_offeringsInput = {
+  update: Prisma.XOR<Prisma.TutorUpdateWithoutSubject_offeringsInput, Prisma.TutorUncheckedUpdateWithoutSubject_offeringsInput>
+  create: Prisma.XOR<Prisma.TutorCreateWithoutSubject_offeringsInput, Prisma.TutorUncheckedCreateWithoutSubject_offeringsInput>
+  where?: Prisma.TutorWhereInput
 }
 
-export type TutorUpdateWithWhereUniqueWithoutSubjectsInput = {
-  where: Prisma.TutorWhereUniqueInput
-  data: Prisma.XOR<Prisma.TutorUpdateWithoutSubjectsInput, Prisma.TutorUncheckedUpdateWithoutSubjectsInput>
+export type TutorUpdateToOneWithWhereWithoutSubject_offeringsInput = {
+  where?: Prisma.TutorWhereInput
+  data: Prisma.XOR<Prisma.TutorUpdateWithoutSubject_offeringsInput, Prisma.TutorUncheckedUpdateWithoutSubject_offeringsInput>
 }
 
-export type TutorUpdateManyWithWhereWithoutSubjectsInput = {
-  where: Prisma.TutorScalarWhereInput
-  data: Prisma.XOR<Prisma.TutorUpdateManyMutationInput, Prisma.TutorUncheckedUpdateManyWithoutSubjectsInput>
-}
-
-export type TutorScalarWhereInput = {
-  AND?: Prisma.TutorScalarWhereInput | Prisma.TutorScalarWhereInput[]
-  OR?: Prisma.TutorScalarWhereInput[]
-  NOT?: Prisma.TutorScalarWhereInput | Prisma.TutorScalarWhereInput[]
-  tutor_id?: Prisma.UuidFilter<"Tutor"> | string
-  first_name?: Prisma.StringFilter<"Tutor"> | string
-  last_name?: Prisma.StringFilter<"Tutor"> | string
-  phone?: Prisma.StringFilter<"Tutor"> | string
-  email?: Prisma.StringNullableFilter<"Tutor"> | string | null
-}
-
-export type TutorUpdateWithoutSubjectsInput = {
+export type TutorUpdateWithoutSubject_offeringsInput = {
   tutor_id?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -499,21 +451,13 @@ export type TutorUpdateWithoutSubjectsInput = {
   classes?: Prisma.ClassTimeUpdateManyWithoutTutorNestedInput
 }
 
-export type TutorUncheckedUpdateWithoutSubjectsInput = {
+export type TutorUncheckedUpdateWithoutSubject_offeringsInput = {
   tutor_id?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   classes?: Prisma.ClassTimeUncheckedUpdateManyWithoutTutorNestedInput
-}
-
-export type TutorUncheckedUpdateManyWithoutSubjectsInput = {
-  tutor_id?: Prisma.StringFieldUpdateOperationsInput | string
-  first_name?: Prisma.StringFieldUpdateOperationsInput | string
-  last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -523,12 +467,12 @@ export type TutorUncheckedUpdateManyWithoutSubjectsInput = {
 
 export type TutorCountOutputType = {
   classes: number
-  subjects: number
+  subject_offerings: number
 }
 
 export type TutorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   classes?: boolean | TutorCountOutputTypeCountClassesArgs
-  subjects?: boolean | TutorCountOutputTypeCountSubjectsArgs
+  subject_offerings?: boolean | TutorCountOutputTypeCountSubject_offeringsArgs
 }
 
 /**
@@ -551,8 +495,8 @@ export type TutorCountOutputTypeCountClassesArgs<ExtArgs extends runtime.Types.E
 /**
  * TutorCountOutputType without action
  */
-export type TutorCountOutputTypeCountSubjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SubjectWhereInput
+export type TutorCountOutputTypeCountSubject_offeringsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SubjectOfferingWhereInput
 }
 
 
@@ -563,7 +507,7 @@ export type TutorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   phone?: boolean
   email?: boolean
   classes?: boolean | Prisma.Tutor$classesArgs<ExtArgs>
-  subjects?: boolean | Prisma.Tutor$subjectsArgs<ExtArgs>
+  subject_offerings?: boolean | Prisma.Tutor$subject_offeringsArgs<ExtArgs>
   _count?: boolean | Prisma.TutorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tutor"]>
 
@@ -594,7 +538,7 @@ export type TutorSelectScalar = {
 export type TutorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"tutor_id" | "first_name" | "last_name" | "phone" | "email", ExtArgs["result"]["tutor"]>
 export type TutorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   classes?: boolean | Prisma.Tutor$classesArgs<ExtArgs>
-  subjects?: boolean | Prisma.Tutor$subjectsArgs<ExtArgs>
+  subject_offerings?: boolean | Prisma.Tutor$subject_offeringsArgs<ExtArgs>
   _count?: boolean | Prisma.TutorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TutorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -604,7 +548,7 @@ export type $TutorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name: "Tutor"
   objects: {
     classes: Prisma.$ClassTimePayload<ExtArgs>[]
-    subjects: Prisma.$SubjectPayload<ExtArgs>[]
+    subject_offerings: Prisma.$SubjectOfferingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     tutor_id: string
@@ -1007,7 +951,7 @@ readonly fields: TutorFieldRefs;
 export interface Prisma__TutorClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   classes<T extends Prisma.Tutor$classesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tutor$classesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassTimePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  subjects<T extends Prisma.Tutor$subjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tutor$subjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subject_offerings<T extends Prisma.Tutor$subject_offeringsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tutor$subject_offeringsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubjectOfferingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1454,27 +1398,27 @@ export type Tutor$classesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
- * Tutor.subjects
+ * Tutor.subject_offerings
  */
-export type Tutor$subjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Tutor$subject_offeringsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Subject
+   * Select specific fields to fetch from the SubjectOffering
    */
-  select?: Prisma.SubjectSelect<ExtArgs> | null
+  select?: Prisma.SubjectOfferingSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Subject
+   * Omit specific fields from the SubjectOffering
    */
-  omit?: Prisma.SubjectOmit<ExtArgs> | null
+  omit?: Prisma.SubjectOfferingOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.SubjectInclude<ExtArgs> | null
-  where?: Prisma.SubjectWhereInput
-  orderBy?: Prisma.SubjectOrderByWithRelationInput | Prisma.SubjectOrderByWithRelationInput[]
-  cursor?: Prisma.SubjectWhereUniqueInput
+  include?: Prisma.SubjectOfferingInclude<ExtArgs> | null
+  where?: Prisma.SubjectOfferingWhereInput
+  orderBy?: Prisma.SubjectOfferingOrderByWithRelationInput | Prisma.SubjectOfferingOrderByWithRelationInput[]
+  cursor?: Prisma.SubjectOfferingWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.SubjectScalarFieldEnum | Prisma.SubjectScalarFieldEnum[]
+  distinct?: Prisma.SubjectOfferingScalarFieldEnum | Prisma.SubjectOfferingScalarFieldEnum[]
 }
 
 /**

@@ -221,6 +221,7 @@ export type TermWhereInput = {
   start_date?: Prisma.DateTimeFilter<"Term"> | Date | string
   end_date?: Prisma.DateTimeFilter<"Term"> | Date | string
   enrolments?: Prisma.EnrolmentListRelationFilter
+  attendances?: Prisma.AttendanceListRelationFilter
 }
 
 export type TermOrderByWithRelationInput = {
@@ -230,6 +231,7 @@ export type TermOrderByWithRelationInput = {
   start_date?: Prisma.SortOrder
   end_date?: Prisma.SortOrder
   enrolments?: Prisma.EnrolmentOrderByRelationAggregateInput
+  attendances?: Prisma.AttendanceOrderByRelationAggregateInput
 }
 
 export type TermWhereUniqueInput = Prisma.AtLeast<{
@@ -243,6 +245,7 @@ export type TermWhereUniqueInput = Prisma.AtLeast<{
   start_date?: Prisma.DateTimeFilter<"Term"> | Date | string
   end_date?: Prisma.DateTimeFilter<"Term"> | Date | string
   enrolments?: Prisma.EnrolmentListRelationFilter
+  attendances?: Prisma.AttendanceListRelationFilter
 }, "term_id" | "year_name">
 
 export type TermOrderByWithAggregationInput = {
@@ -276,6 +279,7 @@ export type TermCreateInput = {
   start_date: Date | string
   end_date: Date | string
   enrolments?: Prisma.EnrolmentCreateNestedManyWithoutTermInput
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutTermInput
 }
 
 export type TermUncheckedCreateInput = {
@@ -285,6 +289,7 @@ export type TermUncheckedCreateInput = {
   start_date: Date | string
   end_date: Date | string
   enrolments?: Prisma.EnrolmentUncheckedCreateNestedManyWithoutTermInput
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutTermInput
 }
 
 export type TermUpdateInput = {
@@ -294,6 +299,7 @@ export type TermUpdateInput = {
   start_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolments?: Prisma.EnrolmentUpdateManyWithoutTermNestedInput
+  attendances?: Prisma.AttendanceUpdateManyWithoutTermNestedInput
 }
 
 export type TermUncheckedUpdateInput = {
@@ -303,6 +309,7 @@ export type TermUncheckedUpdateInput = {
   start_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrolments?: Prisma.EnrolmentUncheckedUpdateManyWithoutTermNestedInput
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutTermNestedInput
 }
 
 export type TermCreateManyInput = {
@@ -391,12 +398,27 @@ export type TermUpdateOneRequiredWithoutEnrolmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TermUpdateToOneWithWhereWithoutEnrolmentsInput, Prisma.TermUpdateWithoutEnrolmentsInput>, Prisma.TermUncheckedUpdateWithoutEnrolmentsInput>
 }
 
+export type TermCreateNestedOneWithoutAttendancesInput = {
+  create?: Prisma.XOR<Prisma.TermCreateWithoutAttendancesInput, Prisma.TermUncheckedCreateWithoutAttendancesInput>
+  connectOrCreate?: Prisma.TermCreateOrConnectWithoutAttendancesInput
+  connect?: Prisma.TermWhereUniqueInput
+}
+
+export type TermUpdateOneRequiredWithoutAttendancesNestedInput = {
+  create?: Prisma.XOR<Prisma.TermCreateWithoutAttendancesInput, Prisma.TermUncheckedCreateWithoutAttendancesInput>
+  connectOrCreate?: Prisma.TermCreateOrConnectWithoutAttendancesInput
+  upsert?: Prisma.TermUpsertWithoutAttendancesInput
+  connect?: Prisma.TermWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TermUpdateToOneWithWhereWithoutAttendancesInput, Prisma.TermUpdateWithoutAttendancesInput>, Prisma.TermUncheckedUpdateWithoutAttendancesInput>
+}
+
 export type TermCreateWithoutEnrolmentsInput = {
   term_id?: string
   name: number
   year: number
   start_date: Date | string
   end_date: Date | string
+  attendances?: Prisma.AttendanceCreateNestedManyWithoutTermInput
 }
 
 export type TermUncheckedCreateWithoutEnrolmentsInput = {
@@ -405,6 +427,7 @@ export type TermUncheckedCreateWithoutEnrolmentsInput = {
   year: number
   start_date: Date | string
   end_date: Date | string
+  attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutTermInput
 }
 
 export type TermCreateOrConnectWithoutEnrolmentsInput = {
@@ -429,6 +452,7 @@ export type TermUpdateWithoutEnrolmentsInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   start_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendances?: Prisma.AttendanceUpdateManyWithoutTermNestedInput
 }
 
 export type TermUncheckedUpdateWithoutEnrolmentsInput = {
@@ -437,6 +461,59 @@ export type TermUncheckedUpdateWithoutEnrolmentsInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   start_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutTermNestedInput
+}
+
+export type TermCreateWithoutAttendancesInput = {
+  term_id?: string
+  name: number
+  year: number
+  start_date: Date | string
+  end_date: Date | string
+  enrolments?: Prisma.EnrolmentCreateNestedManyWithoutTermInput
+}
+
+export type TermUncheckedCreateWithoutAttendancesInput = {
+  term_id?: string
+  name: number
+  year: number
+  start_date: Date | string
+  end_date: Date | string
+  enrolments?: Prisma.EnrolmentUncheckedCreateNestedManyWithoutTermInput
+}
+
+export type TermCreateOrConnectWithoutAttendancesInput = {
+  where: Prisma.TermWhereUniqueInput
+  create: Prisma.XOR<Prisma.TermCreateWithoutAttendancesInput, Prisma.TermUncheckedCreateWithoutAttendancesInput>
+}
+
+export type TermUpsertWithoutAttendancesInput = {
+  update: Prisma.XOR<Prisma.TermUpdateWithoutAttendancesInput, Prisma.TermUncheckedUpdateWithoutAttendancesInput>
+  create: Prisma.XOR<Prisma.TermCreateWithoutAttendancesInput, Prisma.TermUncheckedCreateWithoutAttendancesInput>
+  where?: Prisma.TermWhereInput
+}
+
+export type TermUpdateToOneWithWhereWithoutAttendancesInput = {
+  where?: Prisma.TermWhereInput
+  data: Prisma.XOR<Prisma.TermUpdateWithoutAttendancesInput, Prisma.TermUncheckedUpdateWithoutAttendancesInput>
+}
+
+export type TermUpdateWithoutAttendancesInput = {
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.IntFieldUpdateOperationsInput | number
+  year?: Prisma.IntFieldUpdateOperationsInput | number
+  start_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  end_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrolments?: Prisma.EnrolmentUpdateManyWithoutTermNestedInput
+}
+
+export type TermUncheckedUpdateWithoutAttendancesInput = {
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.IntFieldUpdateOperationsInput | number
+  year?: Prisma.IntFieldUpdateOperationsInput | number
+  start_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  end_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enrolments?: Prisma.EnrolmentUncheckedUpdateManyWithoutTermNestedInput
 }
 
 
@@ -446,10 +523,12 @@ export type TermUncheckedUpdateWithoutEnrolmentsInput = {
 
 export type TermCountOutputType = {
   enrolments: number
+  attendances: number
 }
 
 export type TermCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enrolments?: boolean | TermCountOutputTypeCountEnrolmentsArgs
+  attendances?: boolean | TermCountOutputTypeCountAttendancesArgs
 }
 
 /**
@@ -469,6 +548,13 @@ export type TermCountOutputTypeCountEnrolmentsArgs<ExtArgs extends runtime.Types
   where?: Prisma.EnrolmentWhereInput
 }
 
+/**
+ * TermCountOutputType without action
+ */
+export type TermCountOutputTypeCountAttendancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttendanceWhereInput
+}
+
 
 export type TermSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   term_id?: boolean
@@ -477,6 +563,7 @@ export type TermSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   start_date?: boolean
   end_date?: boolean
   enrolments?: boolean | Prisma.Term$enrolmentsArgs<ExtArgs>
+  attendances?: boolean | Prisma.Term$attendancesArgs<ExtArgs>
   _count?: boolean | Prisma.TermCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["term"]>
 
@@ -507,6 +594,7 @@ export type TermSelectScalar = {
 export type TermOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"term_id" | "name" | "year" | "start_date" | "end_date", ExtArgs["result"]["term"]>
 export type TermInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enrolments?: boolean | Prisma.Term$enrolmentsArgs<ExtArgs>
+  attendances?: boolean | Prisma.Term$attendancesArgs<ExtArgs>
   _count?: boolean | Prisma.TermCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TermIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -516,6 +604,7 @@ export type $TermPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Term"
   objects: {
     enrolments: Prisma.$EnrolmentPayload<ExtArgs>[]
+    attendances: Prisma.$AttendancePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     term_id: string
@@ -918,6 +1007,7 @@ readonly fields: TermFieldRefs;
 export interface Prisma__TermClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   enrolments<T extends Prisma.Term$enrolmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Term$enrolmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrolmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  attendances<T extends Prisma.Term$attendancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Term$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1361,6 +1451,30 @@ export type Term$enrolmentsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.EnrolmentScalarFieldEnum | Prisma.EnrolmentScalarFieldEnum[]
+}
+
+/**
+ * Term.attendances
+ */
+export type Term$attendancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attendance
+   */
+  select?: Prisma.AttendanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attendance
+   */
+  omit?: Prisma.AttendanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttendanceInclude<ExtArgs> | null
+  where?: Prisma.AttendanceWhereInput
+  orderBy?: Prisma.AttendanceOrderByWithRelationInput | Prisma.AttendanceOrderByWithRelationInput[]
+  cursor?: Prisma.AttendanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttendanceScalarFieldEnum | Prisma.AttendanceScalarFieldEnum[]
 }
 
 /**
