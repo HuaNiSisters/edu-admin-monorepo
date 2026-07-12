@@ -13,14 +13,14 @@ export const createSubjectColumns = (
     {
       accessorKey: "subject_name",
       size: 200,
-      filterFn: "equalsString",
+      filterFn: "arrIncludesSome",
       header: "Subject",
     },
     {
       accessorKey: "grade",
       size: 100,
-      filterFn: (row, columnId, filterValue) =>
-        String(row.getValue(columnId)) === filterValue,
+      filterFn: (row, columnId, filterValue: string[]) =>
+        filterValue.includes(String(row.getValue(columnId))),
       header: "Grade",
       cell: ({ row }) => <span className="pl-3">{row.getValue("grade")}</span>,
     },
@@ -28,7 +28,7 @@ export const createSubjectColumns = (
       accessorKey: "location",
       size: 200,
       header: "Location",
-      filterFn: "equalsString",
+      filterFn: "arrIncludesSome",
       cell: ({ row }) => (
         <span>{formatValuesRemoveUnderscores(row.getValue("location"))}</span>
       ),
