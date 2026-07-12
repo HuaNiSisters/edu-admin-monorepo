@@ -37,15 +37,15 @@ export const createClassColumns = (
     sortingFn: (a, b) =>
       DAY_ORDER.indexOf(a.original.day_of_week) -
       DAY_ORDER.indexOf(b.original.day_of_week),
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
     cell: ({ row }) => <span>{row.getValue("day_of_week")}</span>,
   },
   {
     accessorKey: "grade",
     size: 50,
     header: "Grade",
-    filterFn: (row, columnId, filterValue) =>
-      String(row.getValue(columnId)) === filterValue,
+    filterFn: (row, columnId, filterValue: string[]) =>
+      filterValue.includes(String(row.getValue(columnId))),
     cell: ({ row }) => {
       const grade = row.getValue("grade");
       return <span>{grade ? `${grade}` : "—"}</span>;
@@ -55,7 +55,7 @@ export const createClassColumns = (
     accessorKey: "subject_name",
     size: 200,
     header: "Subject",
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
     cell: ({ row }) => (
       <span className="font-medium">{row.getValue("subject_name") ?? "—"}</span>
     ),
@@ -112,7 +112,7 @@ export const createClassColumns = (
     accessorKey: "tutor",
     size: 200,
     header: "Tutor",
-    filterFn: "equalsString",
+    filterFn: "arrIncludesSome",
     cell: ({ row }) => (
       <span className="font-medium">{row.getValue("tutor") ?? "—"}</span>
     ),
