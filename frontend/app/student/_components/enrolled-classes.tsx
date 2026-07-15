@@ -4,11 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import EnrolDialog from "./enrol-dialog";
 import {
+  Attendance,
   EnrolmentWithClassAndTerm,
   PaymentWithDetails,
   Term,
 } from "@/lib/api/types";
-import { enrolmentService, paymentService } from "@/lib/services";
+import { classService, enrolmentService, paymentService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
 import {
   Collapsible,
@@ -26,6 +27,7 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
   const [isEnrolDialogOpen, setIsEnrolDialogOpen] = useState(false);
   const [enrolments, setEnrolments] = useState<EnrolmentWithClassAndTerm[]>([]);
   const [payments, setPayments] = useState<PaymentWithDetails[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
 
   const { run, isPending } = useAsync();
 
@@ -37,6 +39,19 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
     console.log({ fetchedEnrolments });
     setEnrolments(fetchedEnrolments);
     setPayments(fetchedPayments);
+
+    // Each enrolment is a unique (student, class, term) combo, so fetch
+    // attendance per enrolment and flatten the results.
+    const attendanceByEnrolment = await Promise.all(
+      fetchedEnrolments.map((enrolment) =>
+        classService.getAttendanceByStudentAndClassAndTermAsync(
+          studentId,
+          enrolment.class_id,
+          enrolment.term_id,
+        ),
+      ),
+    );
+    setAttendanceRecords(attendanceByEnrolment.flat());
   }, [studentId]);
 
   useEffect(() => {
@@ -66,6 +81,21 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
 
   const getPaymentsForTerm = (termId: string) => {
     return payments.filter((payment) => payment.term_id === termId);
+  };
+
+  const getAttendanceForTerm = (
+    termEnrolments: EnrolmentWithClassAndTerm[],
+    termId: string,
+  ) => {
+    const classIds = new Set(
+      termEnrolments.map((enrolment) => enrolment.class_id),
+    );
+    return attendanceRecords.filter(
+      (attendance) =>
+        attendance.student_id === studentId &&
+        attendance.term_id === termId &&
+        classIds.has(attendance.class_id),
+    );
   };
 
   return (
@@ -110,9 +140,14 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
                   <CollapsibleContent className="flex flex-col p-1">
                     <div className="rounded-md border p-2 bg-primary-foreground">
                       <TermPaymentsTable
+                        studentId={studentId}
                         term={term}
                         enrolments={termEnrolments}
                         payments={getPaymentsForTerm(term.term_id)}
+                        attendanceRecords={getAttendanceForTerm(
+                          termEnrolments,
+                          term.term_id,
+                        )}
                         onChange={() => run(fetchEnrolments)}
                       />
                     </div>
