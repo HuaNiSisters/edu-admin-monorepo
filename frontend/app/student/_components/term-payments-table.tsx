@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit, FileText, Plus, Trash2 } from "lucide-react";
+import { Edit, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import ReusableTable, {
@@ -20,6 +20,7 @@ import { formatTime } from "@/utils/time-utils";
 import { formatDate } from "@/utils/date-utils";
 import { formatCurrency } from "@/utils/currency-utils";
 import StudentAttendanceGrid from "./student-attendance-grid";
+import AddPaymentButton from "./add-payment-button";
 
 type TermPaymentsTableProps = {
   studentId: string;
@@ -38,18 +39,13 @@ const TermPaymentsTable = ({
   attendanceRecords,
   onChange,
 }: TermPaymentsTableProps) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] =
     useState<PaymentWithDetails | null>(null);
 
-  const openCreateDialog = () => {
-    setEditingPayment(null);
-    setDialogOpen(true);
-  };
-
   const openEditDialog = (payment: PaymentWithDetails) => {
     setEditingPayment(payment);
-    setDialogOpen(true);
+    setEditDialogOpen(true);
   };
 
   const deletePayment = async (payment: PaymentWithDetails) => {
@@ -191,9 +187,9 @@ const TermPaymentsTable = ({
       <PaymentDialog
         term={term}
         enrolments={enrolments}
-        isOpen={dialogOpen}
+        isOpen={editDialogOpen}
         payment={editingPayment}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => setEditDialogOpen(false)}
         onSaved={onChange}
       />
 
@@ -210,15 +206,11 @@ const TermPaymentsTable = ({
       <section className="space-y-3 border-t pt-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-semibold tracking-normal">Payments</h3>
-          <Button
-            size="sm"
-            className="gap-2"
-            onClick={openCreateDialog}
-            disabled={enrolments.length === 0}
-          >
-            <Plus className="size-4" />
-            Add Payment
-          </Button>
+          <AddPaymentButton
+            term={term}
+            enrolments={enrolments}
+            onSaved={onChange}
+          />
         </div>
 
         <ReusableTable

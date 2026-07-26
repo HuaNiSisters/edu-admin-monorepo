@@ -436,17 +436,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      search_students: {
-        Args: { search_query: string }
-        Returns: {
-          email: string
-          first_name: string
-          last_name: string
-          parents: Json
-          student_id: string
-          student_mobile: string
-        }[]
-      }
+      search_students:
+        | {
+            Args: { search_query: string }
+            Returns: {
+              email: string
+              first_name: string
+              last_name: string
+              parents: Json
+              student_id: string
+              student_mobile: string
+            }[]
+          }
+        | {
+            Args: {
+              search_query: string
+              status_filter?: Database["public"]["Enums"]["StudentStatus"]
+            }
+            Returns: {
+              email: string
+              first_name: string
+              gender: Database["public"]["Enums"]["Gender"]
+              grade_at_school: number
+              last_name: string
+              parents: Json
+              recent_enrolments: Json
+              recent_term: Json
+              school: string
+              status: Database["public"]["Enums"]["StudentStatus"]
+              student_id: string
+              student_mobile: string
+            }[]
+          }
     }
     Enums: {
       AttendanceStatus: "present" | "absent"

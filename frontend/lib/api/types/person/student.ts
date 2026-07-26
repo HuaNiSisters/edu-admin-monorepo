@@ -1,6 +1,7 @@
 import { Database } from "../../../../types/database.types";
 import { ParentInfo, StudentInfo, StudentStatus } from "..";
 import { CreateParentDataParams } from "./parent";
+import { Term, EnrolmentWithClassAndTerm } from "@/lib/api/types";
 
 type GetStatusesResponse = StudentStatus[];
 
@@ -33,16 +34,8 @@ type SearchStudentsResponse = {
     first_name: ParentInfo["first_name"];
     parent_mobile: ParentInfo["parent_mobile"];
   }[];
-  recent_term: { term_id: string; name: number; year: number } | null;
-  recent_enrolments: {
-    enrolment_id: string;
-    subject_name: string;
-    grade: number;
-    location: string;
-    day_of_week: string;
-    start_time: string;
-    end_time: string;
-    enrolment_date: string;
+  recent_term: Term | null;
+  recent_enrolments: (EnrolmentWithClassAndTerm & {
     latest_payment: {
       amount_paid: number;
       amount_due: number;
@@ -50,7 +43,7 @@ type SearchStudentsResponse = {
       notes: string | null;
       status: "unpaid" | "partial" | "paid";
     } | null;
-  }[] | null;
+  })[] | null;
 }[];
 
 type StatusFilter = StudentStatus;

@@ -6,10 +6,13 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
+import AddPaymentButton from "@/app/student/_components/add-payment-button";
 
 type StudentRow = SearchStudentsResponse[number];
 
-export const columns: ColumnDef<StudentRow>[] = [
+export const getColumns = (
+  onPaymentSaved: () => void,
+): ColumnDef<StudentRow>[] => [
   {
     accessorKey: "first_name",
     header: ({ column }) => {
@@ -113,10 +116,13 @@ export const columns: ColumnDef<StudentRow>[] = [
             >
               <div className="px-3 py-2">
                 <div>
-                  {enr.grade} - {enr.subject_name}
+                  {enr.ClassTime.SubjectOffering.grade} -{" "}
+                  {enr.ClassTime.SubjectOffering.subject_name}
                 </div>
                 <div className="text-slate-300">
-                  {formatValuesRemoveUnderscores(enr.location)}
+                  {formatValuesRemoveUnderscores(
+                    enr.ClassTime.SubjectOffering.location,
+                  )}
                 </div>
                 <div className="text-slate-400 text-xs">
                   Start Date:{" "}
@@ -124,7 +130,7 @@ export const columns: ColumnDef<StudentRow>[] = [
                 </div>
               </div>
               <div className="px-3 py-2">
-                {enr.day_of_week} {enr.start_time}
+                {enr.ClassTime.day_of_week} {enr.ClassTime.start_time}
               </div>
               <div className="px-3 py-2">
                 {enr.latest_payment ? (
@@ -144,6 +150,21 @@ export const columns: ColumnDef<StudentRow>[] = [
                 ) : (
                   <span className="text-slate-400">No payment</span>
                 )}
+              </div>
+              <div
+                className="px-3 py-2 flex items-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <AddPaymentButton
+                  term={recent_term}
+                  enrolments={[enr]}
+                  onSaved={() => {
+                    onPaymentSaved();
+                  }}
+                  size="sm"
+                  className="bg-lime-200 text-slate-900 hover:bg-lime-300 rounded-full"
+                  label="Add"
+                />
               </div>
             </div>
           ))}
