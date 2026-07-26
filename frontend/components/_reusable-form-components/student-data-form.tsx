@@ -77,7 +77,7 @@ const StudentDataForm = ({
       grade: "",
       school: "",
       location: "",
-      status: "Attending",
+      status: "Active",
       notes: "",
       mobile: "",
       suburb: "",

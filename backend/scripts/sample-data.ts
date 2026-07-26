@@ -132,11 +132,10 @@ async function seedSampleData() {
   const students = await Promise.all(Array.from({ length: 100 }, (_, index) => prisma.student.create({
     data: {
       first_name: firstNames[index % firstNames.length]!, last_name: lastNames[(index * 3) % lastNames.length]!,
-      preferred_name: index % 9 === 0 ? firstNames[(index + 1) % firstNames.length]! : null,
       student_mobile: `040${String(1000000 + index).slice(-7)}`, email: email("student", index + 1),
       grade_at_school: 7 + (index % 6), school: ["Canley Vale High School", "Cabramatta High School", "Parramatta High School", "Sydney Girls High School"][index % 4]!,
       suburb_of_home: ["Cabramatta", "Canley Vale", "Fairfield", "Parramatta", "Lidcombe"][index % 5]!,
-      location: index % 8 === 0 ? "online" : "cabramatta_and_canley_vale", gender: index % 2 === 0 ? "F" : "M", status: index % 23 === 0 ? "alumni" : "attending",
+      location: index % 8 === 0 ? "online" : "cabramatta_and_canley_vale", gender: index % 2 === 0 ? "F" : "M", status: index % 23 === 0 ? "inactive" : "active",
       notes: index % 17 === 0 ? "Sample record: learning support discussed with parent." : null,
     },
   })));
