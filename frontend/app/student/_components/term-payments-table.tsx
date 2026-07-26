@@ -8,6 +8,7 @@ import ReusableTable, {
   ReusableTableColumn,
 } from "@/components/_reusable/reusable-table";
 import {
+  Attendance,
   EnrolmentWithClassAndTerm,
   PaymentWithDetails,
   Term,
@@ -18,18 +19,23 @@ import PaymentDialog from "./payment-dialog";
 import { formatTime } from "@/utils/time-utils";
 import { formatDate } from "@/utils/date-utils";
 import { formatCurrency } from "@/utils/currency-utils";
+import StudentAttendanceGrid from "./student-attendance-grid";
 
 type TermPaymentsTableProps = {
+  studentId: string;
   term: Term;
   enrolments: EnrolmentWithClassAndTerm[];
   payments: PaymentWithDetails[];
+  attendanceRecords: Attendance[];
   onChange: () => void;
 };
 
 const TermPaymentsTable = ({
+  studentId,
   term,
   enrolments,
   payments,
+  attendanceRecords,
   onChange,
 }: TermPaymentsTableProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -220,6 +226,17 @@ const TermPaymentsTable = ({
           data={payments}
           getRowKey={(payment) => payment.payment_id}
           emptyMessage="No payments recorded for this term."
+        />
+      </section>
+
+      <section className="space-y-3 border-t pt-5">
+        <h3 className="text-lg font-semibold tracking-normal">Attendance</h3>
+
+        <StudentAttendanceGrid
+          studentId={studentId}
+          term={term}
+          enrolments={enrolments}
+          attendanceRecords={attendanceRecords}
         />
       </section>
     </div>
