@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/input-group";
 import { studentService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
-import { SearchStudentsResponse } from "@/lib/api/types/IApiWrapper";
+import { SearchStudentsResponse } from "@/lib/api/types/person/student";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";

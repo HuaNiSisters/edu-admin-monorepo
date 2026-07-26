@@ -1,9 +1,10 @@
 "use client";
 
-import { SearchStudentsResponse } from "@/lib/api/types/IApiWrapper";
+import { SearchStudentsResponse } from "@/lib/api/types/person/student";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type StudentRow = SearchStudentsResponse[number];
 
@@ -60,5 +61,21 @@ export const columns: ColumnDef<StudentRow>[] = [
       );
     },
     size: 300,
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    // Convert the boolean row value to "Active"/"Inactive" before matching
+    filterFn: (row, columnId, filterValues: string[]) => {
+      const label = row.getValue<boolean>(columnId) ? "Active" : "Inactive";
+      return filterValues.includes(label);
+    },
+    cell: ({ row }) => (
+      <Badge
+        className={row.original.status === "active" ? "default" : "secondary"}
+      >
+        {row.original.status === "active" ? "Active" : "Inactive"}
+      </Badge>
+    ),
   },
 ];

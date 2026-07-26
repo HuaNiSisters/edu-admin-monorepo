@@ -24,6 +24,7 @@ type SearchStudentsResponse = {
   last_name: StudentInfo["last_name"];
   email: StudentInfo["email"];
   student_mobile: StudentInfo["student_mobile"];
+  status: StudentInfo["status"];
   parents: {
     parent_id: ParentInfo["parent_id"];
     first_name: ParentInfo["first_name"];
