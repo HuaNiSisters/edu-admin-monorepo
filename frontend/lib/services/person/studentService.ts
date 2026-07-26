@@ -2,6 +2,7 @@ import { IStudentRepo } from "@/lib/api/adapters/interfaces/people/IStudentRepo"
 import {
   UpdateStudentDataParams,
   CreateStudentParams,
+  StatusFilter,
 } from "../../api/types/person/student";
 import { IParentRepo } from "@/lib/api/adapters/interfaces";
 
@@ -101,8 +102,8 @@ function StudentService(studentRepo: IStudentRepo, parentRepo: IParentRepo) {
     };
   }
 
-  async function searchStudentsAsync(query: string) {
-    return await studentRepo.searchStudentsAsync(query);
+  async function searchStudentsAsync(query: string, statusFilter: StatusFilter | 'all') {
+    return await studentRepo.searchStudentsAsync(query, statusFilter);
   }
 
   return {

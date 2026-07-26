@@ -84,7 +84,6 @@ export const StudentScalarFieldEnum = {
   student_mobile: 'student_mobile',
   first_name: 'first_name',
   last_name: 'last_name',
-  preferred_name: 'preferred_name',
   grade_at_school: 'grade_at_school',
   school: 'school',
   suburb_of_home: 'suburb_of_home',

@@ -1,6 +1,11 @@
 "use client";
 
-import { Location, StudentStatus, Gender, StudentWithParents } from "@/lib/api/types";
+import {
+  Location,
+  StudentStatus,
+  Gender,
+  StudentWithParents,
+} from "@/lib/api/types";
 import { studentService, personService, campusService } from "@/lib/services";
 
 import { useEffect, useState } from "react";
@@ -24,7 +29,6 @@ import { CreateStudentDataParams } from "@/lib/api/types/person/student";
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
   lastName: zod.string().min(1, "Last name is required"),
-  preferredName: zod.string().optional(),
   gender: zod.string().nonempty("Gender is required"),
   email: zod
     .string()
@@ -68,13 +72,12 @@ const StudentDataForm = ({
     defaultValues: {
       firstName: "",
       lastName: "",
-      preferredName: "",
       gender: "",
       email: "",
       grade: "",
       school: "",
       location: "",
-      status: "Attending",
+      status: "Active",
       notes: "",
       mobile: "",
       suburb: "",
@@ -106,7 +109,6 @@ const StudentDataForm = ({
           student_id,
           first_name,
           last_name,
-          preferred_name,
           gender,
           email,
           grade_at_school,
@@ -129,7 +131,6 @@ const StudentDataForm = ({
         setParent2Id(parent2Id || "");
         form.setValue("firstName", first_name || "");
         form.setValue("lastName", last_name || "");
-        form.setValue("preferredName", preferred_name || "");
         form.setValue("gender", gender || "");
         form.setValue("email", email || "");
         form.setValue("grade", grade_at_school?.toString() ?? "");
@@ -162,7 +163,6 @@ const StudentDataForm = ({
     const studentData: CreateStudentDataParams = {
       first_name: data.firstName,
       last_name: data.lastName,
-      preferred_name: data.preferredName,
       gender: data.gender as Gender,
       email: data.email,
       grade_at_school: Number(data.grade),
@@ -460,26 +460,6 @@ const StudentDataForm = ({
               </Field>
             )}
           />
-          <Controller
-            name="preferredName"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel htmlFor="student-preferred-name">
-                  Preferred name
-                </FieldLabel>
-                <Input
-                  id="student-preferred-name"
-                  {...field}
-                  disabled={isViewingMode}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
           <div className="col-span-2">
             <Controller
               name="notes"

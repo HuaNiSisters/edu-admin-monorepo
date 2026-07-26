@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SearchIcon } from "lucide-react";
 import {
   InputGroup,
@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/input-group";
 import { studentService } from "@/lib/services";
 import { useAsync } from "@/hooks/use-async";
-import { SearchStudentsResponse } from "@/lib/api/types/IApiWrapper";
+import { SearchStudentsResponse } from "@/lib/api/types/person/student";
 import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 import { LoadingBar } from "@/components/loading-bar";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const SearchStudentPage = () => {
   const router = useRouter();
@@ -23,11 +24,49 @@ const SearchStudentPage = () => {
   );
   const { run, isPending } = useAsync();
 
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
+    "active",
+  ]);
+
+  const deriveStatusFilter = (
+    selected: string[],
+  ): "active" | "inactive" | "all" => {
+    if (selected.length === 0 || selected.length === 2) return "all";
+    return selected[0] as "active" | "inactive";
+  };
+
+  // Single shared function that re-runs the current search with current filters —
+  // used by input onChange, the status toggle, AND the "+ Add" payment callback
+  const refetchSearch = async () => {
+    if (searchInput.length < 4) return;
+    const result = await studentService.searchStudentsAsync(
+      searchInput,
+      deriveStatusFilter(selectedStatuses),
+    );
+    setSearchResults(result || []);
+  };
+
+  const onStatusToggle = (values: string[]) => {
+    setSelectedStatuses(values);
+    if (searchInput.length >= 4) {
+      run(async () => {
+        const result = await studentService.searchStudentsAsync(
+          searchInput,
+          deriveStatusFilter(values),
+        );
+        setSearchResults(result || []);
+      });
+    }
+  };
+
   const onChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
     if (event.target.value.length < 4) return;
     const handleQuery = async () => {
-      const result = await studentService.searchStudentsAsync(event.target.value);
+      const result = await studentService.searchStudentsAsync(
+        event.target.value,
+        deriveStatusFilter(selectedStatuses),
+      );
       setSearchResults(result || []);
     };
     run(handleQuery);
@@ -36,6 +75,11 @@ const SearchStudentPage = () => {
   const onClickRow = (studentId: string) => {
     router.replace(`/student/${studentId}`);
   };
+
+  const columns = useMemo(
+    () => getColumns(() => run(refetchSearch)),
+    [run, refetchSearch],
+  );
 
   return (
     <div className="">
@@ -50,6 +94,14 @@ const SearchStudentPage = () => {
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>
+        <ToggleGroup
+          type="multiple"
+          value={selectedStatuses}
+          onValueChange={onStatusToggle}
+        >
+          <ToggleGroupItem value="active">Active</ToggleGroupItem>
+          <ToggleGroupItem value="inactive">Inactive</ToggleGroupItem>
+        </ToggleGroup>
       </InputGroup>
 
       {!!searchInput && !isPending && searchResults.length === 0 && (

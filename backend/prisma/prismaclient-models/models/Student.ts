@@ -39,7 +39,6 @@ export type StudentMinAggregateOutputType = {
   student_mobile: string | null
   first_name: string | null
   last_name: string | null
-  preferred_name: string | null
   grade_at_school: number | null
   school: string | null
   suburb_of_home: string | null
@@ -55,7 +54,6 @@ export type StudentMaxAggregateOutputType = {
   student_mobile: string | null
   first_name: string | null
   last_name: string | null
-  preferred_name: string | null
   grade_at_school: number | null
   school: string | null
   suburb_of_home: string | null
@@ -71,7 +69,6 @@ export type StudentCountAggregateOutputType = {
   student_mobile: number
   first_name: number
   last_name: number
-  preferred_name: number
   grade_at_school: number
   school: number
   suburb_of_home: number
@@ -97,7 +94,6 @@ export type StudentMinAggregateInputType = {
   student_mobile?: true
   first_name?: true
   last_name?: true
-  preferred_name?: true
   grade_at_school?: true
   school?: true
   suburb_of_home?: true
@@ -113,7 +109,6 @@ export type StudentMaxAggregateInputType = {
   student_mobile?: true
   first_name?: true
   last_name?: true
-  preferred_name?: true
   grade_at_school?: true
   school?: true
   suburb_of_home?: true
@@ -129,7 +124,6 @@ export type StudentCountAggregateInputType = {
   student_mobile?: true
   first_name?: true
   last_name?: true
-  preferred_name?: true
   grade_at_school?: true
   school?: true
   suburb_of_home?: true
@@ -232,7 +226,6 @@ export type StudentGroupByOutputType = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -271,7 +264,6 @@ export type StudentWhereInput = {
   student_mobile?: Prisma.StringFilter<"Student"> | string
   first_name?: Prisma.StringFilter<"Student"> | string
   last_name?: Prisma.StringFilter<"Student"> | string
-  preferred_name?: Prisma.StringNullableFilter<"Student"> | string | null
   grade_at_school?: Prisma.IntFilter<"Student"> | number
   school?: Prisma.StringFilter<"Student"> | string
   suburb_of_home?: Prisma.StringFilter<"Student"> | string
@@ -290,7 +282,6 @@ export type StudentOrderByWithRelationInput = {
   student_mobile?: Prisma.SortOrder
   first_name?: Prisma.SortOrder
   last_name?: Prisma.SortOrder
-  preferred_name?: Prisma.SortOrderInput | Prisma.SortOrder
   grade_at_school?: Prisma.SortOrder
   school?: Prisma.SortOrder
   suburb_of_home?: Prisma.SortOrder
@@ -312,7 +303,6 @@ export type StudentWhereUniqueInput = Prisma.AtLeast<{
   student_mobile?: Prisma.StringFilter<"Student"> | string
   first_name?: Prisma.StringFilter<"Student"> | string
   last_name?: Prisma.StringFilter<"Student"> | string
-  preferred_name?: Prisma.StringNullableFilter<"Student"> | string | null
   grade_at_school?: Prisma.IntFilter<"Student"> | number
   school?: Prisma.StringFilter<"Student"> | string
   suburb_of_home?: Prisma.StringFilter<"Student"> | string
@@ -331,7 +321,6 @@ export type StudentOrderByWithAggregationInput = {
   student_mobile?: Prisma.SortOrder
   first_name?: Prisma.SortOrder
   last_name?: Prisma.SortOrder
-  preferred_name?: Prisma.SortOrderInput | Prisma.SortOrder
   grade_at_school?: Prisma.SortOrder
   school?: Prisma.SortOrder
   suburb_of_home?: Prisma.SortOrder
@@ -355,7 +344,6 @@ export type StudentScalarWhereWithAggregatesInput = {
   student_mobile?: Prisma.StringWithAggregatesFilter<"Student"> | string
   first_name?: Prisma.StringWithAggregatesFilter<"Student"> | string
   last_name?: Prisma.StringWithAggregatesFilter<"Student"> | string
-  preferred_name?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
   grade_at_school?: Prisma.IntWithAggregatesFilter<"Student"> | number
   school?: Prisma.StringWithAggregatesFilter<"Student"> | string
   suburb_of_home?: Prisma.StringWithAggregatesFilter<"Student"> | string
@@ -371,7 +359,6 @@ export type StudentCreateInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -390,7 +377,6 @@ export type StudentUncheckedCreateInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -409,7 +395,6 @@ export type StudentUpdateInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -428,7 +413,6 @@ export type StudentUncheckedUpdateInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -447,7 +431,6 @@ export type StudentCreateManyInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -463,7 +446,6 @@ export type StudentUpdateManyMutationInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -479,7 +461,6 @@ export type StudentUncheckedUpdateManyInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -495,7 +476,6 @@ export type StudentCountOrderByAggregateInput = {
   student_mobile?: Prisma.SortOrder
   first_name?: Prisma.SortOrder
   last_name?: Prisma.SortOrder
-  preferred_name?: Prisma.SortOrder
   grade_at_school?: Prisma.SortOrder
   school?: Prisma.SortOrder
   suburb_of_home?: Prisma.SortOrder
@@ -515,7 +495,6 @@ export type StudentMaxOrderByAggregateInput = {
   student_mobile?: Prisma.SortOrder
   first_name?: Prisma.SortOrder
   last_name?: Prisma.SortOrder
-  preferred_name?: Prisma.SortOrder
   grade_at_school?: Prisma.SortOrder
   school?: Prisma.SortOrder
   suburb_of_home?: Prisma.SortOrder
@@ -531,7 +510,6 @@ export type StudentMinOrderByAggregateInput = {
   student_mobile?: Prisma.SortOrder
   first_name?: Prisma.SortOrder
   last_name?: Prisma.SortOrder
-  preferred_name?: Prisma.SortOrder
   grade_at_school?: Prisma.SortOrder
   school?: Prisma.SortOrder
   suburb_of_home?: Prisma.SortOrder
@@ -555,16 +533,16 @@ export type StringFieldUpdateOperationsInput = {
   set?: string
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type EnumLocationFieldUpdateOperationsInput = {
@@ -626,7 +604,6 @@ export type StudentCreateWithoutParentsInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -644,7 +621,6 @@ export type StudentUncheckedCreateWithoutParentsInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -678,7 +654,6 @@ export type StudentUpdateWithoutParentsInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -696,7 +671,6 @@ export type StudentUncheckedUpdateWithoutParentsInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -714,7 +688,6 @@ export type StudentCreateWithoutEnrolmentsInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -732,7 +705,6 @@ export type StudentUncheckedCreateWithoutEnrolmentsInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -766,7 +738,6 @@ export type StudentUpdateWithoutEnrolmentsInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -784,7 +755,6 @@ export type StudentUncheckedUpdateWithoutEnrolmentsInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -802,7 +772,6 @@ export type StudentCreateWithoutAttendancesInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -820,7 +789,6 @@ export type StudentUncheckedCreateWithoutAttendancesInput = {
   student_mobile: string
   first_name: string
   last_name: string
-  preferred_name?: string | null
   grade_at_school: number
   school: string
   suburb_of_home: string
@@ -854,7 +822,6 @@ export type StudentUpdateWithoutAttendancesInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -872,7 +839,6 @@ export type StudentUncheckedUpdateWithoutAttendancesInput = {
   student_mobile?: Prisma.StringFieldUpdateOperationsInput | string
   first_name?: Prisma.StringFieldUpdateOperationsInput | string
   last_name?: Prisma.StringFieldUpdateOperationsInput | string
-  preferred_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade_at_school?: Prisma.IntFieldUpdateOperationsInput | number
   school?: Prisma.StringFieldUpdateOperationsInput | string
   suburb_of_home?: Prisma.StringFieldUpdateOperationsInput | string
@@ -939,7 +905,6 @@ export type StudentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   student_mobile?: boolean
   first_name?: boolean
   last_name?: boolean
-  preferred_name?: boolean
   grade_at_school?: boolean
   school?: boolean
   suburb_of_home?: boolean
@@ -959,7 +924,6 @@ export type StudentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   student_mobile?: boolean
   first_name?: boolean
   last_name?: boolean
-  preferred_name?: boolean
   grade_at_school?: boolean
   school?: boolean
   suburb_of_home?: boolean
@@ -975,7 +939,6 @@ export type StudentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   student_mobile?: boolean
   first_name?: boolean
   last_name?: boolean
-  preferred_name?: boolean
   grade_at_school?: boolean
   school?: boolean
   suburb_of_home?: boolean
@@ -991,7 +954,6 @@ export type StudentSelectScalar = {
   student_mobile?: boolean
   first_name?: boolean
   last_name?: boolean
-  preferred_name?: boolean
   grade_at_school?: boolean
   school?: boolean
   suburb_of_home?: boolean
@@ -1002,7 +964,7 @@ export type StudentSelectScalar = {
   notes?: boolean
 }
 
-export type StudentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"student_id" | "student_mobile" | "first_name" | "last_name" | "preferred_name" | "grade_at_school" | "school" | "suburb_of_home" | "email" | "location" | "gender" | "status" | "notes", ExtArgs["result"]["student"]>
+export type StudentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"student_id" | "student_mobile" | "first_name" | "last_name" | "grade_at_school" | "school" | "suburb_of_home" | "email" | "location" | "gender" | "status" | "notes", ExtArgs["result"]["student"]>
 export type StudentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parents?: boolean | Prisma.Student$parentsArgs<ExtArgs>
   enrolments?: boolean | Prisma.Student$enrolmentsArgs<ExtArgs>
@@ -1024,7 +986,6 @@ export type $StudentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     student_mobile: string
     first_name: string
     last_name: string
-    preferred_name: string | null
     grade_at_school: number
     school: string
     suburb_of_home: string
@@ -1463,7 +1424,6 @@ export interface StudentFieldRefs {
   readonly student_mobile: Prisma.FieldRef<"Student", 'String'>
   readonly first_name: Prisma.FieldRef<"Student", 'String'>
   readonly last_name: Prisma.FieldRef<"Student", 'String'>
-  readonly preferred_name: Prisma.FieldRef<"Student", 'String'>
   readonly grade_at_school: Prisma.FieldRef<"Student", 'Int'>
   readonly school: Prisma.FieldRef<"Student", 'String'>
   readonly suburb_of_home: Prisma.FieldRef<"Student", 'String'>

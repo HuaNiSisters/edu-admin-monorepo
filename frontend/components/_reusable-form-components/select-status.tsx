@@ -19,8 +19,8 @@ const SelectStatus = (props: SelectStatusProps) => {
   const { options, value, onChange, disabled } = props;
 
   const mapValueToLabel: Record<string, string> = {
-    attending: "Attending",
-    alumni: "Alumni",
+    active: "Active",
+    inactive: "Inactive",
   };
 
   return (

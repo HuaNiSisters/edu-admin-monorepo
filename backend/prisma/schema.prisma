@@ -19,8 +19,8 @@ enum Gender {
 }
 
 enum StudentStatus {
-  attending
-  alumni
+  active
+  inactive
 }
 
 enum Location {
@@ -90,7 +90,6 @@ model Student {
   student_mobile  String
   first_name      String
   last_name       String
-  preferred_name  String?
   grade_at_school Int
   school          String
   suburb_of_home  String

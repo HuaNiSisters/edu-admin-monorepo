@@ -1,6 +1,7 @@
 import { Database } from "../../../../types/database.types";
 import { ParentInfo, StudentInfo, StudentStatus } from "..";
 import { CreateParentDataParams } from "./parent";
+import { Term, EnrolmentWithClassAndTerm } from "@/lib/api/types";
 
 type GetStatusesResponse = StudentStatus[];
 
@@ -24,12 +25,28 @@ type SearchStudentsResponse = {
   last_name: StudentInfo["last_name"];
   email: StudentInfo["email"];
   student_mobile: StudentInfo["student_mobile"];
+  gender: StudentInfo["gender"];
+  grade_at_school: StudentInfo["grade_at_school"];
+  school: StudentInfo["school"];
+  status: StudentInfo["status"];
   parents: {
     parent_id: ParentInfo["parent_id"];
     first_name: ParentInfo["first_name"];
     parent_mobile: ParentInfo["parent_mobile"];
   }[];
+  recent_term: Term | null;
+  recent_enrolments: (EnrolmentWithClassAndTerm & {
+    latest_payment: {
+      amount_paid: number;
+      amount_due: number;
+      payment_date: string | null;
+      notes: string | null;
+      status: "unpaid" | "partial" | "paid";
+    } | null;
+  })[] | null;
 }[];
+
+type StatusFilter = StudentStatus;
 
 export type {
   GetStatusesResponse,
@@ -38,4 +55,5 @@ export type {
   CreateStudentParams,
   UpdateStudentDataParams,
   SearchStudentsResponse,
+  StatusFilter
 };

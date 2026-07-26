@@ -8,6 +8,23 @@ You can do that by running:
 ## Update Prisma Schema
 `npm run prisma-migrate`
 
+## Troubleshooting 
+If you see the error: 
+`Could not find the migration file at migration.sql. Please delete the directory or restore the migration file.`
+
+- Navigate to your project's migration directory (usually prisma/migrations/).
+- Find the specific folder that is missing the migration.sql file.
+- Delete that entire folder (not just the contents).
+
+If you are getting errors like: 
+`The table `public.Student` does not exist in the current database.`
+Run: 
+`npx prisma migrate dev --name init` 
+Then you can seed your sample data
+
+## Reset Prisma database
+`npx prisma migrate reset`
+
 ## Sample data
 
 After setting `DATABASE_URL` and running the migrations, switch to Node 22.12
