@@ -5,6 +5,7 @@ import {
   CreateStudentDataParams,
   UpdateStudentDataParams,
   SearchStudentsResponse,
+  StatusFilter,
 } from "@/lib/api/types/person/student";
 
 interface IStudentRepo {
@@ -14,7 +15,7 @@ interface IStudentRepo {
     data: UpdateStudentDataParams,
   ) => Promise<StudentInfo>;
   getStudentByIdAsync: (id: string) => Promise<StudentInfo & { parents: ParentInfo[] }>;
-  searchStudentsAsync: (query: string) => Promise<SearchStudentsResponse>;
+  searchStudentsAsync: (query: string, statusFilter: StatusFilter | 'all') => Promise<SearchStudentsResponse>;
   getStatusesAsync: () => Promise<GetStatusesResponse>;
 }
 

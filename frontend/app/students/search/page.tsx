@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
 import { LoadingBar } from "@/components/loading-bar";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const SearchStudentPage = () => {
   const router = useRouter();
@@ -23,11 +24,39 @@ const SearchStudentPage = () => {
   );
   const { run, isPending } = useAsync();
 
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
+    "active",
+  ]);
+
+  // Derive the actual filter value sent to the backend from what's selected
+  const deriveStatusFilter = (
+    selected: string[],
+  ): "active" | "inactive" | "all" => {
+    if (selected.length === 0 || selected.length === 2) return "all";
+    return selected[0] as "active" | "inactive";
+  };
+
+  const onStatusToggle = (values: string[]) => {
+    setSelectedStatuses(values);
+    if (searchInput.length >= 4) {
+      run(async () => {
+        const result = await studentService.searchStudentsAsync(
+          searchInput,
+          deriveStatusFilter(values),
+        );
+        setSearchResults(result || []);
+      });
+    }
+  };
+
   const onChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
     if (event.target.value.length < 4) return;
     const handleQuery = async () => {
-      const result = await studentService.searchStudentsAsync(event.target.value);
+      const result = await studentService.searchStudentsAsync(
+        event.target.value,
+        deriveStatusFilter(selectedStatuses),
+      );
       setSearchResults(result || []);
     };
     run(handleQuery);
@@ -50,6 +79,14 @@ const SearchStudentPage = () => {
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>
+        <ToggleGroup
+          type="multiple"
+          value={selectedStatuses}
+          onValueChange={onStatusToggle}
+        >
+          <ToggleGroupItem value="active">Active</ToggleGroupItem>
+          <ToggleGroupItem value="inactive">Inactive</ToggleGroupItem>
+        </ToggleGroup>
       </InputGroup>
 
       {!!searchInput && !isPending && searchResults.length === 0 && (

@@ -38,6 +38,7 @@ import {
   CreateStudentDataParams,
   GetStatusesResponse,
   SearchStudentsResponse,
+  StatusFilter,
   UpdateStudentDataParams,
 } from "../types/person/student";
 
@@ -546,9 +547,9 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
     return updateStudentResponse;
   }
 
-  async searchStudentsAsync(query: string): Promise<SearchStudentsResponse> {
+  async searchStudentsAsync(query: string, statusFilter: StatusFilter | 'all'): Promise<SearchStudentsResponse> {
     const { data: searchStudentsResult, error: searchStudentsError } =
-      await this.supabase.rpc("search_students", { search_query: query });
+      await this.supabase.rpc("search_students", { search_query: query, status_filter: statusFilter === "all" ? null : statusFilter});
 
     if (searchStudentsError) {
       throw new Error(searchStudentsError.message);

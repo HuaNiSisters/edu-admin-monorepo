@@ -31,6 +31,8 @@ type SearchStudentsResponse = {
   }[];
 }[];
 
+type StatusFilter = StudentStatus;
+
 export type {
   GetStatusesResponse,
   CreateStudentDataParams,
@@ -38,4 +40,5 @@ export type {
   CreateStudentParams,
   UpdateStudentDataParams,
   SearchStudentsResponse,
+  StatusFilter
 };
