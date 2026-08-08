@@ -100,18 +100,27 @@ export const getColumns = (
 
       return (
         <div className="rounded-md overflow-hidden border border-slate-400 min-w-[360px] max-w-[420px]">
-          <div className="bg-slate-700 text-white text-center font-semibold py-1 text-sm">
-            Term {recent_term.name} {recent_term.year}
+          <div className="flex items-center justify-between gap-2 bg-slate-700 px-2 py-1 text-sm font-semibold text-white">
+            <span>Term {recent_term.name} {recent_term.year}</span>
+            <div onClick={(event) => event.stopPropagation()}>
+              <AddPaymentButton
+                term={recent_term}
+                enrolments={recent_enrolments}
+                onSaved={onPaymentSaved}
+                size="sm"
+                className="h-7 gap-1 rounded-full bg-lime-200 px-2 text-xs text-slate-900 hover:bg-lime-300"
+                label="Add"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-[1fr_auto_auto] bg-slate-800 text-white text-xs font-medium border-t">
+          <div className="grid grid-cols-[1fr_auto] border-t bg-slate-800 text-xs font-medium text-white">
             <div className="px-2 py-1">Grade &amp; Subject</div>
             <div className="px-2 py-1">Payment</div>
-            <div className="px-2 py-1 w-[50px]" />
           </div>
           {recent_enrolments.map((enr) => (
             <div
               key={enr.enrolment_id}
-              className="grid grid-cols-[1fr_auto_auto] bg-slate-800 text-white text-xs border-t border-slate-700"
+              className="grid grid-cols-[1fr_auto] border-t border-slate-700 bg-slate-800 text-xs text-white"
             >
               <div className="px-2 py-1.5">
                 <div className="font-medium">
@@ -151,19 +160,6 @@ export const getColumns = (
                     No payment
                   </span>
                 )}
-              </div>
-              <div
-                className="px-2 py-1.5 flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <AddPaymentButton
-                  term={recent_term}
-                  enrolments={[enr]}
-                  onSaved={() => onPaymentSaved()}
-                  size="sm"
-                  className="bg-lime-200 text-slate-900 hover:bg-lime-300 rounded-full h-7 px-2 text-xs"
-                  label="Add"
-                />
               </div>
             </div>
           ))}

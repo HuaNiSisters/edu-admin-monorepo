@@ -1,4 +1,4 @@
-import { Enrolment, EnrolmentStatus } from "@/lib/api/types";
+import { EnrolmentStatus } from "@/lib/api/types";
 import { IEnrolmentRepo } from "../api/adapters/interfaces";
 
 function EnrolmentService(enrolmentRepo: IEnrolmentRepo) {
@@ -27,10 +27,15 @@ function EnrolmentService(enrolmentRepo: IEnrolmentRepo) {
     return await enrolmentRepo.getEnrolmentsByClassIdAsync(classId);
   }
 
+  async function deleteEnrolmentAsync(enrolmentId: string) {
+    return await enrolmentRepo.deleteEnrolmentAsync(enrolmentId);
+  }
+
   return {
     enrolAsync,
     getEnrolmentsByStudentIdAsync,
     getEnrolmentsByClassIdAsync,
+    deleteEnrolmentAsync,
   };
 }
 

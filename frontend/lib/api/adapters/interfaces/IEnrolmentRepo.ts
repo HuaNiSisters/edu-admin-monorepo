@@ -1,8 +1,5 @@
 import { Enrolment, EnrolmentWithClassAndTerm } from "@/lib/api/types";
-import {
-  CreateEnrolmentDataParams,
-  UpdateEnrolmentDataParams,
-} from "../../types/enrolment";
+import { CreateEnrolmentDataParams } from "../../types/enrolment";
 
 interface IEnrolmentRepo {
   createEnrolmentAsync: (data: CreateEnrolmentDataParams) => Promise<Enrolment>;
@@ -16,6 +13,7 @@ interface IEnrolmentRepo {
   getEnrolmentsByClassIdAsync: (
     classId: string,
   ) => Promise<EnrolmentWithClassAndTerm[]>;
+  deleteEnrolmentAsync: (enrolmentId: string) => Promise<void>;
 }
 
 export type { IEnrolmentRepo };
