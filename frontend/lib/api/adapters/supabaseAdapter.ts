@@ -819,6 +819,15 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
     return responseData;
   }
 
+  async deleteEnrolmentAsync(enrolmentId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from("Enrolment")
+      .delete()
+      .eq("enrolment_id", enrolmentId);
+
+    if (error) throw new Error("Failed to delete enrolment: " + error.message);
+  }
+
   // async updateEnrolmentAsync(
   //   id: string,
   //   data: Omit<

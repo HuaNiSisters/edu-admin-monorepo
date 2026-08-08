@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,7 +21,7 @@ import {
   PaymentWithDetails,
   Term,
 } from "@/lib/api/types";
-import { paymentService } from "@/lib/services";
+import { enrolmentService, paymentService, termService } from "@/lib/services";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 type PaymentDialogProps = {
@@ -57,22 +58,49 @@ const PaymentDialog = ({
 }: PaymentDialogProps) => {
   const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([]);
   const [paymentStatuses, setPaymentStatuses] = useState<PaymentStatus[]>([]);
+  const [availableEnrolments, setAvailableEnrolments] = useState(enrolments);
+  const [availableTerms, setAvailableTerms] = useState<Term[]>([term]);
+  const [selectedTermId, setSelectedTermId] = useState(term.term_id);
+  const [selectedEnrolmentIds, setSelectedEnrolmentIds] = useState<string[]>(
+    () => enrolments.map((enrolment) => enrolment.enrolment_id),
+  );
+
+  const enrolmentsForTerm = useMemo(
+    () =>
+      availableEnrolments.filter(
+        (enrolment) => enrolment.term_id === selectedTermId,
+      ),
+    [availableEnrolments, selectedTermId],
+  );
+
+  const selectableEnrolments = useMemo(
+    () => (enrolmentsForTerm.length > 0 ? enrolmentsForTerm : enrolments),
+    [enrolments, enrolmentsForTerm],
+  );
+
+  const selectedEnrolments = useMemo(
+    () =>
+      selectableEnrolments.filter((enrolment) =>
+        selectedEnrolmentIds.includes(enrolment.enrolment_id),
+      ),
+    [selectableEnrolments, selectedEnrolmentIds],
+  );
 
   const defaultAmountDue = useMemo(
     () =>
       String(
-        enrolments.reduce(
+        selectedEnrolments.reduce(
           (total, enrolment) =>
             total + Number(enrolment.ClassTime.SubjectOffering.price_per_term),
           0,
         ),
       ),
-    [enrolments],
+    [selectedEnrolments],
   );
 
   const paymentAnchorEnrolmentId = useMemo(
-    () => payment?.enrolment_id ?? enrolments[0]?.enrolment_id,
-    [enrolments, payment],
+    () => payment?.enrolment_id ?? selectedEnrolments[0]?.enrolment_id,
+    [payment, selectedEnrolments],
   );
 
   const [formState, setFormState] = useState<PaymentFormState>({
@@ -84,6 +112,48 @@ const PaymentDialog = ({
     receipt: "",
     notes: "",
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const initialEnrolmentIds = enrolments.map(
+      (enrolment) => enrolment.enrolment_id,
+    );
+    setAvailableEnrolments(enrolments);
+    setAvailableTerms([term]);
+    setSelectedTermId(term.term_id);
+    setSelectedEnrolmentIds(initialEnrolmentIds);
+
+    const studentId = enrolments[0]?.student_id;
+    if (!studentId) return;
+
+    const fetchStudentPaymentOptions = async () => {
+      const [studentEnrolments, terms] = await Promise.all([
+        enrolmentService.getEnrolmentsByStudentIdAsync(studentId),
+        termService.getTermsAsync(),
+      ]);
+
+      setAvailableEnrolments(studentEnrolments);
+      setAvailableTerms(
+        Array.from(
+          new Map(
+            [term, ...terms]
+              .filter(
+                (availableTerm) =>
+                  new Date(availableTerm.start_date) >=
+                  new Date(term.start_date),
+              )
+              .map((availableTerm) => [
+                availableTerm.term_id,
+                availableTerm,
+              ]),
+          ).values(),
+        ),
+      );
+    };
+
+    fetchStudentPaymentOptions();
+  }, [enrolments, isOpen, term]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -125,6 +195,25 @@ const PaymentDialog = ({
     paymentTypes,
   ]);
 
+  const selectTerm = (termId: string) => {
+    setSelectedTermId(termId);
+    setSelectedEnrolmentIds(
+      (availableEnrolments.some((enrolment) => enrolment.term_id === termId)
+        ? availableEnrolments.filter((enrolment) => enrolment.term_id === termId)
+        : enrolments
+      )
+        .map((enrolment) => enrolment.enrolment_id),
+    );
+  };
+
+  const toggleEnrolment = (enrolmentId: string, isSelected: boolean) => {
+    setSelectedEnrolmentIds((current) =>
+      isSelected
+        ? [...current, enrolmentId]
+        : current.filter((id) => id !== enrolmentId),
+    );
+  };
+
   const updateField = <TKey extends keyof PaymentFormState>(
     key: TKey,
     value: PaymentFormState[TKey],
@@ -151,8 +240,8 @@ const PaymentDialog = ({
       return;
     }
 
-    if (!paymentAnchorEnrolmentId) {
-      toast.error("A payment needs at least one enrolment in the term.");
+    if (selectedEnrolments.length === 0) {
+      toast.error("Select at least one enrolment to pay for.");
       return;
     }
 
@@ -166,8 +255,28 @@ const PaymentDialog = ({
       return;
     }
 
+    let paymentEnrolmentId = paymentAnchorEnrolmentId;
+
+    if (!payment && enrolmentsForTerm.length === 0) {
+      const newEnrolments = await Promise.all(
+        selectedEnrolments.map((enrolment) =>
+          enrolmentService.enrolAsync({
+            studentId: enrolment.student_id,
+            classId: enrolment.class_id,
+            termId: selectedTermId,
+          }),
+        ),
+      );
+      paymentEnrolmentId = newEnrolments[0]?.enrolment_id;
+    }
+
+    if (!paymentEnrolmentId) {
+      toast.error("Unable to create an enrolment for this payment.");
+      return;
+    }
+
     const paymentData = {
-      enrolment_id: paymentAnchorEnrolmentId,
+      enrolment_id: paymentEnrolmentId,
       amount_due: amountDue,
       amount_paid: amountPaid,
       payment_date: formState.paymentDate
@@ -203,14 +312,42 @@ const PaymentDialog = ({
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label>Term</Label>
-          <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
-            {term.year} Term {term.name} ·{" "}
-            {enrolments
-              .map(
-                (enrolment) =>
-                  `${enrolment.ClassTime.SubjectOffering.subject_name} (Grade ${enrolment.ClassTime.SubjectOffering.grade})`,
-              )
-              .join(", ")}
+          <Select value={selectedTermId} onValueChange={selectTerm}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTerms.map((availableTerm) => (
+                <SelectItem key={availableTerm.term_id} value={availableTerm.term_id}>
+                  {availableTerm.year} Term {availableTerm.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Enrolments</Label>
+          <div className="rounded-md border divide-y">
+            {selectableEnrolments.map((enrolment) => {
+              const enrolmentId = enrolment.enrolment_id;
+              const subjectOffering = enrolment.ClassTime.SubjectOffering;
+
+              return (
+                <label
+                  key={enrolmentId}
+                  className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm"
+                >
+                  <Checkbox
+                    checked={selectedEnrolmentIds.includes(enrolmentId)}
+                    onCheckedChange={(checked) =>
+                      toggleEnrolment(enrolmentId, checked === true)
+                    }
+                  />
+                  {subjectOffering.subject_name} (Grade {subjectOffering.grade})
+                </label>
+              );
+            })}
           </div>
         </div>
 

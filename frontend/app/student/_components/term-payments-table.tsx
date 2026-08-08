@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import ReusableTable, {
   ReusableTableColumn,
 } from "@/components/_reusable/reusable-table";
+import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
 import {
   Attendance,
   EnrolmentWithClassAndTerm,
   PaymentWithDetails,
   Term,
 } from "@/lib/api/types";
-import { paymentService } from "@/lib/services";
+import { enrolmentService, paymentService } from "@/lib/services";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import PaymentDialog from "./payment-dialog";
 import { formatTime } from "@/utils/time-utils";
@@ -42,6 +43,8 @@ const TermPaymentsTable = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] =
     useState<PaymentWithDetails | null>(null);
+  const [enrolmentToDelete, setEnrolmentToDelete] =
+    useState<EnrolmentWithClassAndTerm | null>(null);
 
   const openEditDialog = (payment: PaymentWithDetails) => {
     setEditingPayment(payment);
@@ -57,6 +60,37 @@ const TermPaymentsTable = ({
     await paymentService.deletePaymentAsync(payment.payment_id);
     toast.success("Payment deleted.");
     onChange();
+  };
+
+  const requestDeleteEnrolment = (enrolment: EnrolmentWithClassAndTerm) => {
+    const hasPayments = payments.some(
+      (payment) => payment.enrolment_id === enrolment.enrolment_id,
+    );
+
+    if (hasPayments) {
+      toast.error("Delete this enrolment's payment records before removing it.");
+      return;
+    }
+
+    setEnrolmentToDelete(enrolment);
+  };
+
+  const deleteEnrolment = async () => {
+    if (!enrolmentToDelete) return;
+
+    try {
+      await enrolmentService.deleteEnrolmentAsync(
+        enrolmentToDelete.enrolment_id,
+      );
+      toast.success("Enrolment removed.");
+      onChange();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to remove enrolment.",
+      );
+    } finally {
+      setEnrolmentToDelete(null);
+    }
   };
 
   const subjectNames = enrolments
@@ -112,6 +146,20 @@ const TermPaymentsTable = ({
         formatCurrency(
           Number(enrolment.ClassTime.SubjectOffering.price_per_term),
         ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      cell: (enrolment) => (
+        <Button
+          className="bg-red-600 text-white hover:bg-red-700"
+          size="icon"
+          onClick={() => requestDeleteEnrolment(enrolment)}
+          aria-label="Remove enrolment"
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      ),
     },
   ];
 
@@ -184,6 +232,21 @@ const TermPaymentsTable = ({
 
   return (
     <div className="space-y-6">
+      <ReusableDialog
+        isOpen={enrolmentToDelete !== null}
+        title="Remove enrolment?"
+        onClose={() => setEnrolmentToDelete(null)}
+        onCancel={() => setEnrolmentToDelete(null)}
+        onConfirm={deleteEnrolment}
+        confirmText="OK"
+      >
+        <p className="text-sm text-muted-foreground">
+          Remove {enrolmentToDelete?.ClassTime.SubjectOffering.subject_name} (
+          Grade {enrolmentToDelete?.ClassTime.SubjectOffering.grade}) from Term{" "}
+          {term.name} {term.year}?
+        </p>
+      </ReusableDialog>
+
       <PaymentDialog
         term={term}
         enrolments={enrolments}
