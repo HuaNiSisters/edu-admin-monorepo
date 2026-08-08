@@ -53,6 +53,17 @@ const formSchema = zod.object({
   parent2Mobile: zod.string().optional(),
 });
 
+const formatMobileNumber = (value: string | undefined) => {
+  const digits = value?.replace(/\D/g, "")?.slice(0, 10);
+  return digits
+    ? [digits.slice(0, 4), digits.slice(4, 7), digits.slice(7, 10)]
+        .filter(Boolean)
+        .join(" ")
+    : "";
+};
+
+const normaliseMobileNumber = (value: string) => value.replace(/\D/g, "");
+
 const StudentDataForm = ({
   studentData,
   isEditing,
@@ -171,7 +182,7 @@ const StudentDataForm = ({
       status: data.status as StudentStatus,
       notes: data.notes,
       suburb_of_home: data.suburb,
-      student_mobile: data.mobile,
+      student_mobile: normaliseMobileNumber(data.mobile),
     };
 
     const parent1Data: CreateParentDataParams = {
@@ -179,7 +190,7 @@ const StudentDataForm = ({
       parent_id: parent1Id,
       first_name: data.parent1FullName,
       last_name: "",
-      parent_mobile: data.parent1Mobile,
+      parent_mobile: normaliseMobileNumber(data.parent1Mobile),
     };
 
     const parent2Data: CreateParentDataParams = {
@@ -187,7 +198,7 @@ const StudentDataForm = ({
       parent_id: parent2Id,
       first_name: data.parent2FullName || "",
       last_name: "",
-      parent_mobile: data.parent2Mobile || "",
+      parent_mobile: normaliseMobileNumber(data.parent2Mobile || ""),
     };
 
     run(async () => {
@@ -319,6 +330,13 @@ const StudentDataForm = ({
                   id="student-mobile"
                   placeholder="Student's Mobile Number"
                   {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={formatMobileNumber(field.value)}
+                  onChange={(event) =>
+                    field.onChange(formatMobileNumber(event.target.value))
+                  }
                   disabled={isViewingMode}
                 />
                 {fieldState.invalid && (
@@ -516,6 +534,13 @@ const StudentDataForm = ({
                 <Input
                   id="parent1-mobile"
                   {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={formatMobileNumber(field.value)}
+                  onChange={(event) =>
+                    field.onChange(formatMobileNumber(event.target.value))
+                  }
                   disabled={isViewingMode}
                 />
                 {fieldState.invalid && (
@@ -555,6 +580,13 @@ const StudentDataForm = ({
                 <Input
                   id="parent2-mobile"
                   {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={formatMobileNumber(field.value)}
+                  onChange={(event) =>
+                    field.onChange(formatMobileNumber(event.target.value))
+                  }
                   disabled={isViewingMode}
                 />
                 {fieldState.invalid && (
