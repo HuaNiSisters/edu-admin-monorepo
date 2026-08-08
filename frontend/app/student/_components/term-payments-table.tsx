@@ -68,7 +68,9 @@ const TermPaymentsTable = ({
     );
 
     if (hasPayments) {
-      toast.error("Delete this enrolment's payment records before removing it.");
+      toast.error(
+        "Delete this enrolment's payment records before removing it.",
+      );
       return;
     }
 
@@ -228,7 +230,10 @@ const TermPaymentsTable = ({
         </div>
       ),
     },
-  ];
+  ].map( (column) => ({
+    ...column,
+    headerClassName: "bg-slate-800 border-slate-700 text-white",
+  }));
 
   return (
     <div className="space-y-6">
@@ -281,6 +286,9 @@ const TermPaymentsTable = ({
           data={payments}
           getRowKey={(payment) => payment.payment_id}
           emptyMessage="No payments recorded for this term."
+          containerClassName="border-slate-700 bg-slate-800"
+          rowClassName="border-slate-700 bg-slate-800 text-white hover:bg-slate-700"
+          emptyCellClassName="bg-slate-800 text-slate-300"
         />
       </section>
 

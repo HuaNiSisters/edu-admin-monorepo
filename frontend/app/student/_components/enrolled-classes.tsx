@@ -138,7 +138,7 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="flex flex-col p-1">
-                    <div className="rounded-md border p-2 bg-primary-foreground">
+                    <div className="rounded-md border p-4 bg-primary-foreground">
                       <TermPaymentsTable
                         studentId={studentId}
                         term={term}
