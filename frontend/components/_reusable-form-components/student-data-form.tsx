@@ -609,14 +609,25 @@ const StudentDataForm = ({
                 ? "Update Student"
                 : "Create Student"}
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => form.reset()}
-            disabled={isPending}
-          >
-            Reset
-          </Button>
+          {isEditMode ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.replace(`/student/${studentId}`)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => form.reset()}
+              disabled={isPending}
+            >
+              Reset
+            </Button>
+          )}
         </Field>
       </div>
     </form>
