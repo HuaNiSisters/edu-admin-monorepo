@@ -6,9 +6,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useAsync } from "@/hooks/use-async";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
-import { SelectClass } from "@/components/_reusable-form-components/select-class";
+import { SelectClassCascading } from "@/components/_reusable-form-components/select-class-cascading";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Field, FieldError } from "@/components/ui/field";
 import { enrolmentService, termService } from "@/lib/services";
 import { toast } from "sonner";
@@ -37,8 +36,6 @@ export default function EnrolDataForm({
 }: EnrolDataFormProps) {
   // isEditing?
   // disabled student selection, if passed in from prop
-
-  const [allTerms, setAllTerms] = useState([]);
 
   const { run, isPending } = useAsync();
 
@@ -84,7 +81,7 @@ export default function EnrolDataForm({
   const onTermChange = async (termData: Partial<Term>) => {
     console.log({ termData });
     let termId = termData.term_id;
-    if(!termId) {
+    if (!termId) {
       const newlyCreatedTerm = await termService.createTermAsync({
         year: termData.year!,
         name: termData.name!,
@@ -96,7 +93,7 @@ export default function EnrolDataForm({
       await termService.updateTermAsync(termData.term_id!, {
         start_date: termData.start_date!,
         end_date: termData.end_date!,
-      });      
+      });
     }
     form.setValue("termId", termId);
   };
@@ -104,22 +101,22 @@ export default function EnrolDataForm({
   return (
     <div>
       <form id="enrol-data-form" className="w-full flex flex-col gap-4">
-        <div className="flex gap-2 items-center w-full">
-          <span className="shrink-0">Class:</span>
-          <div className="flex-1 min-w-0">
-            <Controller
-              name="classId"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field className="flex">
-                  <SelectClass value={field.value} onChange={field.onChange} />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
+        <div className="w-full">
+          <Controller
+            name="classId"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <SelectClassCascading
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </div>
         <div className="flex gap-2 items-center w-full">
           <div className="flex-1 min-w-0">
@@ -128,10 +125,7 @@ export default function EnrolDataForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field className="flex">
-                  <SelectTerm
-                    value={field.value}
-                    onChange={onTermChange}
-                  />
+                  <SelectTerm value={field.value} onChange={onTermChange} />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}

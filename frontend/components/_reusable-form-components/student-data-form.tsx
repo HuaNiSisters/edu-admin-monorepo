@@ -5,8 +5,15 @@ import {
   StudentStatus,
   Gender,
   StudentWithParents,
+  Term,
 } from "@/lib/api/types";
-import { studentService, personService, campusService } from "@/lib/services";
+import {
+  studentService,
+  personService,
+  campusService,
+  enrolmentService,
+  termService,
+} from "@/lib/services";
 
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,12 +26,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
+import { SelectClassCascading } from "@/components/_reusable-form-components/select-class-cascading";
 import { SelectGender } from "./select-gender";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
 import { useRouter } from "next/navigation";
 import { CreateParentDataParams } from "@/lib/api/types/person/parent";
 import { CreateStudentDataParams } from "@/lib/api/types/person/student";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -77,6 +92,9 @@ const StudentDataForm = ({
   const [studentId, setStudentId] = useState<string>("");
   const [parent1Id, setParent1Id] = useState<string>("");
   const [parent2Id, setParent2Id] = useState<string>("");
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [selectedTermId, setSelectedTermId] = useState("");
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -160,6 +178,29 @@ const StudentDataForm = ({
     fetchAndPopulate();
   }, [studentData]);
 
+  useEffect(() => {
+    if (studentData) return;
+
+    const fetchClassOptions = async () => {
+      const availableTerms = await termService.getTermsAsync();
+      setTerms(availableTerms);
+
+      const today = new Date();
+      const currentOrNextTerm =
+        availableTerms.find(
+          (availableTerm) =>
+            new Date(availableTerm.start_date) <= today &&
+            new Date(availableTerm.end_date) >= today,
+        ) ??
+        availableTerms.find(
+          (availableTerm) => new Date(availableTerm.start_date) >= today,
+        );
+      setSelectedTermId(currentOrNextTerm?.term_id ?? "");
+    };
+
+    fetchClassOptions();
+  }, [studentData]);
+
   const { run, isPending, error } = useAsync();
   const router = useRouter();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -223,6 +264,20 @@ const StudentDataForm = ({
         parent1Data,
         parent2Data,
       });
+
+      if (selectedClassId && selectedTermId && createStudentResponse) {
+        try {
+          await enrolmentService.enrolAsync({
+            studentId: createStudentResponse.student_id,
+            classId: selectedClassId,
+            termId: selectedTermId,
+          });
+        } catch {
+          toast.error(
+            "Student was created, but could not be enrolled in the class.",
+          );
+        }
+      }
       if (error) {
         setSubmissionError(error.message);
       }
@@ -596,6 +651,46 @@ const StudentDataForm = ({
             )}
           />
         </div>
+
+        {!studentData && (
+          <section className="mt-8 space-y-4 border-t pt-6">
+            <div>
+              <h2 className="text-lg font-semibold">Add class</h2>
+              <p className="text-sm text-muted-foreground">
+                Optionally enrol the student in a class when creating them.
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              <SelectClassCascading
+                value={selectedClassId}
+                onChange={setSelectedClassId}
+              />
+
+              <div className="grid gap-2 sm:max-w-xs">
+                <FieldLabel>Term</FieldLabel>
+                <Select
+                  value={selectedTermId}
+                  onValueChange={setSelectedTermId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {terms.map((availableTerm) => (
+                      <SelectItem
+                        key={availableTerm.term_id}
+                        value={availableTerm.term_id}
+                      >
+                        {availableTerm.year} Term {availableTerm.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
 
       <br />
