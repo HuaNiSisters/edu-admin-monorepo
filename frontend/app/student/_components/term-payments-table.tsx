@@ -17,11 +17,14 @@ import {
 import { enrolmentService, paymentService } from "@/lib/services";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import PaymentDialog from "./payment-dialog";
-import { formatTime } from "@/utils/time-utils";
 import { formatDate } from "@/utils/date-utils";
 import { formatCurrency } from "@/utils/currency-utils";
 import StudentAttendanceGrid from "./student-attendance-grid";
 import AddPaymentButton from "./add-payment-button";
+import {
+  EnrolmentSubjectsTable,
+  EnrolmentSubjectRow,
+} from "@/components/_reusable/enrolment-subjects-table";
 
 type TermPaymentsTableProps = {
   studentId: string;
@@ -99,71 +102,19 @@ const TermPaymentsTable = ({
     .map((enrolment) => enrolment.ClassTime.SubjectOffering.subject_name)
     .join(", ");
 
-  const subjectColumns: ReusableTableColumn<EnrolmentWithClassAndTerm>[] = [
-    {
-      key: "grade",
-      header: "Grade",
-      cell: (enrolment) => enrolment.ClassTime.SubjectOffering.grade,
-    },
-    {
-      key: "subject",
-      header: "Subject",
-      cell: (enrolment) => enrolment.ClassTime.SubjectOffering.subject_name,
-    },
-    {
-      key: "day",
-      header: "Day",
-      cell: (enrolment) => enrolment.ClassTime.day_of_week,
-    },
-    {
-      key: "time",
-      header: "Time",
-      cell: (enrolment) => formatTime(enrolment.ClassTime.start_time),
-    },
-    {
-      key: "location",
-      header: "Location",
-      cell: (enrolment) =>
-        formatValuesRemoveUnderscores(
-          enrolment.ClassTime.SubjectOffering.location,
-        ),
-    },
-    {
-      key: "class_start_date",
-      header: "Class Start Date",
-      cell: () => formatDate(term.start_date),
-    },
-    {
-      key: "tutor",
-      header: "Tutor",
-      cell: (enrolment) =>
-        enrolment.ClassTime.Tutor
-          ? `${enrolment.ClassTime.Tutor.first_name} ${enrolment.ClassTime.Tutor.last_name}`
-          : "—",
-    },
-    {
-      key: "fees",
-      header: "Fees",
-      cell: (enrolment) =>
-        formatCurrency(
-          Number(enrolment.ClassTime.SubjectOffering.price_per_term),
-        ),
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      cell: (enrolment) => (
-        <Button
-          className="bg-red-600 text-white hover:bg-red-700"
-          size="icon"
-          onClick={() => requestDeleteEnrolment(enrolment)}
-          aria-label="Remove enrolment"
-        >
-          <Trash2 className="size-4" />
-        </Button>
-      ),
-    },
-  ];
+  const subjectRows: EnrolmentSubjectRow[] = enrolments.map((enrolment) => ({
+    id: enrolment.enrolment_id,
+    classId: enrolment.class_id,
+    subjectName: enrolment.ClassTime.SubjectOffering.subject_name,
+    grade: enrolment.ClassTime.SubjectOffering.grade,
+    dayOfWeek: enrolment.ClassTime.day_of_week,
+    startTime: enrolment.ClassTime.start_time,
+    location: enrolment.ClassTime.SubjectOffering.location,
+    tutor: enrolment.ClassTime.Tutor
+      ? `${enrolment.ClassTime.Tutor.first_name} ${enrolment.ClassTime.Tutor.last_name}`
+      : null,
+    fees: Number(enrolment.ClassTime.SubjectOffering.price_per_term),
+  }));
 
   const paymentColumns: ReusableTableColumn<PaymentWithDetails>[] = [
     {
@@ -263,11 +214,16 @@ const TermPaymentsTable = ({
 
       <section className="space-y-3">
         <h3 className="text-lg font-semibold tracking-normal">Subjects</h3>
-        <ReusableTable
-          columns={subjectColumns}
-          data={enrolments}
-          getRowKey={(enrolment) => enrolment.enrolment_id}
-          emptyMessage="No subjects found for this term."
+        <EnrolmentSubjectsTable
+          term={term}
+          enrolments={subjectRows}
+          onEdit={() => toast.info("Enrolment editing is coming soon.")}
+          onDelete={(subjectRow) => {
+            const enrolment = enrolments.find(
+              (item) => item.enrolment_id === subjectRow.id,
+            );
+            if (enrolment) requestDeleteEnrolment(enrolment);
+          }}
         />
       </section>
 

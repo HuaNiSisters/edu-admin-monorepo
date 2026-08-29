@@ -24,13 +24,21 @@ export interface EnrolDataFormHandle {
 
 interface EnrolDataFormProps {
   studentId?: string;
-  // classId?: string; // Maybe if adding from class UI
+  // Pre-fill the form, e.g. when editing a previously-added pending enrolment.
+  defaultValues?: { classId?: string; termId?: string };
+  // If provided, submission calls this instead of enrolling via the API
+  // directly. Lets the form be reused before a student exists yet (e.g. the
+  // create-student flow, which only wants the selected classId/termId to
+  // stash locally and enrol later once the student has been created).
+  onEnrol?: (data: { classId: string; termId: string }) => Promise<void> | void;
   afterSubmit?: () => void;
   ref?: React.Ref<EnrolDataFormHandle>;
 }
 
 export default function EnrolDataForm({
   studentId,
+  defaultValues,
+  onEnrol,
   afterSubmit,
   ref,
 }: EnrolDataFormProps) {
@@ -45,12 +53,11 @@ export default function EnrolDataForm({
   });
 
   // Do all classes always run every term?
-  // TODO: autoset to the current term
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      classId: "",
-      termId: "",
+      classId: defaultValues?.classId ?? "",
+      termId: defaultValues?.termId ?? "",
     },
   });
 
@@ -64,11 +71,18 @@ export default function EnrolDataForm({
     submit() {
       form.handleSubmit((data) => {
         run(async () => {
-          await enrolmentService.enrolAsync({
-            studentId: studentId!,
-            classId: data.classId,
-            termId: data.termId,
-          });
+          if (onEnrol) {
+            // Deferred/local mode: let the caller decide what to do with
+            // the selection (e.g. add to a pending list) instead of
+            // hitting the enrolment API directly.
+            await onEnrol(data);
+          } else {
+            await enrolmentService.enrolAsync({
+              studentId: studentId!,
+              classId: data.classId,
+              termId: data.termId,
+            });
+          }
 
           // try-catch
           // if no errors, then call onSubmit

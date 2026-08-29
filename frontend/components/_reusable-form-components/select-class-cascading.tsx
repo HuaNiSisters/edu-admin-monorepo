@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 
 const isNonEmptyString = (value: string | null | undefined): value is string =>
   Boolean(value);
@@ -53,7 +54,9 @@ const compareClassesChronologically = (
   if (dayDifference !== 0) return dayDifference;
 
   if (firstDayIndex === -1) {
-    const namedDayDifference = first.day_of_week.localeCompare(second.day_of_week);
+    const namedDayDifference = first.day_of_week.localeCompare(
+      second.day_of_week,
+    );
     if (namedDayDifference !== 0) return namedDayDifference;
   }
 
@@ -111,18 +114,15 @@ export function SelectClassCascading({
     ),
   ).sort(compareGrades);
 
-  
   const subjects = Array.from(
     new Set(
       classes
-        .filter(
-          (classTime) =>
-            toSelectValue(classTime.grade) === selectedGrade,
-        )
+        .filter((classTime) => toSelectValue(classTime.grade) === selectedGrade)
         .map((classTime) => classTime.subject_name)
         .filter(isNonEmptyString),
     ),
   ).sort((first, second) => first.localeCompare(second));
+  
   const locations = Array.from(
     new Set(
       classes
@@ -135,12 +135,15 @@ export function SelectClassCascading({
         .filter(isNonEmptyString),
     ),
   ).sort((first, second) => first.localeCompare(second));
-  const matchingClasses = classes.filter(
-    (classTime) =>
-      toSelectValue(classTime.grade) === selectedGrade &&
-      classTime.subject_name === selectedSubject &&
-      classTime.location === selectedLocation,
-  ).sort(compareClassesChronologically);
+
+  const matchingClasses = classes
+    .filter(
+      (classTime) =>
+        toSelectValue(classTime.grade) === selectedGrade &&
+        classTime.subject_name === selectedSubject &&
+        classTime.location === selectedLocation,
+    )
+    .sort(compareClassesChronologically);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -209,7 +212,7 @@ export function SelectClassCascading({
           <SelectContent>
             {locations.map((location) => (
               <SelectItem key={location} value={location}>
-                {location}
+                {formatValuesRemoveUnderscores(location)}
               </SelectItem>
             ))}
           </SelectContent>

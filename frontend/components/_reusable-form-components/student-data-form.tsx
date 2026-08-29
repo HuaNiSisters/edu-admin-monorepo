@@ -5,17 +5,19 @@ import {
   StudentStatus,
   Gender,
   StudentWithParents,
+  ClassTimeWithSubjectAndTutor,
   Term,
 } from "@/lib/api/types";
 import {
   studentService,
   personService,
   campusService,
+  classService,
   enrolmentService,
   termService,
 } from "@/lib/services";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as zod from "zod";
@@ -26,20 +28,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
-import { SelectClassCascading } from "@/components/_reusable-form-components/select-class-cascading";
+import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
+import {
+  EnrolmentSubjectsTable,
+  EnrolmentSubjectRow,
+} from "@/components/_reusable/enrolment-subjects-table";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { SelectGender } from "./select-gender";
+import { ChevronDownIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
 import { useRouter } from "next/navigation";
 import { CreateParentDataParams } from "@/lib/api/types/person/parent";
 import { CreateStudentDataParams } from "@/lib/api/types/person/student";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import EnrolDataForm, {
+  EnrolDataFormHandle,
+} from "@/app/student/_components/enrol-data-form";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -79,6 +87,11 @@ const formatMobileNumber = (value: string | undefined) => {
 
 const normaliseMobileNumber = (value: string) => value.replace(/\D/g, "");
 
+type PendingEnrolment = {
+  classTime: ClassTimeWithSubjectAndTutor;
+  termId: string;
+};
+
 const StudentDataForm = ({
   studentData,
   isEditing,
@@ -93,8 +106,14 @@ const StudentDataForm = ({
   const [parent1Id, setParent1Id] = useState<string>("");
   const [parent2Id, setParent2Id] = useState<string>("");
   const [terms, setTerms] = useState<Term[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState("");
-  const [selectedTermId, setSelectedTermId] = useState("");
+  const [defaultTermId, setDefaultTermId] = useState("");
+  const [isEnrolDialogOpen, setIsEnrolDialogOpen] = useState(false);
+  const [pendingEnrolments, setPendingEnrolments] = useState<
+    PendingEnrolment[]
+  >([]);
+  const [editingPendingEnrolment, setEditingPendingEnrolment] =
+    useState<PendingEnrolment | null>(null);
+  const enrolFormRef = useRef<EnrolDataFormHandle>(null);
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -195,7 +214,7 @@ const StudentDataForm = ({
         availableTerms.find(
           (availableTerm) => new Date(availableTerm.start_date) >= today,
         );
-      setSelectedTermId(currentOrNextTerm?.term_id ?? "");
+      setDefaultTermId(currentOrNextTerm?.term_id ?? "");
     };
 
     fetchClassOptions();
@@ -265,16 +284,20 @@ const StudentDataForm = ({
         parent2Data,
       });
 
-      if (selectedClassId && selectedTermId && createStudentResponse) {
-        try {
-          await enrolmentService.enrolAsync({
-            studentId: createStudentResponse.student_id,
-            classId: selectedClassId,
-            termId: selectedTermId,
-          });
-        } catch {
+      if (pendingEnrolments.length > 0 && createStudentResponse) {
+        const enrolmentResults = await Promise.allSettled(
+          pendingEnrolments.map((pendingEnrolment) =>
+            enrolmentService.enrolAsync({
+              studentId: createStudentResponse.student_id,
+              classId: pendingEnrolment.classTime.class_id,
+              termId: pendingEnrolment.termId,
+            }),
+          ),
+        );
+
+        if (enrolmentResults.some((result) => result.status === "rejected")) {
           toast.error(
-            "Student was created, but could not be enrolled in the class.",
+            "Student was created, but one or more classes could not be enrolled.",
           );
         }
       }
@@ -288,6 +311,87 @@ const StudentDataForm = ({
       return;
     });
   }
+
+  // Passed to EnrolDataForm as `onEnrol`: since there's no student yet to
+  // enrol against, just stash the validated {classId, termId} selection
+  // locally. The actual enrolmentService.enrolAsync calls happen after the
+  // student is created, in onSubmit above.
+  const addClassToEnrolment = async ({
+    classId,
+    termId,
+  }: {
+    classId: string;
+    termId: string;
+  }) => {
+    const isDuplicate = pendingEnrolments.some(
+      (pendingEnrolment) =>
+        pendingEnrolment.classTime.class_id === classId &&
+        pendingEnrolment.termId === termId &&
+        pendingEnrolment !== editingPendingEnrolment,
+    );
+    if (isDuplicate) {
+      toast.error("This class has already been added for the selected term.");
+      throw new Error("Duplicate pending enrolment");
+    }
+
+    const classTime = await classService.getClassByIdAsync(classId);
+    const updatedEnrolment = { classTime, termId };
+    setPendingEnrolments((current) =>
+      editingPendingEnrolment
+        ? current.map((pendingEnrolment) =>
+            pendingEnrolment === editingPendingEnrolment
+              ? updatedEnrolment
+              : pendingEnrolment,
+          )
+        : [...current, updatedEnrolment],
+    );
+  };
+
+  const pendingEnrolmentsByTerm = terms
+    .map((term) => ({
+      term,
+      enrolments: pendingEnrolments.filter(
+        (pendingEnrolment) => pendingEnrolment.termId === term.term_id,
+      ),
+    }))
+    .filter(({ enrolments }) => enrolments.length > 0);
+
+  const removePendingEnrolment = (classId: string, termId: string) => {
+    setPendingEnrolments((current) =>
+      current.filter(
+        (pendingEnrolment) =>
+          pendingEnrolment.classTime.class_id !== classId ||
+          pendingEnrolment.termId !== termId,
+      ),
+    );
+  };
+
+  const resetForm = () => {
+    form.reset();
+    setPendingEnrolments([]);
+    setEditingPendingEnrolment(null);
+    setIsEnrolDialogOpen(false);
+  };
+
+  const openPendingEnrolmentEditor = (
+    subjectRow: EnrolmentSubjectRow,
+    termId: string,
+  ) => {
+    const pendingEnrolment = pendingEnrolments.find(
+      (item) =>
+        item.classTime.class_id === subjectRow.classId &&
+        item.termId === termId,
+    );
+    if (!pendingEnrolment) return;
+
+    setEditingPendingEnrolment(pendingEnrolment);
+    setIsEnrolDialogOpen(true);
+  };
+
+  const closeEnrolDialog = () => {
+    setEditingPendingEnrolment(null);
+    setIsEnrolDialogOpen(false);
+  };
 
   return (
     <form
@@ -653,43 +757,88 @@ const StudentDataForm = ({
         </div>
 
         {!studentData && (
-          <section className="mt-8 space-y-4 border-t pt-6">
-            <div>
-              <h2 className="text-lg font-semibold">Add class</h2>
-              <p className="text-sm text-muted-foreground">
-                Optionally enrol the student in a class when creating them.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              <SelectClassCascading
-                value={selectedClassId}
-                onChange={setSelectedClassId}
-              />
-
-              <div className="grid gap-2 sm:max-w-xs">
-                <FieldLabel>Term</FieldLabel>
-                <Select
-                  value={selectedTermId}
-                  onValueChange={setSelectedTermId}
+          <div>
+            <div className="py-4">
+              <div className="flex justify-between">
+                <span className="text-xl font-bold">Enrolments</span>
+                <Button
+                  type="button"
+                  onClick={() => setIsEnrolDialogOpen(true)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select term" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {terms.map((availableTerm) => (
-                      <SelectItem
-                        key={availableTerm.term_id}
-                        value={availableTerm.term_id}
-                      >
-                        {availableTerm.year} Term {availableTerm.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  Enrol
+                </Button>
               </div>
             </div>
-          </section>
+
+            <ReusableDialog
+              title="Enrol in a class"
+              isOpen={isEnrolDialogOpen}
+              onClose={closeEnrolDialog}
+              onConfirm={() => enrolFormRef.current?.submit()}
+              onCancel={closeEnrolDialog}
+              confirmText={
+                editingPendingEnrolment ? "Save changes" : "Add class"
+              }
+            >
+              <EnrolDataForm
+                key={
+                  editingPendingEnrolment
+                    ? `${editingPendingEnrolment.classTime.class_id}-${editingPendingEnrolment.termId}`
+                    : "new"
+                }
+                ref={enrolFormRef}
+                defaultValues={
+                  editingPendingEnrolment
+                    ? {
+                        classId: editingPendingEnrolment.classTime.class_id,
+                        termId: editingPendingEnrolment.termId,
+                      }
+                    : { termId: defaultTermId }
+                }
+                onEnrol={addClassToEnrolment}
+                afterSubmit={closeEnrolDialog}
+              />
+            </ReusableDialog>
+
+            {pendingEnrolmentsByTerm.map(({ term, enrolments }) => (
+              <div key={term.term_id} className="mt-4">
+                <Collapsible className="rounded-md data-[state=open]:bg-muted">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="group w-full bg-muted text-md"
+                    >
+                      {term.year} Term {term.name}
+                      <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="p-1">
+                    <EnrolmentSubjectsTable
+                      term={term}
+                      enrolments={enrolments.map((pendingEnrolment) => ({
+                        id: `${pendingEnrolment.classTime.class_id}-${pendingEnrolment.termId}`,
+                        classId: pendingEnrolment.classTime.class_id,
+                        subjectName:
+                          pendingEnrolment.classTime.subject_name ?? "—",
+                        grade: pendingEnrolment.classTime.grade,
+                        dayOfWeek: pendingEnrolment.classTime.day_of_week,
+                        startTime: pendingEnrolment.classTime.start_time,
+                        location: pendingEnrolment.classTime.location,
+                        tutor: pendingEnrolment.classTime.tutor,
+                      }))}
+                      onEdit={(subjectRow) =>
+                        openPendingEnrolmentEditor(subjectRow, term.term_id)
+                      }
+                      onDelete={(subjectRow) =>
+                        removePendingEnrolment(subjectRow.classId, term.term_id)
+                      }
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -717,7 +866,7 @@ const StudentDataForm = ({
             <Button
               type="button"
               variant="destructive"
-              onClick={() => form.reset()}
+              onClick={resetForm}
               disabled={isPending}
             >
               Reset
