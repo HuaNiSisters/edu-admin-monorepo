@@ -190,8 +190,8 @@ const SelectTerm = (props: SelectTermProps) => {
   };
 
   return (
-    <div>
-      <div className="flex gap-2 items-center">
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className="shrink-0">Year:</span>
         <Select
           value={`${selectedYear}`}
@@ -230,29 +230,29 @@ const SelectTerm = (props: SelectTermProps) => {
             {getTermStatus()}
           </Badge>
         )}
-        <div className="">
-          <DateRangePicker
-            className="justify-start"
-            isDisabled={disableEditTermDates()}
-            startDate={selectedTermStartDate}
-            endDate={selectedTermEndDate}
-            onChange={(dateRange: DateRange | undefined) => {
-              if (!dateRange) return;
-              selectSelectedTermStartDate(dateRange.from);
-              setSelectedTermEndDate(dateRange.to);
-              onChange?.({
-                term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
-                  ?.term_id,
-                year: selectedYear,
-                name: selectedTermNumber,
-                start_date: dateRange.from?.toISOString(),
-                end_date: dateRange.to?.toISOString(),
-              });
-            }}
-            minDate={minDate}
-            maxDate={maxDate}
-          />
-        </div>
+      </div>
+      <div>
+        <DateRangePicker
+          className="mx-0 justify-start"
+          isDisabled={disableEditTermDates()}
+          startDate={selectedTermStartDate}
+          endDate={selectedTermEndDate}
+          onChange={(dateRange: DateRange | undefined) => {
+            if (!dateRange) return;
+            selectSelectedTermStartDate(dateRange.from);
+            setSelectedTermEndDate(dateRange.to);
+            onChange?.({
+              term_id: findExistingTerm(selectedYear!, selectedTermNumber!)
+                ?.term_id,
+              year: selectedYear,
+              name: selectedTermNumber,
+              start_date: dateRange.from?.toISOString(),
+              end_date: dateRange.to?.toISOString(),
+            });
+          }}
+          minDate={minDate}
+          maxDate={maxDate}
+        />
       </div>
     </div>
   );

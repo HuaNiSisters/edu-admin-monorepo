@@ -5,10 +5,19 @@ import {
   StudentStatus,
   Gender,
   StudentWithParents,
+  ClassTimeWithSubjectAndTutor,
+  Term,
 } from "@/lib/api/types";
-import { studentService, personService, campusService } from "@/lib/services";
+import {
+  studentService,
+  personService,
+  campusService,
+  classService,
+  enrolmentService,
+  termService,
+} from "@/lib/services";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as zod from "zod";
@@ -19,12 +28,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
+import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
+import {
+  EnrolmentSubjectsTable,
+  EnrolmentSubjectRow,
+} from "@/components/_reusable/enrolment-subjects-table";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { SelectGender } from "./select-gender";
+import { ChevronDownIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
 import { useRouter } from "next/navigation";
 import { CreateParentDataParams } from "@/lib/api/types/person/parent";
 import { CreateStudentDataParams } from "@/lib/api/types/person/student";
+import EnrolDataForm, {
+  EnrolDataFormHandle,
+} from "@/app/student/_components/enrol-data-form";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -53,6 +76,22 @@ const formSchema = zod.object({
   parent2Mobile: zod.string().optional(),
 });
 
+const formatMobileNumber = (value: string | undefined) => {
+  const digits = value?.replace(/\D/g, "")?.slice(0, 10);
+  return digits
+    ? [digits.slice(0, 4), digits.slice(4, 7), digits.slice(7, 10)]
+        .filter(Boolean)
+        .join(" ")
+    : "";
+};
+
+const normaliseMobileNumber = (value: string) => value.replace(/\D/g, "");
+
+type PendingEnrolment = {
+  classTime: ClassTimeWithSubjectAndTutor;
+  termId: string;
+};
+
 const StudentDataForm = ({
   studentData,
   isEditing,
@@ -66,6 +105,15 @@ const StudentDataForm = ({
   const [studentId, setStudentId] = useState<string>("");
   const [parent1Id, setParent1Id] = useState<string>("");
   const [parent2Id, setParent2Id] = useState<string>("");
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [defaultTermId, setDefaultTermId] = useState("");
+  const [isEnrolDialogOpen, setIsEnrolDialogOpen] = useState(false);
+  const [pendingEnrolments, setPendingEnrolments] = useState<
+    PendingEnrolment[]
+  >([]);
+  const [editingPendingEnrolment, setEditingPendingEnrolment] =
+    useState<PendingEnrolment | null>(null);
+  const enrolFormRef = useRef<EnrolDataFormHandle>(null);
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -149,6 +197,29 @@ const StudentDataForm = ({
     fetchAndPopulate();
   }, [studentData]);
 
+  useEffect(() => {
+    if (studentData) return;
+
+    const fetchClassOptions = async () => {
+      const availableTerms = await termService.getTermsAsync();
+      setTerms(availableTerms);
+
+      const today = new Date();
+      const currentOrNextTerm =
+        availableTerms.find(
+          (availableTerm) =>
+            new Date(availableTerm.start_date) <= today &&
+            new Date(availableTerm.end_date) >= today,
+        ) ??
+        availableTerms.find(
+          (availableTerm) => new Date(availableTerm.start_date) >= today,
+        );
+      setDefaultTermId(currentOrNextTerm?.term_id ?? "");
+    };
+
+    fetchClassOptions();
+  }, [studentData]);
+
   const { run, isPending, error } = useAsync();
   const router = useRouter();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -171,7 +242,7 @@ const StudentDataForm = ({
       status: data.status as StudentStatus,
       notes: data.notes,
       suburb_of_home: data.suburb,
-      student_mobile: data.mobile,
+      student_mobile: normaliseMobileNumber(data.mobile),
     };
 
     const parent1Data: CreateParentDataParams = {
@@ -179,7 +250,7 @@ const StudentDataForm = ({
       parent_id: parent1Id,
       first_name: data.parent1FullName,
       last_name: "",
-      parent_mobile: data.parent1Mobile,
+      parent_mobile: normaliseMobileNumber(data.parent1Mobile),
     };
 
     const parent2Data: CreateParentDataParams = {
@@ -187,7 +258,7 @@ const StudentDataForm = ({
       parent_id: parent2Id,
       first_name: data.parent2FullName || "",
       last_name: "",
-      parent_mobile: data.parent2Mobile || "",
+      parent_mobile: normaliseMobileNumber(data.parent2Mobile || ""),
     };
 
     run(async () => {
@@ -212,6 +283,24 @@ const StudentDataForm = ({
         parent1Data,
         parent2Data,
       });
+
+      if (pendingEnrolments.length > 0 && createStudentResponse) {
+        const enrolmentResults = await Promise.allSettled(
+          pendingEnrolments.map((pendingEnrolment) =>
+            enrolmentService.enrolAsync({
+              studentId: createStudentResponse.student_id,
+              classId: pendingEnrolment.classTime.class_id,
+              termId: pendingEnrolment.termId,
+            }),
+          ),
+        );
+
+        if (enrolmentResults.some((result) => result.status === "rejected")) {
+          toast.error(
+            "Student was created, but one or more classes could not be enrolled.",
+          );
+        }
+      }
       if (error) {
         setSubmissionError(error.message);
       }
@@ -222,6 +311,87 @@ const StudentDataForm = ({
       return;
     });
   }
+
+  // Passed to EnrolDataForm as `onEnrol`: since there's no student yet to
+  // enrol against, just stash the validated {classId, termId} selection
+  // locally. The actual enrolmentService.enrolAsync calls happen after the
+  // student is created, in onSubmit above.
+  const addClassToEnrolment = async ({
+    classId,
+    termId,
+  }: {
+    classId: string;
+    termId: string;
+  }) => {
+    const isDuplicate = pendingEnrolments.some(
+      (pendingEnrolment) =>
+        pendingEnrolment.classTime.class_id === classId &&
+        pendingEnrolment.termId === termId &&
+        pendingEnrolment !== editingPendingEnrolment,
+    );
+    if (isDuplicate) {
+      toast.error("This class has already been added for the selected term.");
+      throw new Error("Duplicate pending enrolment");
+    }
+
+    const classTime = await classService.getClassByIdAsync(classId);
+    const updatedEnrolment = { classTime, termId };
+    setPendingEnrolments((current) =>
+      editingPendingEnrolment
+        ? current.map((pendingEnrolment) =>
+            pendingEnrolment === editingPendingEnrolment
+              ? updatedEnrolment
+              : pendingEnrolment,
+          )
+        : [...current, updatedEnrolment],
+    );
+  };
+
+  const pendingEnrolmentsByTerm = terms
+    .map((term) => ({
+      term,
+      enrolments: pendingEnrolments.filter(
+        (pendingEnrolment) => pendingEnrolment.termId === term.term_id,
+      ),
+    }))
+    .filter(({ enrolments }) => enrolments.length > 0);
+
+  const removePendingEnrolment = (classId: string, termId: string) => {
+    setPendingEnrolments((current) =>
+      current.filter(
+        (pendingEnrolment) =>
+          pendingEnrolment.classTime.class_id !== classId ||
+          pendingEnrolment.termId !== termId,
+      ),
+    );
+  };
+
+  const resetForm = () => {
+    form.reset();
+    setPendingEnrolments([]);
+    setEditingPendingEnrolment(null);
+    setIsEnrolDialogOpen(false);
+  };
+
+  const openPendingEnrolmentEditor = (
+    subjectRow: EnrolmentSubjectRow,
+    termId: string,
+  ) => {
+    const pendingEnrolment = pendingEnrolments.find(
+      (item) =>
+        item.classTime.class_id === subjectRow.classId &&
+        item.termId === termId,
+    );
+    if (!pendingEnrolment) return;
+
+    setEditingPendingEnrolment(pendingEnrolment);
+    setIsEnrolDialogOpen(true);
+  };
+
+  const closeEnrolDialog = () => {
+    setEditingPendingEnrolment(null);
+    setIsEnrolDialogOpen(false);
+  };
 
   return (
     <form
@@ -319,6 +489,13 @@ const StudentDataForm = ({
                   id="student-mobile"
                   placeholder="Student's Mobile Number"
                   {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={formatMobileNumber(field.value)}
+                  onChange={(event) =>
+                    field.onChange(formatMobileNumber(event.target.value))
+                  }
                   disabled={isViewingMode}
                 />
                 {fieldState.invalid && (
@@ -516,6 +693,13 @@ const StudentDataForm = ({
                 <Input
                   id="parent1-mobile"
                   {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={formatMobileNumber(field.value)}
+                  onChange={(event) =>
+                    field.onChange(formatMobileNumber(event.target.value))
+                  }
                   disabled={isViewingMode}
                 />
                 {fieldState.invalid && (
@@ -555,6 +739,13 @@ const StudentDataForm = ({
                 <Input
                   id="parent2-mobile"
                   {...field}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={12}
+                  value={formatMobileNumber(field.value)}
+                  onChange={(event) =>
+                    field.onChange(formatMobileNumber(event.target.value))
+                  }
                   disabled={isViewingMode}
                 />
                 {fieldState.invalid && (
@@ -564,6 +755,91 @@ const StudentDataForm = ({
             )}
           />
         </div>
+
+        {!studentData && (
+          <div>
+            <div className="py-4">
+              <div className="flex justify-between">
+                <span className="text-xl font-bold">Enrolments</span>
+                <Button
+                  type="button"
+                  onClick={() => setIsEnrolDialogOpen(true)}
+                >
+                  Enrol
+                </Button>
+              </div>
+            </div>
+
+            <ReusableDialog
+              title="Enrol in a class"
+              isOpen={isEnrolDialogOpen}
+              onClose={closeEnrolDialog}
+              onConfirm={() => enrolFormRef.current?.submit()}
+              onCancel={closeEnrolDialog}
+              confirmText={
+                editingPendingEnrolment ? "Save changes" : "Add class"
+              }
+            >
+              <EnrolDataForm
+                key={
+                  editingPendingEnrolment
+                    ? `${editingPendingEnrolment.classTime.class_id}-${editingPendingEnrolment.termId}`
+                    : "new"
+                }
+                ref={enrolFormRef}
+                defaultValues={
+                  editingPendingEnrolment
+                    ? {
+                        classId: editingPendingEnrolment.classTime.class_id,
+                        termId: editingPendingEnrolment.termId,
+                      }
+                    : { termId: defaultTermId }
+                }
+                onEnrol={addClassToEnrolment}
+                afterSubmit={closeEnrolDialog}
+              />
+            </ReusableDialog>
+
+            {pendingEnrolmentsByTerm.map(({ term, enrolments }) => (
+              <div key={term.term_id} className="mt-4">
+                <Collapsible className="rounded-md data-[state=open]:bg-muted">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="group w-full bg-muted text-md"
+                    >
+                      {term.year} Term {term.name}
+                      <ChevronDownIcon className="ml-auto group-data-[state=open]:rotate-180" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="p-1">
+                    <EnrolmentSubjectsTable
+                      term={term}
+                      enrolments={enrolments.map((pendingEnrolment) => ({
+                        id: `${pendingEnrolment.classTime.class_id}-${pendingEnrolment.termId}`,
+                        classId: pendingEnrolment.classTime.class_id,
+                        subjectName:
+                          pendingEnrolment.classTime.subject_name ?? "—",
+                        grade: pendingEnrolment.classTime.grade,
+                        dayOfWeek: pendingEnrolment.classTime.day_of_week,
+                        startTime: pendingEnrolment.classTime.start_time,
+                        location: pendingEnrolment.classTime.location,
+                        tutor: pendingEnrolment.classTime.tutor,
+                      }))}
+                      onEdit={(subjectRow) =>
+                        openPendingEnrolmentEditor(subjectRow, term.term_id)
+                      }
+                      onDelete={(subjectRow) =>
+                        removePendingEnrolment(subjectRow.classId, term.term_id)
+                      }
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <br />
@@ -577,14 +853,25 @@ const StudentDataForm = ({
                 ? "Update Student"
                 : "Create Student"}
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => form.reset()}
-            disabled={isPending}
-          >
-            Reset
-          </Button>
+          {isEditMode ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.replace(`/student/${studentId}`)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={resetForm}
+              disabled={isPending}
+            >
+              Reset
+            </Button>
+          )}
         </Field>
       </div>
     </form>

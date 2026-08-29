@@ -6,9 +6,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useAsync } from "@/hooks/use-async";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
-import { SelectClass } from "@/components/_reusable-form-components/select-class";
+import { SelectClassCascading } from "@/components/_reusable-form-components/select-class-cascading";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Field, FieldError } from "@/components/ui/field";
 import { enrolmentService, termService } from "@/lib/services";
 import { toast } from "sonner";
@@ -25,20 +24,26 @@ export interface EnrolDataFormHandle {
 
 interface EnrolDataFormProps {
   studentId?: string;
-  // classId?: string; // Maybe if adding from class UI
+  // Pre-fill the form, e.g. when editing a previously-added pending enrolment.
+  defaultValues?: { classId?: string; termId?: string };
+  // If provided, submission calls this instead of enrolling via the API
+  // directly. Lets the form be reused before a student exists yet (e.g. the
+  // create-student flow, which only wants the selected classId/termId to
+  // stash locally and enrol later once the student has been created).
+  onEnrol?: (data: { classId: string; termId: string }) => Promise<void> | void;
   afterSubmit?: () => void;
   ref?: React.Ref<EnrolDataFormHandle>;
 }
 
 export default function EnrolDataForm({
   studentId,
+  defaultValues,
+  onEnrol,
   afterSubmit,
   ref,
 }: EnrolDataFormProps) {
   // isEditing?
   // disabled student selection, if passed in from prop
-
-  const [allTerms, setAllTerms] = useState([]);
 
   const { run, isPending } = useAsync();
 
@@ -48,12 +53,11 @@ export default function EnrolDataForm({
   });
 
   // Do all classes always run every term?
-  // TODO: autoset to the current term
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      classId: "",
-      termId: "",
+      classId: defaultValues?.classId ?? "",
+      termId: defaultValues?.termId ?? "",
     },
   });
 
@@ -67,11 +71,18 @@ export default function EnrolDataForm({
     submit() {
       form.handleSubmit((data) => {
         run(async () => {
-          await enrolmentService.enrolAsync({
-            studentId: studentId!,
-            classId: data.classId,
-            termId: data.termId,
-          });
+          if (onEnrol) {
+            // Deferred/local mode: let the caller decide what to do with
+            // the selection (e.g. add to a pending list) instead of
+            // hitting the enrolment API directly.
+            await onEnrol(data);
+          } else {
+            await enrolmentService.enrolAsync({
+              studentId: studentId!,
+              classId: data.classId,
+              termId: data.termId,
+            });
+          }
 
           // try-catch
           // if no errors, then call onSubmit
@@ -84,7 +95,7 @@ export default function EnrolDataForm({
   const onTermChange = async (termData: Partial<Term>) => {
     console.log({ termData });
     let termId = termData.term_id;
-    if(!termId) {
+    if (!termId) {
       const newlyCreatedTerm = await termService.createTermAsync({
         year: termData.year!,
         name: termData.name!,
@@ -96,7 +107,7 @@ export default function EnrolDataForm({
       await termService.updateTermAsync(termData.term_id!, {
         start_date: termData.start_date!,
         end_date: termData.end_date!,
-      });      
+      });
     }
     form.setValue("termId", termId);
   };
@@ -104,22 +115,22 @@ export default function EnrolDataForm({
   return (
     <div>
       <form id="enrol-data-form" className="w-full flex flex-col gap-4">
-        <div className="flex gap-2 items-center w-full">
-          <span className="shrink-0">Class:</span>
-          <div className="flex-1 min-w-0">
-            <Controller
-              name="classId"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field className="flex">
-                  <SelectClass value={field.value} onChange={field.onChange} />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
+        <div className="w-full">
+          <Controller
+            name="classId"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <SelectClassCascading
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
         </div>
         <div className="flex gap-2 items-center w-full">
           <div className="flex-1 min-w-0">
@@ -128,10 +139,7 @@ export default function EnrolDataForm({
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field className="flex">
-                  <SelectTerm
-                    value={field.value}
-                    onChange={onTermChange}
-                  />
+                  <SelectTerm value={field.value} onChange={onTermChange} />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
