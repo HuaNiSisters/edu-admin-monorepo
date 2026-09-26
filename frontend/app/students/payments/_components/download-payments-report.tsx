@@ -2,6 +2,7 @@ import React from "react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaymentWithDetails } from "@/lib/api/types";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 
 const DownloadPaymentsReport = ({
   payments,
@@ -29,8 +30,15 @@ const DownloadPaymentsReport = ({
 
     const rows = payments.map((payment) => [
       payment.student_name,
-      payment.student_mobile,
-      payment.parents,
+      formatPhoneNumber(payment.student_mobile),
+      payment.parents
+        .split("\n")
+        .map((parent) => {
+          const separator = parent.lastIndexOf(":");
+          if (separator < 0) return parent;
+          return `${parent.slice(0, separator + 1)} ${formatPhoneNumber(parent.slice(separator + 1).trim())}`;
+        })
+        .join("\n"),
       payment.term_label,
       payment.subject_name,
       payment.grade,

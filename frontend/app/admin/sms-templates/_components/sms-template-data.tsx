@@ -8,6 +8,7 @@ import { useAsync } from "@/hooks/use-async";
 import { smsService } from "@/lib/services";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
 import { useRouter } from "next/navigation";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -57,7 +58,7 @@ const SMSTemplateData = ({
   const { run } = useAsync();
 
   const templateId = "HX8287cd145a356a5415090602424c2531";
-  const [toTestPhoneNumber, setToTestPhoneNumber] = useState("+61420398812");
+  const [toTestPhoneNumber, setToTestPhoneNumber] = useState("0420 398 812");
 
   useEffect(() => {
     setSampleContext(deepClone(actionToSampleContext[smsAction]));
@@ -161,7 +162,11 @@ const SMSTemplateData = ({
     );
 
     run(async () => {
-      await smsService.sendSMSTemplateAsync(templateId, toTestPhoneNumber, sampleVariables);
+      const digits = toTestPhoneNumber.replace(/\D/g, "");
+      const recipient = digits.startsWith("0")
+        ? `+61${digits.slice(1)}`
+        : `+${digits}`;
+      await smsService.sendSMSTemplateAsync(templateId, recipient, sampleVariables);
       toast.success("Test SMS sent successfully!", {
         position: "top-center",
       });
@@ -267,7 +272,7 @@ const SMSTemplateData = ({
           Send test SMS to:
           <Input
             value={toTestPhoneNumber}
-            onChange={(e) => setToTestPhoneNumber(e.target.value)}
+            onChange={(e) => setToTestPhoneNumber(formatPhoneNumber(e.target.value))}
           />
           <br />
           <br />

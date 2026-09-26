@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StudentOwing } from "@/lib/api/types/owing";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 
 const currency = new Intl.NumberFormat("en-AU", {
   style: "currency",
@@ -49,6 +50,7 @@ export const createOwingColumns = ({
       <Checkbox
         aria-label={`Select ${row.original.student_name}`}
         checked={selectedIds.has(row.original.enrolment_id)}
+        onClick={(event) => event.stopPropagation()}
         onCheckedChange={(checked) =>
           onToggleSelected(row.original.enrolment_id, checked === true)
         }
@@ -96,7 +98,7 @@ export const createOwingColumns = ({
       <div className="whitespace-normal">
         <div className="font-medium">{row.original.student_name}</div>
         <div className="text-xs text-muted-foreground">
-          {row.original.student_mobile}
+          {formatPhoneNumber(row.original.student_mobile)}
         </div>
       </div>
     ),
@@ -112,7 +114,7 @@ export const createOwingColumns = ({
             <div key={`${parent.phone}-${index}`}>
               <div>{parent.name}</div>
               <div className="text-xs text-muted-foreground">
-                {parent.phone}
+                {formatPhoneNumber(parent.phone)}
               </div>
             </div>
           ))

@@ -4,6 +4,7 @@ import { GetTutorsResponse } from "@/lib/api/types/IApiWrapper";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 
 type TutorRow = GetTutorsResponse[number];
 
@@ -74,7 +75,11 @@ export const columns: ColumnDef<TutorRow>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <span className="pl-4">{row.getValue("phone")}</span>,
+    cell: ({ row }) => (
+      <span className="pl-4">
+        {formatPhoneNumber(String(row.getValue("phone") ?? ""))}
+      </span>
+    ),
     size: 150,
   },
 ];

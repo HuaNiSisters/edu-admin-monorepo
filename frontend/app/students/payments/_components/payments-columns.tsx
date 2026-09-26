@@ -2,6 +2,7 @@
 
 import { PaymentWithDetails } from "@/lib/api/types";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 import { ColumnDef } from "@tanstack/react-table";
 
 const currencyFormatter = new Intl.NumberFormat("en-AU", {
@@ -35,7 +36,7 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
           {row.original.student_name}
         </div>
         <div className="text-xs text-muted-foreground">
-          {row.original.student_mobile || "—"}
+          {formatPhoneNumber(row.original.student_mobile) || "—"}
         </div>
       </div>
     ),
@@ -46,7 +47,16 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     header: "Parents",
     cell: ({ row }) => (
       <div className="max-w-[260px] whitespace-pre-line text-sm leading-5">
-        {row.original.parents || "—"}
+        {row.original.parents
+          ? row.original.parents
+              .split("\n")
+              .map((parent) => {
+                const separator = parent.lastIndexOf(":");
+                if (separator < 0) return parent;
+                return `${parent.slice(0, separator + 1)} ${formatPhoneNumber(parent.slice(separator + 1).trim())}`;
+              })
+              .join("\n")
+          : "—"}
       </div>
     ),
   },
