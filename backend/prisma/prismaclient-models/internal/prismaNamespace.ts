@@ -393,7 +393,8 @@ export const ModelName = {
   Term: 'Term',
   Enrolment: 'Enrolment',
   Attendance: 'Attendance',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  SmsTemplate: 'SmsTemplate'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "student" | "parent" | "studentParent" | "tutor" | "classTime" | "subjectOffering" | "term" | "enrolment" | "attendance" | "payment"
+    modelProps: "student" | "parent" | "studentParent" | "tutor" | "classTime" | "subjectOffering" | "term" | "enrolment" | "attendance" | "payment" | "smsTemplate"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1153,6 +1154,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SmsTemplate: {
+      payload: Prisma.$SmsTemplatePayload<ExtArgs>
+      fields: Prisma.SmsTemplateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SmsTemplateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SmsTemplateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>
+        }
+        findFirst: {
+          args: Prisma.SmsTemplateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SmsTemplateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>
+        }
+        findMany: {
+          args: Prisma.SmsTemplateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>[]
+        }
+        create: {
+          args: Prisma.SmsTemplateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>
+        }
+        createMany: {
+          args: Prisma.SmsTemplateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SmsTemplateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>[]
+        }
+        delete: {
+          args: Prisma.SmsTemplateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>
+        }
+        update: {
+          args: Prisma.SmsTemplateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>
+        }
+        deleteMany: {
+          args: Prisma.SmsTemplateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SmsTemplateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SmsTemplateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>[]
+        }
+        upsert: {
+          args: Prisma.SmsTemplateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsTemplatePayload>
+        }
+        aggregate: {
+          args: Prisma.SmsTemplateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSmsTemplate>
+        }
+        groupBy: {
+          args: Prisma.SmsTemplateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsTemplateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SmsTemplateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsTemplateCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1320,12 +1395,32 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const SmsTemplateScalarFieldEnum = {
+  sms_template_id: 'sms_template_id',
+  sms_provider: 'sms_provider',
+  provider_template_id: 'provider_template_id',
+  name: 'name',
+  variable_mapping: 'variable_mapping',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type SmsTemplateScalarFieldEnum = (typeof SmsTemplateScalarFieldEnum)[keyof typeof SmsTemplateScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1342,6 +1437,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -1512,6 +1616,20 @@ export type ListEnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1629,6 +1747,7 @@ export type GlobalOmitConfig = {
   enrolment?: Prisma.EnrolmentOmit
   attendance?: Prisma.AttendanceOmit
   payment?: Prisma.PaymentOmit
+  smsTemplate?: Prisma.SmsTemplateOmit
 }
 
 /* Types for Logging */

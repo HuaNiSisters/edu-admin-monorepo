@@ -69,3 +69,8 @@ export type Attendance = Prisma.AttendanceModel
  * 
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model SmsTemplate
+ * 
+ */
+export type SmsTemplate = Prisma.SmsTemplateModel

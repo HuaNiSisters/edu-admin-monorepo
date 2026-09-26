@@ -234,6 +234,18 @@ model Payment {
   enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id])
 }
 
+model SmsTemplate {
+  sms_template_id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sms_provider         String
+  provider_template_id String
+  name                 String
+  variable_mapping     Json
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  @@unique([sms_provider, provider_template_id])
+}
+
 generator prismabox {
   provider = "prisma-client"
   // you can optionally specify the output location. Defaults to ./prismabox

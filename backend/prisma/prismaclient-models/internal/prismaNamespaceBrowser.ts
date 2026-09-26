@@ -60,7 +60,8 @@ export const ModelName = {
   Term: 'Term',
   Enrolment: 'Enrolment',
   Attendance: 'Attendance',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  SmsTemplate: 'SmsTemplate'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -207,12 +208,32 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const SmsTemplateScalarFieldEnum = {
+  sms_template_id: 'sms_template_id',
+  sms_provider: 'sms_provider',
+  provider_template_id: 'provider_template_id',
+  name: 'name',
+  variable_mapping: 'variable_mapping',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type SmsTemplateScalarFieldEnum = (typeof SmsTemplateScalarFieldEnum)[keyof typeof SmsTemplateScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -229,4 +250,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

@@ -1,7 +1,20 @@
 import { ISMSRepo } from "../api/adapters/interfaces";
-import { UpdateSMSTemplateRequest } from "../api/types/sms";
+import {
+  CreateSMSTemplateRequest,
+  UpdateSMSTemplateRequest,
+} from "../api/types/sms";
 
 function SMSService(apiWrapper: ISMSRepo) {
+  async function getSMSTemplatesAsync() {
+    return await apiWrapper.getSMSTemplatesAsync();
+  }
+
+  async function createSMSTemplateAsync(
+    createParams: CreateSMSTemplateRequest,
+  ) {
+    return await apiWrapper.createSMSTemplateAsync(createParams);
+  }
+
   async function getSMSTemplateByIdAsync(templateId: string) {
     return await apiWrapper.getSMSTemplateByIdAsync(templateId);
   }
@@ -29,6 +42,8 @@ function SMSService(apiWrapper: ISMSRepo) {
   }
 
   return {
+    getSMSTemplatesAsync,
+    createSMSTemplateAsync,
     getSMSTemplateByIdAsync,
     updateSMSTemplateAsync,
     sendSMSTemplateAsync,

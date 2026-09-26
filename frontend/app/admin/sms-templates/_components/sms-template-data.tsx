@@ -7,8 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAsync } from "@/hooks/use-async";
 import { smsService } from "@/lib/services";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
-import { useRouter } from "next/navigation";
-import { formatPhoneNumber } from "@/utils/phone-utils";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -45,6 +44,7 @@ const SMSTemplateData = ({
   isEditing?: boolean;
 }) => {
   const router = useRouter();
+  const params = useParams();
 
   const [sampleContext, setSampleContext] = useState<{
     [key: string]: { [key: string]: any };
@@ -57,8 +57,8 @@ const SMSTemplateData = ({
   const [templateName, setTemplateName] = useState("");
   const { run } = useAsync();
 
-  const templateId = "HX8287cd145a356a5415090602424c2531";
-  const [toTestPhoneNumber, setToTestPhoneNumber] = useState("0420 398 812");
+  const templateId = params.id as string;
+  const [toTestPhoneNumber, setToTestPhoneNumber] = useState("+61420398812");
 
   useEffect(() => {
     setSampleContext(deepClone(actionToSampleContext[smsAction]));
@@ -67,7 +67,7 @@ const SMSTemplateData = ({
       setTemplateName(template.name);
       setTextAreaString(template.content);
     });
-  }, [smsAction]);
+  }, [smsAction, templateId]);
 
   useEffect(() => {
     if (sampleContext && Object.keys(sampleContext).length > 0) {
