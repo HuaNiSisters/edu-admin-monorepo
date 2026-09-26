@@ -23,6 +23,11 @@ export const actionToSampleContext = {
       last_name: "Doe",
       mobile: "0412 345 678",
     },
+    receiver: {
+      first_name: "John",
+      last_name: "Doe",
+      full_name: "John Doe",
+    },
     parent: {
       full_name: "Jane Doe",
       phone: "0412 345 679",

@@ -688,6 +688,8 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
         return parent
           ? [{
               name: `${parent.first_name} ${parent.last_name}`.trim(),
+              first_name: parent.first_name,
+              last_name: parent.last_name,
               phone: parent.parent_mobile,
             }]
           : [];

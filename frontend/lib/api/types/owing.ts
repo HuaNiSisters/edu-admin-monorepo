@@ -8,7 +8,12 @@ export type StudentOwing = {
   student_first_name: string;
   student_last_name: string;
   student_mobile: string;
-  parents: { name: string; phone: string }[];
+  parents: {
+    name: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+  }[];
   term_id: string;
   term_name: number;
   term_year: number;

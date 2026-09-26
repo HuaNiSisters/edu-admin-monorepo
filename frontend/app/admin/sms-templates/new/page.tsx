@@ -16,7 +16,7 @@ import { smsService } from "@/lib/services";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import SmsTemplateVariableSelector, {
@@ -29,6 +29,7 @@ export default function CreateSMSTemplatePage() {
   const { run, isPending } = useAsync();
   const [templateName, setTemplateName] = useState("");
   const [content, setContent] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [sampleContext, setSampleContext] = useState(() =>
     cloneTemplateContext(actionToSampleContext[SMSAction.Owings]),
   );
@@ -86,7 +87,9 @@ export default function CreateSMSTemplatePage() {
           <CardTitle>Template details</CardTitle>
           <CardDescription>
             Use named variables such as {"{{student.full_name}}"} in the
-            message body.
+            message body. Use {"{{receiver.first_name}}"},
+            {" {{receiver.last_name}}"}, or {" {{receiver.full_name}}"} to address
+            each student or parent receiving the SMS.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,6 +113,7 @@ export default function CreateSMSTemplatePage() {
                 </span>
               </div>
               <Textarea
+                ref={textareaRef}
                 id="template-content"
                 value={content}
                 onChange={(event) => setContent(event.target.value)}
@@ -125,6 +129,7 @@ export default function CreateSMSTemplatePage() {
             </div>
 
             <SmsTemplateVariableSelector
+              textareaRef={textareaRef}
               content={content}
               context={sampleContext}
               editable

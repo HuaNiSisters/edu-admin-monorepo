@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { StudentOwing } from "@/lib/api/types/owing";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { formatPhoneNumber } from "@/utils/phone-utils";
@@ -11,6 +11,7 @@ const currency = new Intl.NumberFormat("en-AU", {
   maximumFractionDigits: 0,
 });
 
+export const OWING_SMS_TEMPLATES = ["Payment reminder", "Overdue follow-up"];
 export const OWING_SENT_FILTER_ID = "sent_templates";
 
 type OwingColumnOptions = {
@@ -59,20 +60,32 @@ export const createOwingColumns = ({
   },
   {
     id: "sent",
-    header: "Sent this session",
+    header: "Sent",
     size: 210,
     cell: ({ row }) => {
-      const sent = sentTemplatesByEnrolment[row.original.enrolment_id] ?? [];
+      const sent = new Set([
+        ...row.original.sent_templates,
+        ...(sentTemplatesByEnrolment[row.original.enrolment_id] ?? []),
+      ]);
       return (
         <div className="space-y-2 whitespace-normal">
-          {sent.length === 0 && <span className="text-muted-foreground">—</span>}
-          {sent.map((template) => (
+          {OWING_SMS_TEMPLATES.map((template) => (
             <div
               key={template}
               className="flex items-center justify-start gap-2"
             >
               <span className="text-base font-medium">{template}</span>
-              <Check className="size-4 shrink-0 text-green-600" aria-label="Sent" />
+              {sent.has(template) ? (
+                <Check
+                  className="size-4 shrink-0 text-green-600"
+                  aria-label="Sent"
+                />
+              ) : (
+                <X
+                  className="size-4 shrink-0 text-red-600"
+                  aria-label="Not sent"
+                />
+              )}
             </div>
           ))}
         </div>

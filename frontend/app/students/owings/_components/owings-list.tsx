@@ -49,6 +49,9 @@ const dayInMilliseconds = 24 * 60 * 60 * 1000;
 type OwingParent = StudentOwing["parents"][number];
 type OwingRecipient = {
   label: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
   phone: string;
   phoneNumber: string | null;
   parent?: OwingParent;
@@ -58,11 +61,17 @@ function getOwingRecipients(owing: StudentOwing): OwingRecipient[] {
   const candidates: OwingRecipient[] = [
     {
       label: `Student: ${owing.student_name}`,
+      firstName: owing.student_first_name,
+      lastName: owing.student_last_name,
+      fullName: owing.student_name,
       phone: owing.student_mobile,
       phoneNumber: toSmsPhoneNumber(owing.student_mobile),
     },
     ...owing.parents.map((parent) => ({
       label: `Parent: ${parent.name}`,
+      firstName: parent.first_name,
+      lastName: parent.last_name,
+      fullName: parent.name,
       phone: parent.phone,
       phoneNumber: toSmsPhoneNumber(parent.phone),
       parent,
@@ -102,6 +111,9 @@ function getOwingTemplateValues(
   );
 
   return {
+    "receiver.first_name": recipient?.firstName ?? owing.student_first_name,
+    "receiver.last_name": recipient?.lastName ?? owing.student_last_name,
+    "receiver.full_name": recipient?.fullName ?? owing.student_name,
     "student.full_name": owing.student_name,
     "student.first_name": owing.student_first_name,
     "student.last_name": owing.student_last_name,

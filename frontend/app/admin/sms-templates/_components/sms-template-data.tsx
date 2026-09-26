@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAsync } from "@/hooks/use-async";
 import { smsService } from "@/lib/services";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import SmsTemplateVariableSelector, {
   cloneTemplateContext,
@@ -33,6 +33,7 @@ const SMSTemplateData = ({
     cloneTemplateContext(actionToSampleContext[smsAction]),
   );
   const [content, setContent] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [templateName, setTemplateName] = useState("");
   const [toTestPhoneNumber, setToTestPhoneNumber] = useState("+61420398812");
 
@@ -107,6 +108,7 @@ const SMSTemplateData = ({
       />
       <div className="space-y-2">
         <Textarea
+          ref={textareaRef}
           value={content}
           placeholder="Template content e.g. Hi {{student.full_name}}"
           onChange={(event) => setContent(event.target.value)}
@@ -121,7 +123,12 @@ const SMSTemplateData = ({
         )}
       </div>
 
+      <p className="text-sm text-muted-foreground">
+        Receiver name variables use the name of each student or parent receiving
+        the SMS.
+      </p>
       <SmsTemplateVariableSelector
+        textareaRef={textareaRef}
         content={content}
         context={sampleContext}
         editable={Boolean(isEditing)}
