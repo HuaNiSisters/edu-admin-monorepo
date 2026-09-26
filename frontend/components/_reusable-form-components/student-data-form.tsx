@@ -45,6 +45,7 @@ import { useAsync } from "@/hooks/use-async";
 import { useRouter } from "next/navigation";
 import { CreateParentDataParams } from "@/lib/api/types/person/parent";
 import { CreateStudentDataParams } from "@/lib/api/types/person/student";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 import EnrolDataForm, {
   EnrolDataFormHandle,
 } from "@/app/student/_components/enrol-data-form";
@@ -77,12 +78,7 @@ const formSchema = zod.object({
 });
 
 const formatMobileNumber = (value: string | undefined) => {
-  const digits = value?.replace(/\D/g, "")?.slice(0, 10);
-  return digits
-    ? [digits.slice(0, 4), digits.slice(4, 7), digits.slice(7, 10)]
-        .filter(Boolean)
-        .join(" ")
-    : "";
+  return formatPhoneNumber(value);
 };
 
 const normaliseMobileNumber = (value: string) => value.replace(/\D/g, "");

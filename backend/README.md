@@ -1,5 +1,8 @@
 # EduAdmin-backend
 
+To start the BE, just run this on the backend folder: 
+`npm run start`
+
 Ensure you are on nvm v22.12.0
 
 You can do that by running: 

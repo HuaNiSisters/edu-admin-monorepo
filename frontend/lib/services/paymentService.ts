@@ -5,6 +5,10 @@ function PaymentService(paymentRepo: IPaymentRepo) {
     return await paymentRepo.getPaymentsAsync();
   }
 
+  async function getStudentOwingsAsync() {
+    return await paymentRepo.getStudentOwingsAsync();
+  }
+
   async function getPaymentTypesAsync() {
     return await paymentRepo.getPaymentTypesAsync();
   }
@@ -40,6 +44,7 @@ function PaymentService(paymentRepo: IPaymentRepo) {
     getPaymentStatusesAsync,
     getPaymentTypesAsync,
     getPaymentsAsync,
+    getStudentOwingsAsync,
     getPaymentsByStudentIdAsync,
     updatePaymentAsync,
   };

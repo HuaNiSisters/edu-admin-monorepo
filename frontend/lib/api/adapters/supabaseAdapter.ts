@@ -28,6 +28,7 @@ import {
 import { GetLocationsResponse } from "../types/campus";
 import { GetGendersResponse } from "../types/person";
 import { GetTutorsResponse } from "../types/person/employee";
+import { StudentOwing } from "../types/owing";
 
 import {
   CreateParentDataParams,
@@ -642,6 +643,80 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
     if (error) throw new Error("Failed to fetch payments: " + error.message);
 
     return (responseData ?? []).map((row) => this.mapPaymentWithDetails(row));
+  }
+
+  async getStudentOwingsAsync(): Promise<StudentOwing[]> {
+    const { data: responseData, error } = await this.supabase
+      .from("Enrolment")
+      .select(
+        `
+        enrolment_id,
+        status,
+        Payment (payment_id),
+        Student (
+          student_id,
+          first_name,
+          last_name,
+          student_mobile,
+          parents:StudentParent (Parent (first_name, last_name, parent_mobile))
+        ),
+        Term (term_id, name, year),
+        ClassTime (
+          day_of_week,
+          start_time,
+          Tutor (first_name, last_name),
+          SubjectOffering (subject_name, grade, location, price_per_term)
+        )
+      `,
+      )
+      .eq("status", "active");
+
+    if (error) throw new Error("Failed to fetch student owings: " + error.message);
+
+    const first = <T,>(relation: T | T[] | null | undefined): T | undefined =>
+      Array.isArray(relation) ? relation[0] : relation ?? undefined;
+
+    return (responseData ?? []).flatMap((enrolment) => {
+      const student = first(enrolment.Student);
+      const term = first(enrolment.Term);
+      const classTime = first(enrolment.ClassTime);
+      const offering = first(classTime?.SubjectOffering);
+      const tutor = first(classTime?.Tutor);
+      const payments = enrolment.Payment;
+      const parents = (student?.parents ?? []).flatMap((parentLink) => {
+        const parent = first(parentLink.Parent);
+        return parent
+          ? [{
+              name: `${parent.first_name} ${parent.last_name}`.trim(),
+              phone: parent.parent_mobile,
+            }]
+          : [];
+      });
+
+      if (!student || !term || !classTime || !offering || payments.length > 0) {
+        return [];
+      }
+
+      return [{
+        enrolment_id: enrolment.enrolment_id,
+        amount_outstanding: Number(offering.price_per_term),
+        student_id: student.student_id,
+        student_name: `${student.first_name} ${student.last_name}`.trim(),
+        student_mobile: student.student_mobile,
+        parents,
+        term_id: term.term_id,
+        term_name: term.name,
+        term_year: term.year,
+        term_label: `Term ${term.name} ${term.year}`,
+        subject_name: offering.subject_name,
+        grade: offering.grade,
+        location: offering.location,
+        day_of_week: classTime.day_of_week,
+        start_time: classTime.start_time,
+        tutor: tutor ? `${tutor.first_name} ${tutor.last_name}`.trim() : "",
+        sent_templates: [],
+      }];
+    });
   }
 
   async getPaymentsByStudentIdAsync(

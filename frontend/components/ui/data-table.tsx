@@ -113,7 +113,7 @@ export function DataTable<TData, TValue>({
                   onClick={() => onRowClick?.(row.original)}
                   className={
                     onRowClick
-                      ? "cursor-pointer"
+                      ? "cursor-pointer [&:has([data-row-hover-ignore]:hover)]:hover:bg-transparent"
                       : "cursor-default hover:bg-transparent"
                   }
                 >
@@ -121,6 +121,21 @@ export function DataTable<TData, TValue>({
                     <TableCell
                       key={cell.id}
                       style={{ width: cell.column.getSize() }}
+                      className={
+                        cell.column.id === "select" || cell.column.id === "sent"
+                          ? "cursor-default"
+                          : undefined
+                      }
+                      data-row-hover-ignore={
+                        cell.column.id === "select" || cell.column.id === "sent"
+                          ? "true"
+                          : undefined
+                      }
+                      onClick={
+                        cell.column.id === "select" || cell.column.id === "sent"
+                          ? (event) => event.stopPropagation()
+                          : undefined
+                      }
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

@@ -6,6 +6,7 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 import AddPaymentButton from "@/app/student/_components/add-payment-button";
 
 type StudentRow = SearchStudentsResponse[number];
@@ -71,10 +72,10 @@ export const getColumns = (
       const { student_mobile, parents } = row.original;
       return (
         <div className="flex flex-col justify-end gap-1">
-          <div>Student: {student_mobile}</div>
+          <div>Student: {formatPhoneNumber(student_mobile)}</div>
           {parents.map((parent) => (
             <div key={parent.parent_id}>
-              {`${parent.first_name}: ${parent.parent_mobile}`}
+              {`${parent.first_name}: ${formatPhoneNumber(parent.parent_mobile)}`}
             </div>
           ))}
         </div>
