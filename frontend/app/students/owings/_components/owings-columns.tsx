@@ -9,10 +9,7 @@ const currency = new Intl.NumberFormat("en-AU", {
   maximumFractionDigits: 0,
 });
 
-export const OWING_SMS_TEMPLATES = [
-  "Payment reminder",
-  "Overdue follow-up",
-];
+export const OWING_SMS_TEMPLATES = ["Payment reminder", "Overdue follow-up"];
 
 type OwingColumnOptions = {
   selectedIds: Set<string>;
@@ -69,6 +66,7 @@ export const createOwingColumns = ({
           {OWING_SMS_TEMPLATES.map((template) => (
             <label key={template} className="flex items-center gap-2 text-xs">
               <Checkbox
+                disabled={true}
                 aria-label={`${template} sent to ${row.original.student_name}`}
                 checked={sent.includes(template)}
                 onCheckedChange={(checked) =>
@@ -113,7 +111,9 @@ export const createOwingColumns = ({
           row.original.parents.map((parent, index) => (
             <div key={`${parent.phone}-${index}`}>
               <div>{parent.name}</div>
-              <div className="text-xs text-muted-foreground">{parent.phone}</div>
+              <div className="text-xs text-muted-foreground">
+                {parent.phone}
+              </div>
             </div>
           ))
         ) : (
