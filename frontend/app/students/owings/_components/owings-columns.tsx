@@ -47,14 +47,15 @@ export const createOwingColumns = ({
       />
     ),
     cell: ({ row }) => (
-      <Checkbox
-        aria-label={`Select ${row.original.student_name}`}
-        checked={selectedIds.has(row.original.enrolment_id)}
-        onClick={(event) => event.stopPropagation()}
-        onCheckedChange={(checked) =>
-          onToggleSelected(row.original.enrolment_id, checked === true)
-        }
-      />
+      <div onClick={(event) => event.stopPropagation()}>
+        <Checkbox
+          aria-label={`Select ${row.original.student_name}`}
+          checked={selectedIds.has(row.original.enrolment_id)}
+          onCheckedChange={(checked) =>
+            onToggleSelected(row.original.enrolment_id, checked === true)
+          }
+        />
+      </div>
     ),
   },
   {
