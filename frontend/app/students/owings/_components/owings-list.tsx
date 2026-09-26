@@ -25,8 +25,10 @@ import {
 } from "@/components/ui/select";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { createOwingColumns, OWING_SMS_TEMPLATES } from "./owings-columns";
+import { useRouter } from "next/navigation";
 
 export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
+  const router = useRouter();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sentByEnrolment, setSentByEnrolment] = useState<
@@ -170,6 +172,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
       <DataTable
         columns={columns}
         data={owings}
+        onRowClick={(row) => router.replace(`/student/${row.student_id}`)}
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
         columnVisibility={{
