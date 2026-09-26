@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,33 +13,34 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAsync } from "@/hooks/use-async";
 import { smsService } from "@/lib/services";
+import { actionToSampleContext, SMSAction } from "@/types/smsActions";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-const TEMPLATE_VARIABLE_PATTERN = /{{(.*?)}}/g;
+import SmsTemplateVariableSelector, {
+  cloneTemplateContext,
+  getInvalidTemplateVariables,
+} from "../_components/sms-template-variable-selector";
 
 export default function CreateSMSTemplatePage() {
   const router = useRouter();
   const { run, isPending } = useAsync();
   const [templateName, setTemplateName] = useState("");
   const [content, setContent] = useState("");
-
-  const variables = useMemo(
-    () => [
-      ...new Set(
-        [...content.matchAll(TEMPLATE_VARIABLE_PATTERN)]
-          .map((match) => match[1]?.trim())
-          .filter((variable): variable is string => Boolean(variable)),
-      ),
-    ],
-    [content],
+  const [sampleContext, setSampleContext] = useState(() =>
+    cloneTemplateContext(actionToSampleContext[SMSAction.Owings]),
+  );
+  const invalidVariables = useMemo(
+    () => getInvalidTemplateVariables(content, sampleContext),
+    [content, sampleContext],
   );
 
   const canSubmit =
     templateName.trim().length > 0 &&
     content.trim().length > 0 &&
+    invalidVariables.length === 0 &&
     !isPending;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -55,7 +55,8 @@ export default function CreateSMSTemplatePage() {
       toast.success("SMS template created successfully", {
         position: "top-center",
       });
-      router.push(`/admin/sms-templates/${template.id}`);
+      sessionStorage.setItem("selectedSmsTemplateId", template.id);
+      router.push("/admin/sms-templates");
     });
   }
 
@@ -116,20 +117,20 @@ export default function CreateSMSTemplatePage() {
                 maxLength={1600}
                 className="min-h-40"
               />
+              {invalidVariables.length > 0 && (
+                <p className="text-destructive text-sm" role="alert">
+                  The following variables are not valid: {invalidVariables.join(", ")}
+                </p>
+              )}
             </div>
 
-            {variables.length > 0 && (
-              <div className="space-y-2">
-                <Label>Variables</Label>
-                <div className="flex flex-wrap gap-2">
-                  {variables.map((variable) => (
-                    <Badge key={variable} variant="secondary">
-                      {variable}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+            <SmsTemplateVariableSelector
+              content={content}
+              context={sampleContext}
+              editable
+              onContentChange={setContent}
+              onContextChange={setSampleContext}
+            />
 
             <div className="flex justify-end gap-3">
               <Button

@@ -1,37 +1,84 @@
 "use client";
 
 import { LoadingBar } from "@/components/loading-bar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAsync } from "@/hooks/use-async";
 import type { SMSTemplateSummary } from "@/lib/api/types/sms";
 import { smsService } from "@/lib/services";
-import { Plus } from "lucide-react";
+import { SMSAction } from "@/types/smsActions";
+import { Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import SMSTemplateData from "./_components/sms-template-data";
 
 const SMSTemplatesPage = () => {
   const router = useRouter();
   const { run, isPending } = useAsync();
   const [templates, setTemplates] = useState<SMSTemplateSummary[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editorVersion, setEditorVersion] = useState(0);
 
   const loadTemplates = useCallback(() => {
     run(async () => {
-      setTemplates(await smsService.getSMSTemplatesAsync());
+      const loadedTemplates = await smsService.getSMSTemplatesAsync();
+      const newlyCreatedTemplateId = sessionStorage.getItem(
+        "selectedSmsTemplateId",
+      );
+      sessionStorage.removeItem("selectedSmsTemplateId");
+      setTemplates(loadedTemplates);
+      setSelectedTemplateId((currentId) => {
+        if (
+          newlyCreatedTemplateId &&
+          loadedTemplates.some(({ id }) => id === newlyCreatedTemplateId)
+        ) {
+          return newlyCreatedTemplateId;
+        }
+        if (loadedTemplates.some(({ id }) => id === currentId)) {
+          return currentId;
+        }
+        return loadedTemplates[0]?.id ?? "";
+      });
     });
   }, [run]);
 
   useEffect(() => {
     loadTemplates();
   }, [loadTemplates]);
+
+  const selectedTemplate = templates.find(
+    ({ id }) => id === selectedTemplateId,
+  );
+
+  function selectTemplate(templateId: string) {
+    setSelectedTemplateId(templateId);
+    setIsEditing(false);
+    setEditorVersion((version) => version + 1);
+  }
+
+  function finishEditing() {
+    setIsEditing(false);
+    setEditorVersion((version) => version + 1);
+    loadTemplates();
+  }
+
+  function cancelEditing() {
+    setIsEditing(false);
+    setEditorVersion((version) => version + 1);
+  }
 
   return (
     <div className="space-y-6">
@@ -40,7 +87,7 @@ const SMSTemplatesPage = () => {
         <div>
           <h1 className="text-2xl font-semibold">SMS templates</h1>
           <p className="text-muted-foreground text-sm">
-            Create and manage reusable SMS templates.
+            Select a template to view, test, or edit it.
           </p>
         </div>
         <Button
@@ -52,61 +99,56 @@ const SMSTemplatesPage = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Provider</TableHead>
-              <TableHead>Variables</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {templates.length === 0 && !isPending ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-muted-foreground h-24 text-center"
-                >
-                  No SMS templates have been created.
-                </TableCell>
-              </TableRow>
-            ) : (
-              templates.map((template) => (
-                <TableRow key={template.id}>
-                  <TableCell className="font-medium">{template.name}</TableCell>
-                  <TableCell className="capitalize">{template.provider}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {template.variables.length === 0 ? (
-                        <span className="text-muted-foreground">None</span>
-                      ) : (
-                        template.variables.map((variable) => (
-                          <Badge key={variable} variant="secondary">
-                            {variable}
-                          </Badge>
-                        ))
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        router.push(`/admin/sms-templates/${template.id}`)
-                      }
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      <div className="space-y-2">
+        <label htmlFor="sms-template-select" className="text-sm font-medium">
+          Template
+        </label>
+        <Select value={selectedTemplateId} onValueChange={selectTemplate}>
+          <SelectTrigger id="sms-template-select" className="w-full max-w-xl">
+            <SelectValue placeholder="Select an SMS template" />
+          </SelectTrigger>
+          <SelectContent>
+            {templates.map((template) => (
+              <SelectItem key={template.id} value={template.id}>
+                {template.name} ({template.provider})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
+      {!selectedTemplateId && !isPending && (
+        <div className="text-muted-foreground rounded-md border p-8 text-center">
+          No SMS templates have been created.
+        </div>
+      )}
+
+      {selectedTemplate && (
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle>{selectedTemplate.name}</CardTitle>
+            {isEditing ? (
+              <Button variant="outline" onClick={cancelEditing}>
+                Cancel editing
+              </Button>
+            ) : (
+              <Button className="gap-2" onClick={() => setIsEditing(true)}>
+                <Pencil className="size-4" />
+                Edit template
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            <SMSTemplateData
+              key={`${selectedTemplateId}-${editorVersion}`}
+              templateId={selectedTemplateId}
+              smsAction={SMSAction.Owings}
+              isEditing={isEditing}
+              onSaved={finishEditing}
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

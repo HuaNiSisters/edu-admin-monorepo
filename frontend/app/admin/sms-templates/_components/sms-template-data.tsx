@@ -2,282 +2,152 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useAsync } from "@/hooks/use-async";
 import { smsService } from "@/lib/services";
 import { actionToSampleContext, SMSAction } from "@/types/smsActions";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-
-function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
-}
-
-function getPropertyByPath(obj: any, path: string): any {
-  return path.split(".").reduce((curr, key) => curr?.[key], obj);
-}
-
-function updatePropertyByPath(obj: any, path: string, value: any): any {
-  const keys = path.split(".");
-  const result = { ...obj };
-  let curr = result;
-
-  keys.forEach((key, i) => {
-    if (i === keys.length - 1) {
-      curr[key] = value;
-    } else {
-      curr[key] = { ...curr[key] };
-      curr = curr[key];
-    }
-  });
-
-  return result;
-}
+import SmsTemplateVariableSelector, {
+  cloneTemplateContext,
+  getContextValue,
+  getInvalidTemplateVariables,
+  getTemplateVariables,
+  type SmsTemplateContext,
+} from "./sms-template-variable-selector";
 
 const SMSTemplateData = ({
+  templateId,
   smsAction,
   isEditing,
+  onSaved,
 }: {
+  templateId: string;
   smsAction: SMSAction;
   isEditing?: boolean;
+  onSaved?: () => void;
 }) => {
-  const router = useRouter();
-  const params = useParams();
-
-  const [sampleContext, setSampleContext] = useState<{
-    [key: string]: { [key: string]: any };
-  }>();
-  const [contextFields, setContextFields] = useState<string[]>([]);
-  const [textAreaString, setTextAreaString] = useState("");
-  const [templateVariables, setTemplateVariables] = useState<string[]>([]);
-  const [templateValidationErrorMessage, setTemplateValidationErrorMessage] =
-    useState("");
-  const [templateName, setTemplateName] = useState("");
   const { run } = useAsync();
 
-  const templateId = params.id as string;
+  const [sampleContext, setSampleContext] = useState<SmsTemplateContext>(() =>
+    cloneTemplateContext(actionToSampleContext[smsAction]),
+  );
+  const [content, setContent] = useState("");
+  const [templateName, setTemplateName] = useState("");
   const [toTestPhoneNumber, setToTestPhoneNumber] = useState("+61420398812");
 
+  const templateVariables = useMemo(
+    () => getTemplateVariables(content),
+    [content],
+  );
+  const invalidVariables = useMemo(
+    () => getInvalidTemplateVariables(content, sampleContext),
+    [content, sampleContext],
+  );
+  const validationError =
+    invalidVariables.length > 0
+      ? `The following variables are not valid: ${invalidVariables.join(", ")}`
+      : "";
+
   useEffect(() => {
-    setSampleContext(deepClone(actionToSampleContext[smsAction]));
+    setSampleContext(cloneTemplateContext(actionToSampleContext[smsAction]));
     smsService.getSMSTemplateByIdAsync(templateId).then((template) => {
-      console.log({ fetchedTemplate: template });
       setTemplateName(template.name);
-      setTextAreaString(template.content);
+      setContent(template.content);
     });
   }, [smsAction, templateId]);
 
-  useEffect(() => {
-    if (sampleContext && Object.keys(sampleContext).length > 0) {
-      const fields = Object.keys(sampleContext).flatMap((key) =>
-        Object.keys(sampleContext[key]).map((field) => `${key}.${field}`),
-      );
-      setContextFields(fields);
-    }
-  }, [sampleContext]);
-
-  // Validation to ensure that variables in the template are part of the context fields
-  useEffect(() => {
-    const regex = /{{(.*?)}}/g;
-    const matches = textAreaString.match(regex);
-    if (matches) {
-      const variables = matches.map((match) => match.replace(/{{|}}/g, ""));
-      validateTemplate();
-      setTemplateVariables(variables);
-    } else {
-      setTemplateVariables([]);
-    }
-  }, [textAreaString]);
-
-  const hasVariableBeenAdded = (variable: string) => {
-    return templateVariables.includes(variable);
-  };
-
-  const addVariableToTemplate = (variable: string) => {
-    if (!hasVariableBeenAdded(variable)) {
-      setTemplateVariables((prev) => [...prev, variable]);
-      setTextAreaString((prev) => prev + `{{${variable}}}`);
-    }
-  };
-
-  const removeVariableFromTemplate = (variable: string) => {
-    setTemplateVariables((prev) =>
-      prev.filter((existingVariable) => existingVariable !== variable),
-    );
-    const variableWithBraces = `{{${variable}}}`;
-    setTextAreaString((prev) => prev.replace(variableWithBraces, ""));
-  };
-
-  const validateTemplate = () => {
-    const regex = /{{(.*?)}}/g;
-    const matches = textAreaString.match(regex);
-    if (matches) {
-      const variables = matches.map((match) => match.replace(/{{|}}/g, ""));
-      const invalidVariables = variables.filter(
-        (variable) => !contextFields.includes(variable),
-      );
-      if (invalidVariables.length > 0) {
-        setTemplateValidationErrorMessage(
-          `The following variables are not valid: ${invalidVariables.join(", ")}`,
-        );
-      } else {
-        setTemplateValidationErrorMessage("");
-      }
-    }
-  };
-
-  const saveTemplate = () => {
+  function saveTemplate() {
     run(async () => {
-      if (!templateName) {
-        throw "Please provide a template name before saving.";
+      if (!templateName.trim()) {
+        throw new Error("Please provide a template name before saving.");
       }
-
-      if (templateValidationErrorMessage) {
-        throw "Please fix template errors before saving.";
+      if (validationError) {
+        throw new Error("Please fix template errors before saving.");
       }
 
       await smsService.updateSMSTemplateAsync(templateId, {
-        name: templateName,
-        content: textAreaString,
+        name: templateName.trim(),
+        content,
       });
-
       toast.success("Template updated successfully!", {
         position: "top-center",
       });
-
-      router.push(`/admin/sms-templates/${templateId}`);
+      onSaved?.();
     });
-  };
+  }
 
-  const sendTestSMS = () => {
-    // Get variables from the template and provide example values from the sample context
-    const sampleVariables = templateVariables.reduce(   
-      (acc, variable) => {
-        acc[variable] = getPropertyByPath(sampleContext, variable);
-        return acc;
-      },
-      {} as Record<string, any>,
+  function sendTestSMS() {
+    const sampleVariables = Object.fromEntries(
+      templateVariables.map((variable) => [
+        variable,
+        String(getContextValue(sampleContext, variable) ?? ""),
+      ]),
     );
 
     run(async () => {
-      const digits = toTestPhoneNumber.replace(/\D/g, "");
-      const recipient = digits.startsWith("0")
-        ? `+61${digits.slice(1)}`
-        : `+${digits}`;
-      await smsService.sendSMSTemplateAsync(templateId, recipient, sampleVariables);
+      await smsService.sendSMSTemplateAsync(
+        templateId,
+        toTestPhoneNumber,
+        sampleVariables,
+      );
       toast.success("Test SMS sent successfully!", {
         position: "top-center",
       });
     });
-  };
+  }
 
   return (
-    <div>
+    <div className="space-y-6">
       <Input
         placeholder="Template name"
         value={templateName}
-        onChange={(e) => setTemplateName(e.target.value)}
+        onChange={(event) => setTemplateName(event.target.value)}
         disabled={!isEditing}
       />
-      <br /> <br />
-      <Textarea
-        value={textAreaString}
-        placeholder="Template content e.g. Hi {{student.first_name}}"
-        onChange={(e) => setTextAreaString(e.target.value)}
-        disabled={!isEditing}
-        maxLength={1600}
+      <div className="space-y-2">
+        <Textarea
+          value={content}
+          placeholder="Template content e.g. Hi {{student.full_name}}"
+          onChange={(event) => setContent(event.target.value)}
+          disabled={!isEditing}
+          maxLength={1600}
+          className="min-h-40"
+        />
+        {validationError && (
+          <p className="text-destructive text-sm" role="alert">
+            {validationError}
+          </p>
+        )}
+      </div>
+
+      <SmsTemplateVariableSelector
+        content={content}
+        context={sampleContext}
+        editable={Boolean(isEditing)}
+        onContentChange={setContent}
+        onContextChange={setSampleContext}
       />
-      {templateValidationErrorMessage && (
-        <div style={{ color: "red" }}>{templateValidationErrorMessage}</div>
-      )}
-      <br />
-      {contextFields.length > 0 && (
-        <div>
-          <b style={{ fontSize: "20px" }}>Select variables</b>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell>
-                  <b>Variable</b>
-                </TableCell>
-                <TableCell>
-                  <b>Example value</b>
-                </TableCell>
-                <TableCell>
-                  <b>Usage</b>
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-            {contextFields.map((field) => (
-              <TableRow key={field}>
-                <TableCell>{field}</TableCell>
-                <TableCell>
-                  {isEditing && (
-                    <span style={{ color: "gray" }}>
-                      {getPropertyByPath(sampleContext, field)}
-                    </span>
-                  )}
-                  {!isEditing && (
-                    <Input
-                      value={getPropertyByPath(sampleContext, field)}
-                      onChange={(e) =>
-                        setSampleContext(
-                          updatePropertyByPath(
-                            sampleContext,
-                            field,
-                            e.target.value,
-                          ),
-                        )
-                      }
-                    />
-                  )}
-                </TableCell>
-                <TableCell>
-                  {!hasVariableBeenAdded(field) && (
-                    <Button
-                      onClick={() => addVariableToTemplate(field)}
-                      disabled={!isEditing}
-                    >
-                      Add as variable
-                    </Button>
-                  )}
-                  {hasVariableBeenAdded(field) && (
-                    <Button
-                      onClick={() => removeVariableFromTemplate(field)}
-                      disabled={!isEditing}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </Table>
-          {/* {JSON.stringify(sampleContext)} */}
-        </div>
-      )}
-      <br />
-      {isEditing && (
+
+      {isEditing ? (
         <Button
           onClick={saveTemplate}
-          disabled={!templateName || templateValidationErrorMessage !== ""}
+          disabled={!templateName.trim() || Boolean(validationError)}
         >
           Save template
         </Button>
-      )}
-      {!isEditing && (
-        <>
-          Send test SMS to:
-          <Input
-            value={toTestPhoneNumber}
-            onChange={(e) => setToTestPhoneNumber(formatPhoneNumber(e.target.value))}
-          />
-          <br />
-          <br />
+      ) : (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="test-phone-number">Send test SMS to:</label>
+            <Input
+              id="test-phone-number"
+              value={toTestPhoneNumber}
+              onChange={(event) => setToTestPhoneNumber(event.target.value)}
+            />
+          </div>
           <Button onClick={sendTestSMS}>Send Test SMS</Button>
-        </>
+        </div>
       )}
     </div>
   );
