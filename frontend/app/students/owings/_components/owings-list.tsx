@@ -1,17 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ColumnFiltersState } from "@tanstack/react-table";
 import { StudentOwing } from "@/lib/api/types/owing";
 import FilterContent from "@/components/filter-content";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -26,10 +25,107 @@ import {
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import {
   createOwingColumns,
-  OWING_SMS_TEMPLATES,
   OWING_SENT_FILTER_ID,
 } from "./owings-columns";
 import { useRouter } from "next/navigation";
+import { smsService } from "@/lib/services";
+import type { SMSTemplateSummary } from "@/lib/api/types/sms";
+import { formatPhoneNumber, toSmsPhoneNumber } from "@/utils/phone-utils";
+import { toast } from "sonner";
+
+const currency = new Intl.NumberFormat("en-AU", {
+  style: "currency",
+  currency: "AUD",
+  maximumFractionDigits: 0,
+});
+const dateFormatter = new Intl.DateTimeFormat("en-AU", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const dayInMilliseconds = 24 * 60 * 60 * 1000;
+
+type OwingParent = StudentOwing["parents"][number];
+type OwingRecipient = {
+  label: string;
+  phone: string;
+  phoneNumber: string | null;
+  parent?: OwingParent;
+};
+
+function getOwingRecipients(owing: StudentOwing): OwingRecipient[] {
+  const candidates: OwingRecipient[] = [
+    {
+      label: `Student: ${owing.student_name}`,
+      phone: owing.student_mobile,
+      phoneNumber: toSmsPhoneNumber(owing.student_mobile),
+    },
+    ...owing.parents.map((parent) => ({
+      label: `Parent: ${parent.name}`,
+      phone: parent.phone,
+      phoneNumber: toSmsPhoneNumber(parent.phone),
+      parent,
+    })),
+  ];
+  const seenPhoneNumbers = new Set<string>();
+  return candidates.filter(({ phoneNumber }) => {
+    if (!phoneNumber) return true;
+    if (seenPhoneNumbers.has(phoneNumber)) return false;
+    seenPhoneNumbers.add(phoneNumber);
+    return true;
+  });
+}
+
+function getOwingTemplateValues(
+  owing?: StudentOwing,
+  recipient?: OwingRecipient,
+): Record<string, string> {
+  if (!owing) return {};
+  const parent = recipient?.parent ?? owing.parents[0];
+
+  const startDay = Date.parse(`${owing.term_start_date.slice(0, 10)}T00:00:00Z`);
+  const endDay = Date.parse(`${owing.term_end_date.slice(0, 10)}T00:00:00Z`);
+  const today = new Date();
+  const todayDay = Date.UTC(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+  const numberOfWeeks = Math.max(
+    1,
+    Math.ceil((endDay - startDay + dayInMilliseconds) / (7 * dayInMilliseconds)),
+  );
+  const currentWeek = Math.min(
+    numberOfWeeks,
+    Math.max(1, Math.floor((todayDay - startDay) / (7 * dayInMilliseconds)) + 1),
+  );
+
+  return {
+    "student.full_name": owing.student_name,
+    "student.first_name": owing.student_first_name,
+    "student.last_name": owing.student_last_name,
+    "student.mobile": owing.student_mobile,
+    ...(parent && {
+      "parent.full_name": parent.name,
+      "parent.phone": parent.phone,
+    }),
+    "term.week_number": String(currentWeek),
+    "term.number": String(owing.term_name),
+    "term.year": String(owing.term_year),
+    "term.label": owing.term_label,
+    "term.n_weeks": String(numberOfWeeks),
+    "term.start_date": dateFormatter.format(new Date(startDay)),
+    "term.end_date": dateFormatter.format(new Date(endDay)),
+    "invoice.amount_due": currency.format(owing.amount_outstanding),
+    "subject.name": owing.subject_name,
+    "subject.grade": String(owing.grade),
+    "subject.location": formatValuesRemoveUnderscores(owing.location),
+    "class.day_of_week": owing.day_of_week,
+    "class.start_time": owing.start_time,
+    ...(owing.tutor && { "class.tutor": owing.tutor }),
+  };
+}
 
 export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const router = useRouter();
@@ -37,6 +133,19 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [templates, setTemplates] = useState<SMSTemplateSummary[]>([]);
+  const [templateContent, setTemplateContent] = useState("");
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const [templateError, setTemplateError] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState("");
+  const [previewRecipientIndex, setPreviewRecipientIndex] = useState(0);
+  const [completedRecipientKeys, setCompletedRecipientKeys] = useState<
+    Set<string>
+  >(new Set());
+  const [sentTemplatesByEnrolment, setSentTemplatesByEnrolment] = useState<
+    Record<string, string[]>
+  >({});
   const allSelected = owings.length > 0 && selectedIds.size === owings.length;
 
   const columns = useMemo(
@@ -59,8 +168,9 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
               : new Set(),
           );
         },
+        sentTemplatesByEnrolment,
       }),
-    [allSelected, owings, selectedIds],
+    [allSelected, owings, selectedIds, sentTemplatesByEnrolment],
   );
 
   const termOptions = useMemo(
@@ -91,6 +201,181 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const searchValue =
     (columnFilters.find((filter) => filter.id === "student_name")
       ?.value as string) ?? "";
+
+  useEffect(() => {
+    if (!sendDialogOpen) return;
+    let cancelled = false;
+    setTemplateError("");
+    smsService
+      .getSMSTemplatesAsync()
+      .then((loadedTemplates) => {
+        if (cancelled) return;
+        setTemplates(loadedTemplates);
+        setSelectedTemplate((current) =>
+          loadedTemplates.some(({ id }) => id === current)
+            ? current
+            : loadedTemplates[0]?.id ?? "",
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setTemplateError("Unable to load SMS templates.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sendDialogOpen]);
+
+  useEffect(() => {
+    if (!selectedTemplate || !sendDialogOpen) {
+      setTemplateContent("");
+      return;
+    }
+    let cancelled = false;
+    setTemplateLoading(true);
+    setTemplateError("");
+    smsService
+      .getSMSTemplateByIdAsync(selectedTemplate)
+      .then((template) => {
+        if (!cancelled) setTemplateContent(template.content);
+      })
+      .catch(() => {
+        if (!cancelled) setTemplateError("Unable to load this SMS template.");
+      })
+      .finally(() => {
+        if (!cancelled) setTemplateLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTemplate, sendDialogOpen]);
+
+  const previewOwing =
+    owings.find(({ enrolment_id }) => selectedIds.has(enrolment_id)) ??
+    owings[0];
+  const previewRecipients = previewOwing ? getOwingRecipients(previewOwing) : [];
+  const previewRecipient =
+    previewRecipients[previewRecipientIndex] ?? previewRecipients[0];
+  const previewValues = getOwingTemplateValues(previewOwing, previewRecipient);
+  const usedVariables = [
+    ...new Set(
+      [...templateContent.matchAll(/{{(.*?)}}/g)]
+        .map((match) => match[1]?.trim())
+        .filter((variable): variable is string => Boolean(variable)),
+    ),
+  ];
+  const preview = templateContent.replace(
+    /{{(.*?)}}/g,
+    (match, variable: string) => previewValues[variable.trim()] ?? match,
+  );
+  const selectedOwings = owings.filter(({ enrolment_id }) =>
+    selectedIds.has(enrolment_id),
+  );
+  const sendTargets = selectedOwings.flatMap((owing) =>
+    getOwingRecipients(owing).map((recipient, index) => ({
+      owing,
+      recipient,
+      key: `${selectedTemplate}:${owing.enrolment_id}:${recipient.phoneNumber ?? `invalid-${index}`}`,
+    })),
+  );
+  const pendingTargets = sendTargets.filter(
+    ({ key }) => !completedRecipientKeys.has(key),
+  );
+  const sendBlockers = pendingTargets.flatMap(({ owing, recipient }) => {
+    const values = getOwingTemplateValues(owing, recipient);
+    const missingVariables = usedVariables.filter(
+      (variable) => !values[variable]?.trim(),
+    );
+    const problems = [
+      ...(!recipient.phoneNumber
+        ? [`invalid or missing mobile number: ${recipient.phone || "none"}`]
+        : []),
+      ...(missingVariables.length
+        ? [`missing ${missingVariables.join(", ")}`]
+        : []),
+    ];
+    return problems.length
+      ? [
+          `${recipient.label} (${owing.term_label}, ${owing.subject_name}): ${problems.join("; ")}`,
+        ]
+      : [];
+  });
+
+  async function sendMessages() {
+    if (
+      isSending ||
+      !selectedTemplate ||
+      !templateContent.trim() ||
+      !pendingTargets.length ||
+      sendBlockers.length
+    ) return;
+
+    setIsSending(true);
+    setSendError("");
+    const failed: typeof pendingTargets = [];
+    const newlyCompletedKeys = new Set<string>();
+    const templateName =
+      templates.find(({ id }) => id === selectedTemplate)?.name ?? "SMS";
+    for (const target of pendingTargets) {
+      const { owing, recipient, key } = target;
+      if (!recipient.phoneNumber) {
+        failed.push(target);
+        continue;
+      }
+      const values = getOwingTemplateValues(owing, recipient);
+      const variables = Object.fromEntries(
+        usedVariables.map((variable) => [variable, values[variable]]),
+      );
+      try {
+        await smsService.sendSMSTemplateAsync(
+          selectedTemplate,
+          recipient.phoneNumber,
+          variables,
+        );
+        newlyCompletedKeys.add(key);
+      } catch {
+        failed.push(target);
+      }
+    }
+
+    const allCompletedKeys = new Set([
+      ...completedRecipientKeys,
+      ...newlyCompletedKeys,
+    ]);
+    const completedOwings = selectedOwings.filter((owing) =>
+      sendTargets
+        .filter((target) => target.owing.enrolment_id === owing.enrolment_id)
+        .every(({ key }) => allCompletedKeys.has(key)),
+    );
+    if (completedOwings.length) {
+      setSentTemplatesByEnrolment((previous) => {
+        const next = { ...previous };
+        for (const owing of completedOwings) {
+          next[owing.enrolment_id] = [
+            ...new Set([...(next[owing.enrolment_id] ?? []), templateName]),
+          ];
+        }
+        return next;
+      });
+    }
+    const sentCount = newlyCompletedKeys.size;
+    if (sentCount) {
+      toast.success(
+        `Sent ${sentCount} text ${sentCount === 1 ? "message" : "messages"}.`,
+      );
+    }
+    if (failed.length) {
+      setCompletedRecipientKeys(allCompletedKeys);
+      setSendError(
+        `${failed.length} ${failed.length === 1 ? "message failed" : "messages failed"} to send. Only those recipients will be retried.`,
+      );
+      setSelectedIds(new Set(failed.map(({ owing }) => owing.enrolment_id)));
+    } else {
+      setCompletedRecipientKeys(new Set());
+      setSelectedIds(new Set());
+      setSendDialogOpen(false);
+    }
+    setIsSending(false);
+  }
 
   return (
     <div className="space-y-3">
@@ -130,14 +415,6 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
         />
-        {/* <FilterContent
-          filterValue={OWING_SENT_FILTER_ID}
-          filterName="Sent templates"
-          placeholderName="SMS template"
-          options={OWING_SMS_TEMPLATES}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-        /> */}
         <Input
           className="h-9 w-[220px]"
           placeholder="Search student"
@@ -182,31 +459,120 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
         }}
       />
 
-      <Dialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
-        <DialogContent>
+      <Dialog
+        open={sendDialogOpen}
+        onOpenChange={(open) => {
+          if (!isSending) setSendDialogOpen(open);
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Select SMS Template</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             <Select
+              disabled={isSending}
               value={selectedTemplate}
-              onValueChange={setSelectedTemplate}
+              onValueChange={(templateId) => {
+                setTemplateContent("");
+                setSendError("");
+                setPreviewRecipientIndex(0);
+                setSelectedTemplate(templateId);
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a template" />
               </SelectTrigger>
               <SelectContent>
-                {OWING_SMS_TEMPLATES.map((template) => (
-                  <SelectItem key={template} value={template}>
-                    {template} (placeholder)
+                {templates.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {templateError && (
+              <p className="text-sm text-destructive">{templateError}</p>
+            )}
+            {!templates.length && !templateError && (
+              <p className="text-sm text-muted-foreground">
+                No SMS templates available.
+              </p>
+            )}
+            {selectedTemplate && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Preview</h3>
+                {previewRecipients.length > 1 && (
+                  <Select
+                    disabled={isSending}
+                    value={String(previewRecipients.indexOf(previewRecipient))}
+                    onValueChange={(index) =>
+                      setPreviewRecipientIndex(Number(index))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Preview recipient" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {previewRecipients.map((recipient, index) => (
+                        <SelectItem key={index} value={String(index)}>
+                          {recipient.label} (
+                          {formatPhoneNumber(recipient.phone) || "No mobile"})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <div className="min-h-20 whitespace-pre-wrap rounded-md border bg-muted/40 p-3 text-sm">
+                  {templateLoading
+                    ? "Loading preview…"
+                    : preview || "This template is empty."}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previewOwing
+                    ? `Preview uses ${previewOwing.student_name}’s owing details for ${previewRecipient.label}.`
+                    : "Select an owing to preview variable values."}
+                </p>
+                {!templateLoading && usedVariables.length > 0 && (
+                  <div className="space-y-1 text-xs">
+                    <h4 className="font-medium">Variable values</h4>
+                    {usedVariables.map((variable) => (
+                      <div
+                        key={variable}
+                        className="flex justify-between gap-3 border-b py-1 last:border-0"
+                      >
+                        <code className="break-all">{variable}</code>
+                        <span className="text-right">
+                          {previewValues[variable] ?? "No owing value"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">
-              SMS template loading and sending are not connected yet.
+              Send to the student and each parent for the{" "}
+              {selectedOwings.length} selected owings ({pendingTargets.length}{" "}
+              {pendingTargets.length === 1 ? "message" : "messages"}). Duplicate
+              mobile numbers within an owing receive one message.
             </p>
+            {sendBlockers.length > 0 && (
+              <div className="space-y-1 text-sm text-destructive" role="alert">
+                <p>Resolve these details before sending:</p>
+                <ul className="list-disc pl-5">
+                  {sendBlockers.map((blocker) => (
+                    <li key={blocker}>{blocker}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {sendError && (
+              <p className="text-sm text-destructive" role="alert">
+                {sendError}
+              </p>
+            )}
             <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
               Please double-check the Enrolment fee for the subjects if your
               selected message includes the Fee to ensure the details are
@@ -215,10 +581,28 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSendDialogOpen(false)}>
+            <Button
+              variant="outline"
+              disabled={isSending}
+              onClick={() => setSendDialogOpen(false)}
+            >
               Close
             </Button>
-            <Button disabled>Send</Button>
+            <Button
+              onClick={sendMessages}
+              disabled={
+                isSending ||
+                templateLoading ||
+                Boolean(templateError) ||
+                !selectedTemplate ||
+                !templateContent.trim() ||
+                !pendingTargets.length ||
+                sendBlockers.length > 0
+              }
+            >
+              {isSending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {isSending ? "Sending…" : "Send"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

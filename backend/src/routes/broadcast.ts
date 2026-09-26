@@ -117,7 +117,6 @@ async function routes(
       }>,
     ) => {
       const { templateId, toPhoneNumber, templateVariables } = request.body;
-      console.log({ templateId, toPhoneNumber, templateVariables });
       await sendSMSTemplateAsync(templateId, toPhoneNumber, templateVariables);
       return { message: "SMS sent successfully" };
     },

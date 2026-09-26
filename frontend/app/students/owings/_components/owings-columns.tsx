@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { StudentOwing } from "@/lib/api/types/owing";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { formatPhoneNumber } from "@/utils/phone-utils";
@@ -11,7 +11,6 @@ const currency = new Intl.NumberFormat("en-AU", {
   maximumFractionDigits: 0,
 });
 
-export const OWING_SMS_TEMPLATES = ["Payment reminder", "Overdue follow-up"];
 export const OWING_SENT_FILTER_ID = "sent_templates";
 
 type OwingColumnOptions = {
@@ -19,6 +18,7 @@ type OwingColumnOptions = {
   onToggleSelected: (enrolmentId: string, selected: boolean) => void;
   allSelected: boolean;
   onToggleAll: (selected: boolean) => void;
+  sentTemplatesByEnrolment: Record<string, string[]>;
 };
 
 function displayLocation(location: string) {
@@ -33,6 +33,7 @@ export const createOwingColumns = ({
   onToggleSelected,
   allSelected,
   onToggleAll,
+  sentTemplatesByEnrolment,
 }: OwingColumnOptions): ColumnDef<StudentOwing>[] => [
   {
     id: "select",
@@ -58,28 +59,20 @@ export const createOwingColumns = ({
   },
   {
     id: "sent",
-    header: "Sent",
+    header: "Sent this session",
     size: 210,
     cell: ({ row }) => {
-      const sent = row.original.sent_templates;
+      const sent = sentTemplatesByEnrolment[row.original.enrolment_id] ?? [];
       return (
         <div className="space-y-2 whitespace-normal">
-          {OWING_SMS_TEMPLATES.map((template) => (
+          {sent.length === 0 && <span className="text-muted-foreground">—</span>}
+          {sent.map((template) => (
             <div
               key={template}
               className="flex items-center justify-start gap-2"
             >
               <span className="text-base font-medium">{template}</span>
-              <span
-                className="shrink-0"
-                aria-label={sent.includes(template) ? "Sent" : "Not sent"}
-              >
-                {sent.includes(template) ? (
-                  <Check className="size-4 text-green-600" aria-hidden="true" />
-                ) : (
-                  <X className="size-4 text-red-600" aria-hidden="true" />
-                )}
-              </span>
+              <Check className="size-4 shrink-0 text-green-600" aria-label="Sent" />
             </div>
           ))}
         </div>

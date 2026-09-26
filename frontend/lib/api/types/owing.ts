@@ -5,12 +5,16 @@ export type StudentOwing = {
   amount_outstanding: number;
   student_id: string;
   student_name: string;
+  student_first_name: string;
+  student_last_name: string;
   student_mobile: string;
   parents: { name: string; phone: string }[];
   term_id: string;
   term_name: number;
   term_year: number;
   term_label: string;
+  term_start_date: string;
+  term_end_date: string;
   subject_name: string;
   grade: number;
   location: Location;
