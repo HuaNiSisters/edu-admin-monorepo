@@ -17,4 +17,5 @@ export type StudentOwing = {
   day_of_week: string;
   start_time: string;
   tutor: string;
+  sent_templates: string[];
 };

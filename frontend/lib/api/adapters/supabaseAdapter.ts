@@ -714,6 +714,7 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
         day_of_week: classTime.day_of_week,
         start_time: classTime.start_time,
         tutor: tutor ? `${tutor.first_name} ${tutor.last_name}`.trim() : "",
+        sent_templates: [],
       }];
     });
   }

@@ -24,16 +24,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
-import { createOwingColumns, OWING_SMS_TEMPLATES } from "./owings-columns";
+import {
+  createOwingColumns,
+  OWING_SMS_TEMPLATES,
+  OWING_SENT_FILTER_ID,
+} from "./owings-columns";
 import { useRouter } from "next/navigation";
 
 export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const router = useRouter();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [sentByEnrolment, setSentByEnrolment] = useState<
-    Record<string, string[]>
-  >({});
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const allSelected = owings.length > 0 && selectedIds.size === owings.length;
@@ -43,7 +44,6 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
       createOwingColumns({
         selectedIds,
         allSelected,
-        sentByEnrolment,
         onToggleSelected: (enrolmentId, selected) => {
           setSelectedIds((previous) => {
             const next = new Set(previous);
@@ -59,17 +59,8 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
               : new Set(),
           );
         },
-        onToggleSent: (enrolmentId, template, sent) => {
-          setSentByEnrolment((previous) => {
-            const current = previous[enrolmentId] ?? [];
-            const next = sent
-              ? [...new Set([...current, template])]
-              : current.filter((item) => item !== template);
-            return { ...previous, [enrolmentId]: next };
-          });
-        },
       }),
-    [allSelected, owings, selectedIds, sentByEnrolment],
+    [allSelected, owings, selectedIds],
   );
 
   const termOptions = useMemo(
@@ -139,6 +130,14 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
         />
+        {/* <FilterContent
+          filterValue={OWING_SENT_FILTER_ID}
+          filterName="Sent templates"
+          placeholderName="SMS template"
+          options={OWING_SMS_TEMPLATES}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        /> */}
         <Input
           className="h-9 w-[220px]"
           placeholder="Search student"
@@ -179,6 +178,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
           grade: false,
           subject_name: false,
           location: false,
+          [OWING_SENT_FILTER_ID]: false,
         }}
       />
 
