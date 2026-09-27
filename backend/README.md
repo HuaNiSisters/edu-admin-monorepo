@@ -1,7 +1,7 @@
 # EduAdmin-backend
 
 To start the BE, just run this on the backend folder: 
-`npm run start`
+`npm run dev`
 
 Ensure you are on nvm v22.12.0
 
@@ -63,3 +63,4 @@ It creates 100 students, 120 parents, 10 tutors, 20 classes, 200 enrolments,
 existing subject names. The command generates the Prisma client before it
 runs. Remove just this sample dataset with
 `npm run clean:sample`.
+
