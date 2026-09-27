@@ -1,4 +1,6 @@
 import {
+  OwingSmsContext,
+  OwingSmsSend,
   CreateSMSTemplateRequest,
   GetSMSTemplateResponse,
   SMSTemplateSummary,
@@ -6,6 +8,8 @@ import {
 } from "../../types/sms";
 
 interface ISMSRepo {
+  getSmsSendMode: () => Promise<{ mock: boolean }>;
+  getOwingSmsSendsAsync: () => Promise<OwingSmsSend[]>;
   getSMSTemplatesAsync: () => Promise<SMSTemplateSummary[]>;
   createSMSTemplateAsync: (
     data: CreateSMSTemplateRequest,
@@ -19,6 +23,7 @@ interface ISMSRepo {
     templateId: string,
     toPhoneNumber: string,
     templateVariables?: Record<string, string>,
+    owing?: OwingSmsContext,
   ) => Promise<void>;
 }
 

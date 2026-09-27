@@ -1,5 +1,7 @@
 import axios from "axios";
 import {
+  OwingSmsContext,
+  OwingSmsSend,
   CreateSMSTemplateRequest,
   GetSMSTemplateResponse,
   SMSTemplateSummary,
@@ -12,6 +14,14 @@ const API_BASE_URL =
   "http://localhost:8888/api/v1/broadcast";
 
 function ourBackendAdapter(): ISMSRepo {
+  async function getSmsSendMode(): Promise<{ mock: boolean }> {
+    return (await axios.get(`${API_BASE_URL}/sms-send-mode`)).data;
+  }
+
+  async function getOwingSmsSendsAsync(): Promise<OwingSmsSend[]> {
+    return (await axios.get(`${API_BASE_URL}/owing-sms-sends`)).data;
+  }
+
   // ERROR HANDLING
   async function getSMSTemplatesAsync(): Promise<SMSTemplateSummary[]> {
     const response = await axios.get(`${API_BASE_URL}/template/sms`);
@@ -55,15 +65,19 @@ function ourBackendAdapter(): ISMSRepo {
     templateId: string,
     toPhoneNumber: string,
     templateVariables?: Record<string, string>,
+    owing?: OwingSmsContext,
   ): Promise<void> {
     await axios.post(`${API_BASE_URL}/send-sms`, {
       templateId,
       toPhoneNumber,
       templateVariables,
+      owing,
     });
   }
 
   return {
+    getSmsSendMode,
+    getOwingSmsSendsAsync,
     getSMSTemplatesAsync,
     createSMSTemplateAsync,
     getSMSTemplateByIdAsync,

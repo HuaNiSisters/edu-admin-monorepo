@@ -1,10 +1,16 @@
 import { ISMSRepo } from "../api/adapters/interfaces";
 import {
+  OwingSmsContext,
+  OwingSmsSend,
   CreateSMSTemplateRequest,
   UpdateSMSTemplateRequest,
 } from "../api/types/sms";
 
 function SMSService(apiWrapper: ISMSRepo) {
+  async function getOwingSmsSendsAsync(): Promise<OwingSmsSend[]> {
+    return apiWrapper.getOwingSmsSendsAsync();
+  }
+
   async function getSMSTemplatesAsync() {
     return await apiWrapper.getSMSTemplatesAsync();
   }
@@ -33,15 +39,19 @@ function SMSService(apiWrapper: ISMSRepo) {
     templateId: string,
     toPhoneNumber: string,
     templateVariables?: Record<string, string>,
+    owing?: OwingSmsContext,
   ): Promise<void> {
     await apiWrapper.sendSMSTemplateAsync(
       templateId,
       toPhoneNumber,
       templateVariables,
+      owing,
     );
   }
 
   return {
+    getSmsSendMode: apiWrapper.getSmsSendMode,
+    getOwingSmsSendsAsync,
     getSMSTemplatesAsync,
     createSMSTemplateAsync,
     getSMSTemplateByIdAsync,

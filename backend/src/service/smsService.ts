@@ -1,3 +1,4 @@
+import { prisma } from "../lib/prisma.ts";
 import type {
   CreateSMSTemplateRequest,
   GetSMSTemplateResponse,
@@ -10,6 +11,14 @@ import { SmsWrapperTwilio } from "../repositories/SmsWrapperTwilio.ts";
 const smsTemplateRepository = new SmsTemplateRepositoryPrisma();
 const providers: ISmsProvider[] = [new SmsWrapperTwilio()];
 const defaultProviderName = process.env.SMS_PROVIDER || "twilio";
+
+function getSmsSendMode(): { mock: boolean } {
+  const mock = process.env.SMS_MOCK_SEND === "true";
+  if (mock && process.env.NODE_ENV === "production") {
+    throw new Error("SMS_MOCK_SEND must be disabled in production");
+  }
+  return { mock };
+}
 
 function getProvider(providerName: string): ISmsProvider {
   const provider = providers.find(({ provider }) => provider === providerName);
@@ -119,20 +128,59 @@ async function sendSMSTemplateAsync(
   templateId: string,
   toPhoneNumber: string,
   variables: Record<string, string> = {},
+  owing?: { enrolmentId: string; termId: string },
 ) {
+  const { mock } = getSmsSendMode();
   const storedTemplate = await smsTemplateRepository.getById(templateId);
   if (!storedTemplate) throw notFound(templateId);
 
-  const provider = getProvider(storedTemplate.provider);
-  await provider.sendSMSTemplate(
-    storedTemplate.providerTemplateId,
-    toPhoneNumber,
-    variables,
-    storedTemplate.variableMapping,
-  );
+  const sendKey = owing ? {
+    enrolment_id: owing.enrolmentId,
+    term_id: owing.termId,
+    template_id: templateId,
+    phone_number: toPhoneNumber,
+  } : undefined;
+  if (sendKey) {
+    const enrolment = await prisma.enrolment.findUnique({
+      where: { enrolment_id: sendKey.enrolment_id },
+    });
+    if (!enrolment || enrolment.term_id !== sendKey.term_id) {
+      throw Object.assign(new Error("Enrolment does not belong to this term"), { statusCode: 400 });
+    }
+    const previous = await prisma.owingSmsSend.findUnique({
+      where: { enrolment_id_term_id_template_id_phone_number: sendKey },
+    });
+    if (previous) return;
+  }
+  if (!mock) {
+    const provider = getProvider(storedTemplate.provider);
+    await provider.sendSMSTemplate(
+      storedTemplate.providerTemplateId,
+      toPhoneNumber,
+      variables,
+      storedTemplate.variableMapping,
+    );
+  }
+  // Mock sends intentionally persist the same status so the owing workflow
+  // can be exercised without submitting a message to the provider.
+  if (sendKey) {
+    await prisma.owingSmsSend.upsert({
+      where: { enrolment_id_term_id_template_id_phone_number: sendKey },
+      create: sendKey,
+      update: {},
+    });
+  }
+}
+
+async function getOwingSmsSendsAsync() {
+  return prisma.owingSmsSend.findMany({
+    select: { enrolment_id: true, term_id: true, template_id: true, phone_number: true },
+  });
 }
 
 export {
+  getSmsSendMode,
+  getOwingSmsSendsAsync,
   createSMSTemplateAsync,
   getSMSTemplateByIdAsync,
   getSMSTemplatesAsync,

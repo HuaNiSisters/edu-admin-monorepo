@@ -64,3 +64,27 @@ existing subject names. The command generates the Prisma client before it
 runs. Remove just this sample dataset with
 `npm run clean:sample`.
 
+
+## Owing SMS sent status
+
+The owings table loads saved SMS templates and successful recipient submissions
+from the backend. `OwingSmsSend` records are keyed by enrolment, term, template ID,
+and recipient phone number. A new term starts with no sends. Renaming a template
+does not lose its history. The checkmark means all current student/parent
+recipients were accepted by the provider, not confirmed handset delivery.
+Previously sent messages cannot be reconstructed because they were not recorded.
+
+Apply the tracking migration with `npx prisma migrate deploy`, then restart
+`npm run dev` to generate the current Prisma client.
+
+### Try mock sending without sending an SMS
+
+Set `SMS_MOCK_SEND=true` in `backend/.env` and restart the backend. Refresh Owings,
+select an owing and a template, then click **Simulate send**. The UI displays a
+mock-mode banner. The backend skips the provider send and saves the normal sent
+history, so the checkmark survives a refresh. Template previews still read the
+existing content from Twilio; no text message is submitted.
+
+Set `SMS_MOCK_SEND=false` and restart to resume real sends. Mock checkmarks remain
+saved and those recipients will be skipped for that template/enrolment/term, so
+use sample enrolments. Mock mode is rejected when `NODE_ENV=production`.

@@ -155,9 +155,21 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const [completedRecipientKeys, setCompletedRecipientKeys] = useState<
     Set<string>
   >(new Set());
-  const [sentTemplatesByEnrolment, setSentTemplatesByEnrolment] = useState<
-    Record<string, string[]>
-  >({});
+  const [mockSend, setMockSend] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(true);
+  const [statusError, setStatusError] = useState("");
+  const [reloadStatus, setReloadStatus] = useState(0);
+  const owingsWithStatus = useMemo(() => owings.map((owing) => ({
+    ...owing,
+    sent_templates: templates.filter((template) => {
+      const recipients = getOwingRecipients(owing);
+      return recipients.length > 0 && recipients.every((recipient) =>
+        recipient.phoneNumber && completedRecipientKeys.has(
+          `${template.id}:${owing.enrolment_id}:${owing.term_id}:${recipient.phoneNumber}`,
+        ),
+      );
+    }).map(({ id }) => id),
+  })), [owings, templates, completedRecipientKeys]);
   const allSelected = owings.length > 0 && selectedIds.size === owings.length;
 
   const columns = useMemo(
@@ -180,9 +192,11 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
               : new Set(),
           );
         },
-        sentTemplatesByEnrolment,
+        templates,
+        statusLoading,
+        statusError,
       }),
-    [allSelected, owings, selectedIds, sentTemplatesByEnrolment],
+    [allSelected, owings, selectedIds, templates, statusLoading, statusError],
   );
 
   const termOptions = useMemo(
@@ -215,14 +229,17 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
       ?.value as string) ?? "";
 
   useEffect(() => {
-    if (!sendDialogOpen) return;
     let cancelled = false;
-    setTemplateError("");
-    smsService
-      .getSMSTemplatesAsync()
-      .then((loadedTemplates) => {
+    setStatusLoading(true);
+    setStatusError("");
+    Promise.all([smsService.getSMSTemplatesAsync(), smsService.getOwingSmsSendsAsync(), smsService.getSmsSendMode()])
+      .then(([loadedTemplates, sends, mode]) => {
         if (cancelled) return;
         setTemplates(loadedTemplates);
+        setMockSend(mode.mock);
+        setCompletedRecipientKeys(new Set(sends.map((send) =>
+          `${send.template_id}:${send.enrolment_id}:${send.term_id}:${send.phone_number}`,
+        )));
         setSelectedTemplate((current) =>
           loadedTemplates.some(({ id }) => id === current)
             ? current
@@ -230,12 +247,13 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
         );
       })
       .catch(() => {
-        if (!cancelled) setTemplateError("Unable to load SMS templates.");
-      });
+        if (!cancelled) setStatusError("Unable to load SMS templates and sent status.");
+      })
+      .finally(() => { if (!cancelled) setStatusLoading(false); });
     return () => {
       cancelled = true;
     };
-  }, [sendDialogOpen]);
+  }, [reloadStatus]);
 
   useEffect(() => {
     if (!selectedTemplate || !sendDialogOpen) {
@@ -286,7 +304,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
     getOwingRecipients(owing).map((recipient, index) => ({
       owing,
       recipient,
-      key: `${selectedTemplate}:${owing.enrolment_id}:${recipient.phoneNumber ?? `invalid-${index}`}`,
+      key: `${selectedTemplate}:${owing.enrolment_id}:${owing.term_id}:${recipient.phoneNumber ?? `invalid-${index}`}`,
     })),
   );
   const pendingTargets = sendTargets.filter(
@@ -315,6 +333,8 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   async function sendMessages() {
     if (
       isSending ||
+      statusLoading ||
+      Boolean(statusError) ||
       !selectedTemplate ||
       !templateContent.trim() ||
       !pendingTargets.length ||
@@ -325,8 +345,6 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
     setSendError("");
     const failed: typeof pendingTargets = [];
     const newlyCompletedKeys = new Set<string>();
-    const templateName =
-      templates.find(({ id }) => id === selectedTemplate)?.name ?? "SMS";
     for (const target of pendingTargets) {
       const { owing, recipient, key } = target;
       if (!recipient.phoneNumber) {
@@ -342,6 +360,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
           selectedTemplate,
           recipient.phoneNumber,
           variables,
+          { enrolmentId: owing.enrolment_id, termId: owing.term_id },
         );
         newlyCompletedKeys.add(key);
       } catch {
@@ -353,36 +372,21 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
       ...completedRecipientKeys,
       ...newlyCompletedKeys,
     ]);
-    const completedOwings = selectedOwings.filter((owing) =>
-      sendTargets
-        .filter((target) => target.owing.enrolment_id === owing.enrolment_id)
-        .every(({ key }) => allCompletedKeys.has(key)),
-    );
-    if (completedOwings.length) {
-      setSentTemplatesByEnrolment((previous) => {
-        const next = { ...previous };
-        for (const owing of completedOwings) {
-          next[owing.enrolment_id] = [
-            ...new Set([...(next[owing.enrolment_id] ?? []), templateName]),
-          ];
-        }
-        return next;
-      });
-    }
+    setCompletedRecipientKeys(allCompletedKeys);
     const sentCount = newlyCompletedKeys.size;
     if (sentCount) {
       toast.success(
-        `Sent ${sentCount} text ${sentCount === 1 ? "message" : "messages"}.`,
+        mockSend
+          ? `Marked ${sentCount} mock messages as sent. No SMS was sent.`
+          : `Sent ${sentCount} text ${sentCount === 1 ? "message" : "messages"}.`,
       );
     }
     if (failed.length) {
-      setCompletedRecipientKeys(allCompletedKeys);
       setSendError(
         `${failed.length} ${failed.length === 1 ? "message failed" : "messages failed"} to send. Only those recipients will be retried.`,
       );
       setSelectedIds(new Set(failed.map(({ owing }) => owing.enrolment_id)));
     } else {
-      setCompletedRecipientKeys(new Set());
       setSelectedIds(new Set());
       setSendDialogOpen(false);
     }
@@ -391,9 +395,21 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
 
   return (
     <div className="space-y-3">
+      {mockSend && (
+        <p role="status" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+          Mock SMS mode: sending saves the Sent status, but no SMS is sent.
+          These checkmarks persist even after mock mode is disabled.
+        </p>
+      )}
       <div className="flex justify-end">
-        <Button onClick={() => setSendDialogOpen(true)}>Send message</Button>
+        <Button disabled={statusLoading || Boolean(statusError)} onClick={() => setSendDialogOpen(true)}>Send message</Button>
       </div>
+      {statusError && (
+        <div role="alert" className="flex items-center gap-2 text-sm text-destructive">
+          {statusError}
+          <Button variant="outline" size="sm" onClick={() => setReloadStatus((value) => value + 1)}>Retry</Button>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <FilterContent
           filterValue="term_label"
@@ -459,7 +475,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
       </div>
       <DataTable
         columns={columns}
-        data={owings}
+        data={owingsWithStatus}
         onRowClick={(row) => router.replace(`/student/${row.student_id}`)}
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
@@ -483,6 +499,11 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
           </DialogHeader>
 
           <div className="space-y-4">
+            {mockSend && (
+              <p role="status" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+                Mock SMS mode — this records sent status without sending any SMS.
+              </p>
+            )}
             <Select
               disabled={isSending}
               value={selectedTemplate}
@@ -568,7 +589,8 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
               Send to the student and each parent for the{" "}
               {selectedOwings.length} selected owings ({pendingTargets.length}{" "}
               {pendingTargets.length === 1 ? "message" : "messages"}). Duplicate
-              mobile numbers within an owing receive one message.
+              mobile numbers within an owing receive one message. Recipients already
+              sent this template for this enrolment and term are skipped.
             </p>
             {sendBlockers.length > 0 && (
               <div className="space-y-1 text-sm text-destructive" role="alert">
@@ -613,7 +635,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
               }
             >
               {isSending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {isSending ? "Sending…" : "Send"}
+              {isSending ? "Sending…" : mockSend ? "Simulate send" : "Send"}
             </Button>
           </DialogFooter>
         </DialogContent>

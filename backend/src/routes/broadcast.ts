@@ -4,6 +4,8 @@ import type {
   FastifyRequest,
 } from "fastify";
 import {
+  getSmsSendMode,
+  getOwingSmsSendsAsync,
   createSMSTemplateAsync,
   getSMSTemplateByIdAsync,
   getSMSTemplatesAsync,
@@ -17,6 +19,10 @@ async function routes(
   _options: FastifyPluginOptions,
 ) {
   const app = fastify;
+
+  app.get("/sms-send-mode", async () => getSmsSendMode());
+
+  app.get("/owing-sms-sends", async () => getOwingSmsSendsAsync());
 
   app.get("/template/sms", async () => getSMSTemplatesAsync());
 
@@ -107,18 +113,39 @@ async function routes(
 
   app.post(
     "/send-sms",
+    {
+      schema: {
+        body: {
+          type: "object",
+          required: ["templateId", "toPhoneNumber"],
+          properties: {
+            templateId: { type: "string", format: "uuid" },
+            toPhoneNumber: { type: "string", minLength: 1 },
+            templateVariables: { type: "object", additionalProperties: { type: "string" } },
+            owing: {
+              type: "object", required: ["enrolmentId", "termId"], additionalProperties: false,
+              properties: {
+                enrolmentId: { type: "string", format: "uuid" },
+                termId: { type: "string", format: "uuid" },
+              },
+            },
+          },
+        },
+      },
+    },
     async (
       request: FastifyRequest<{
         Body: {
           templateId: string;
           toPhoneNumber: string;
           templateVariables?: Record<string, string>;
+          owing?: { enrolmentId: string; termId: string };
         };
       }>,
     ) => {
-      const { templateId, toPhoneNumber, templateVariables } = request.body;
-      await sendSMSTemplateAsync(templateId, toPhoneNumber, templateVariables);
-      return { message: "SMS sent successfully" };
+      const { templateId, toPhoneNumber, templateVariables, owing } = request.body;
+      await sendSMSTemplateAsync(templateId, toPhoneNumber, templateVariables, owing);
+      return { message: getSmsSendMode().mock ? "Mock send saved; no SMS sent" : "SMS sent successfully" };
     },
   );
 }

@@ -22,3 +22,11 @@ export interface UpdateSMSTemplateRequest {
 }
 
 export type CreateSMSTemplateRequest = UpdateSMSTemplateRequest;
+
+export type OwingSmsContext = { enrolmentId: string; termId: string };
+export type OwingSmsSend = {
+  enrolment_id: string;
+  term_id: string;
+  template_id: string;
+  phone_number: string;
+};
