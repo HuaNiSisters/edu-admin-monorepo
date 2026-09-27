@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/api/supabase/client";
-import { UserResponse, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 import { UserRole } from "@/core/userRoles/types";
 
 const supabase = createClient();
@@ -33,17 +33,17 @@ export function useAuth() {
     return !!currentUser;
   }
 
-  function getCurrentUserEmail() {
-    return currentUser?.email || null;
-  }
-
   function isUserAdmin() {
-    return currentUser?.user_metadata?.role === UserRole.Admin;
+    return currentUser?.app_metadata?.role === UserRole.Admin;
   }
 
   function isUserReceptionist() {
-    return currentUser?.user_metadata?.role === UserRole.Receptionist;
+    return currentUser?.app_metadata?.role === UserRole.Receptionist;
   }
 
-  return { isUserLoggedIn, isUserAdmin, isUserReceptionist };
+  function isUserTutor() {
+    return currentUser?.app_metadata?.role === UserRole.Tutor;
+  }
+
+  return { currentUser, isUserLoggedIn, isUserAdmin, isUserReceptionist, isUserTutor };
 }

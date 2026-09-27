@@ -9,7 +9,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   // Callback and error routes must be reachable before a session exists.
-  if (["/auth/login", "/auth/confirm", "/auth/error", "/auth/forgot-password"].includes(pathname)) {
+  if (["/auth/login", "/auth/error", "/auth/forgot-password"].includes(pathname)) {
     return supabaseResponse;
   }
   if (pathname === "/auth/sign-up" || pathname === "/auth/sign-up-success") {
