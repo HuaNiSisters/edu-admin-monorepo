@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/api/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -45,16 +46,21 @@ export function TutorAccountButton({
     setError(null);
     setAttempted(true);
     try {
-      const response = await fetch(
-        `/api/admin/tutors/${tutor.tutor_id}/account`,
-        {
-          method: reset ? "PATCH" : "POST",
-          cache: "no-store",
-        },
-      );
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error ?? "Could not update this account.");
+      const { data, error: invokeError } =
+        await createClient().functions.invoke("manage-employee-account", {
+          body: { tutorId: tutor.tutor_id, reset },
+        });
+      if (invokeError) {
+        let message = invokeError.message;
+        if (invokeError.context instanceof Response) {
+          const result = await invokeError.context.json().catch(() => null);
+          if (typeof result?.error === "string") message = result.error;
+        }
+        throw new Error(message || "Could not update this account.");
+      }
+      const result = data as (Partial<Credentials> & { error?: string }) | null;
+      if (!result?.temporaryPassword || !result.email)
+        throw new Error(result?.error ?? "Could not update this account.");
       setCredentials({
         email: result.email,
         temporaryPassword: result.temporaryPassword,
