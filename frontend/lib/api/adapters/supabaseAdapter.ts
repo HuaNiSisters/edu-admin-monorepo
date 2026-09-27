@@ -561,9 +561,15 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
 
   // --- Tutors (Employees) ---
   async getTutorsAsync(): Promise<GetTutorsResponse> {
+    const { data, error } = await this.supabase.rpc("get_teaching_tutors");
+    if (error) throw error;
+    return data ?? [];
+  }
+
+  async getEmployeesAsync(): Promise<GetTutorsResponse> {
     const { data: responseData, error } = await this.supabase
       .from("Tutor")
-      .select("tutor_id, first_name, last_name, email, phone")
+      .select("tutor_id, first_name, last_name, email, phone, auth_user_id")
       .order("first_name", { ascending: true });
 
     if (error) throw error;

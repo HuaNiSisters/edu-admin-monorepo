@@ -126,6 +126,8 @@ model StudentParent {
 }
 
 model Tutor {
+  details TutorDetails?
+  auth_user_id String? @unique @db.Uuid // FK to Supabase auth.users is managed in SQL.
   tutor_id   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   first_name String
   last_name  String
@@ -247,4 +249,31 @@ generator prismabox {
   // // optionally enable the data model generation. See the data model section below for more info
   // inputModel                  = true
   // importFileExtension         = ".ts"
+}
+
+
+model TutorDetails {
+  tutor_id String @id @db.Uuid
+  tutor Tutor @relation(fields: [tutor_id], references: [tutor_id], onDelete: Cascade)
+  date_of_birth DateTime? @db.Date
+  gender String?
+  address String?
+  job String @default("tutor")
+  start_date DateTime? @db.Date
+  end_date DateTime? @db.Date
+  emergency_contact_name String?
+  emergency_contact_mobile String?
+  start_hourly_rate Decimal? @db.Decimal(8, 2)
+  tfn String?
+  account_name String?
+  bsb String?
+  account_number String?
+  super_name String?
+  super_member_number String?
+  high_school String?
+  university_course String?
+  working_with_children String?
+  police_check String?
+  special_skills String?
+  hsc_subjects String[] @default([])
 }

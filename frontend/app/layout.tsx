@@ -20,7 +20,7 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorProvider } from "@/contexts/ErrorContext";
-import { LogoutButton } from "@/components/logout-button";
+import { AccountMenu } from "@/components/account-menu";
 import { useAuth } from "@/hooks/use-auth";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -39,8 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const documentTitle = "document.title";
-  const { isUserLoggedIn } = useAuth();
-
+  const { currentUser, isUserLoggedIn } = useAuth();
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
@@ -61,8 +60,8 @@ export default function RootLayout({
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  {isUserLoggedIn() && <LogoutButton />}
                   <ModeToggle />
+                  {currentUser && <AccountMenu user={currentUser} />}
                 </div>
               </div>
               <SidebarInset>
