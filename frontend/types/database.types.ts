@@ -409,6 +409,7 @@ export type Database = {
       }
       Tutor: {
         Row: {
+          auth_user_id: string | null
           email: string | null
           first_name: string
           last_name: string
@@ -416,6 +417,7 @@ export type Database = {
           tutor_id: string
         }
         Insert: {
+          auth_user_id?: string | null
           email?: string | null
           first_name: string
           last_name: string
@@ -423,6 +425,7 @@ export type Database = {
           tutor_id?: string
         }
         Update: {
+          auth_user_id?: string | null
           email?: string | null
           first_name?: string
           last_name?: string
@@ -431,11 +434,104 @@ export type Database = {
         }
         Relationships: []
       }
+      TutorDetails: {
+        Row: {
+          tutor_id: string
+          date_of_birth: string | null
+          gender: string | null
+          address: string | null
+          job: string
+          start_date: string | null
+          end_date: string | null
+          emergency_contact_name: string | null
+          emergency_contact_mobile: string | null
+          start_hourly_rate: number | null
+          tfn: string | null
+          account_name: string | null
+          bsb: string | null
+          account_number: string | null
+          super_name: string | null
+          super_member_number: string | null
+          high_school: string | null
+          university_course: string | null
+          working_with_children: string | null
+          police_check: string | null
+          special_skills: string | null
+          hsc_subjects: string[]
+        }
+        Insert: {
+          tutor_id: string
+          date_of_birth?: string | null
+          gender?: string | null
+          address?: string | null
+          job?: string
+          start_date?: string | null
+          end_date?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_mobile?: string | null
+          start_hourly_rate?: number | null
+          tfn?: string | null
+          account_name?: string | null
+          bsb?: string | null
+          account_number?: string | null
+          super_name?: string | null
+          super_member_number?: string | null
+          high_school?: string | null
+          university_course?: string | null
+          working_with_children?: string | null
+          police_check?: string | null
+          special_skills?: string | null
+          hsc_subjects?: string[]
+        }
+        Update: {
+          tutor_id?: string
+          date_of_birth?: string | null
+          gender?: string | null
+          address?: string | null
+          job?: string
+          start_date?: string | null
+          end_date?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_mobile?: string | null
+          start_hourly_rate?: number | null
+          tfn?: string | null
+          account_name?: string | null
+          bsb?: string | null
+          account_number?: string | null
+          super_name?: string | null
+          super_member_number?: string | null
+          high_school?: string | null
+          university_course?: string | null
+          working_with_children?: string | null
+          police_check?: string | null
+          special_skills?: string | null
+          hsc_subjects?: string[]
+        }
+        Relationships: [{
+          foreignKeyName: "TutorDetails_tutor_id_fkey"
+          columns: ["tutor_id"]
+          isOneToOne: true
+          referencedRelation: "Tutor"
+          referencedColumns: ["tutor_id"]
+        }]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_teaching_tutors: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Tables"]["Tutor"]["Row"][]
+      }
+      create_employee: {
+        Args: { p_first_name: string; p_last_name: string; p_email: string; p_phone: string; p_details: Json }
+        Returns: string
+      }
+      save_tutor_details: {
+        Args: { p_tutor_id: string; p_phone: string; p_details: Json }
+        Returns: undefined
+      }
       search_students:
         | {
             Args: { search_query: string }

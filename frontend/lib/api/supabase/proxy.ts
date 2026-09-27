@@ -1,25 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../../utils";
-import {
-  ADMIN_ROUTE_PREFIX,
-  RECEPTION_ADMIN_ROUTES,
-  ROUTES,
-} from "@/core/routes/consts";
-import { UserRole } from "@/core/userRoles/types";
+import { canAccessPath, getRole } from "@/core/userRoles/access";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // Pages that don't require authentication
-  if (
-    request.nextUrl.pathname === ROUTES.AUTH.LOGIN ||
-    request.nextUrl.pathname === ROUTES.AUTH.SIGN_UP ||
-    request.nextUrl.pathname === ROUTES.AUTH.RESET_PASSWORD
-  ) {
+  const pathname = request.nextUrl.pathname;
+  // Callback and error routes must be reachable before a session exists.
+  if (["/auth/login", "/auth/error", "/auth/forgot-password"].includes(pathname)) {
     return supabaseResponse;
+  }
+  if (pathname === "/auth/sign-up" || pathname === "/auth/sign-up-success") {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   // With Fluid compute, don't put this client in a global environment
@@ -47,53 +41,20 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  // IMPORTANT: If you remove getClaims() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
-
-  // Pages that require authentication
-  if (!user) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = ROUTES.AUTH.LOGIN;
-    return NextResponse.redirect(url);
-  }
-
-  // Pages that require the user to be an admin
-  if (request.nextUrl.pathname.startsWith(ADMIN_ROUTE_PREFIX)) {
-    if (
-      user.user_metadata?.role === UserRole.Receptionist &&
-      RECEPTION_ADMIN_ROUTES.includes(request.nextUrl.pathname)
-    ) {
-      return supabaseResponse;
+  // Fetch the current user: privileged operations must not trust stale role claims.
+  const { data: { user } } = await supabase.auth.getUser();
+  const role = getRole(user?.app_metadata);
+  const denied = !user || !canAccessPath(role, pathname);
+  if (denied) {
+    if (pathname.startsWith("/api/")) {
+      const response = NextResponse.json({ error: user ? "Forbidden." : "Please sign in." }, { status: user ? 403 : 401 });
+      supabaseResponse.cookies.getAll().forEach(cookie => response.cookies.set(cookie));
+      return response;
     }
-
-    if (user.user_metadata?.role === UserRole.Admin) {
-      return supabaseResponse;
-    }
-    // Otherwise, 403 or redirect to home page
-    const url = request.nextUrl.clone();
-    url.pathname = ROUTES.FORBIDDEN;
-    return NextResponse.redirect(url);
+    const url = new URL(user ? "/forbidden" : "/auth/login", request.url);
+    const response = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach(cookie => response.cookies.set(cookie));
+    return response;
   }
-
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
-
   return supabaseResponse;
 }

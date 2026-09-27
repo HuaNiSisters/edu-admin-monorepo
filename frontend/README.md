@@ -1,5 +1,24 @@
 # EduAdmin-frontend
 
+Employee details, creation, and temporary-password accounts: [setup and deployment](docs/tutor-accounts.md).
+
+## Deploy employee account management
+
+Employee account creation and password resets run in a Supabase Edge Function.
+Link the `backend` directory to the same Supabase project used by the frontend,
+then deploy the function:
+
+```bash
+cd backend
+supabase link --project-ref YOUR_PROJECT_REF
+supabase functions deploy manage-employee-account
+```
+
+The function verifies the signed-in admin before using Supabase Auth Admin. The
+Supabase service-role key is provided to the Edge Function runtime; do not add
+it to frontend environment variables. See the
+[employee account setup guide](docs/tutor-accounts.md) for migrations and role setup.
+
 Ensure you are on nvm v22.12.0
 
 You can do that by running: 
