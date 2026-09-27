@@ -11,6 +11,26 @@ You can do that by running:
 ## Update Prisma Schema
 `npm run prisma-migrate`
 
+## Deploy employee account management
+
+The frontend invokes this Supabase Edge Function to create employee accounts
+and reset their passwords. From the `backend` directory, link this project to
+the same Supabase project configured in the frontend, then deploy:
+
+```bash
+supabase link --project-ref YOUR_PROJECT_REF
+supabase functions deploy manage-employee-account
+```
+
+The function requires a valid signed-in admin and checks the trusted
+`app_metadata.role` before using Supabase Auth Admin. Supabase provides the
+service-role key in the Edge Function runtime. Keep it out of frontend
+environment variables. The function is configured with JWT verification in
+`supabase/config.toml`.
+
+See [employee account setup](../frontend/docs/tutor-accounts.md) for the
+database migrations, role configuration, and account workflow.
+
 ## Troubleshooting 
 If you see the error: 
 `Could not find the migration file at migration.sql. Please delete the directory or restore the migration file.`
