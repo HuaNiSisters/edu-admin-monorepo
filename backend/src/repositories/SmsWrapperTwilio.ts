@@ -1,155 +1,168 @@
 import axios from "axios";
 import Twilio from "twilio";
 import type {
-  ISmsWrapper,
+  ISmsProvider,
+  ProviderSMSTemplate,
+  SmsTemplateVariableMapping,
   UpdateSMSTemplateRequest,
 } from "../interfaces/ISmsWrapper.ts";
-
-const TWILIO_BASE_URL =
-  process.env.TWILIO_BASE_URL || "https://api.twilio.com/2010-04-01";
 
 const TWILIO_CONTENT_BASE_URL =
   process.env.TWILIO_CONTENT_BASE_URL ||
   "https://content.twilio.com/v1/Content";
-
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || "";
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || "";
-const TWILIO_KEY_SID = process.env.TWILIO_KEY_SID || "";
-const TWILIO_KEY_SECRET = process.env.TWILIO_KEY_SECRET || "";
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || "";
 
-const twilioApiAuth = {
-  username: TWILIO_ACCOUNT_SID,
-  password: TWILIO_AUTH_TOKEN,
+const twilioRequestOptions = {
+  auth: { username: TWILIO_ACCOUNT_SID, password: TWILIO_AUTH_TOKEN },
+  headers: { "Content-Type": "application/json" },
 };
-
-const twilioHeaders = {
-  "Content-Type": "application/json",
-};
-
-const twiolioRequestOptions = {
-  auth: twilioApiAuth,
-  headers: twilioHeaders,
-};
-
 const client = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-
 const variableRegex = /{{(.*?)}}/g;
 const numericalVariableRegex = /{{(\d+)}}/g;
 
-// ERROR HANDLING
+function buildVariableMapping(content: string): SmsTemplateVariableMapping {
+  const variables = [
+    ...new Set(
+      [...content.matchAll(variableRegex)]
+        .map((match) => match[1]?.trim())
+        .filter((variable): variable is string => Boolean(variable)),
+    ),
+  ];
+  return Object.fromEntries(
+    variables.map((variable, index) => [String(index + 1), variable]),
+  );
+}
 
-// TODO: Store and get mapping from Database
-const variablesMapping = {
-  "1": "student.full_name",
-  "2": "term.week_number",
-  "3": "term.number",
-  "4": "term.n_weeks",
-  "5": "term.start_date",
-  "6": "term.end_date",
-  "7": "invoice.amount_due",
-  "8": "subject.name",
-};
+function toNumberedVariables(
+  content: string,
+  variableMapping: SmsTemplateVariableMapping,
+) {
+  const variableNumbers = Object.fromEntries(
+    Object.entries(variableMapping).map(([number, name]) => [name, number]),
+  );
+  return content.replace(variableRegex, (_, rawVariableName: string) => {
+    const variableName = rawVariableName.trim();
+    const variableNumber = variableNumbers[variableName];
+    if (!variableNumber) {
+      throw new Error(`No Twilio variable mapping exists for ${variableName}`);
+    }
+    return `{{${variableNumber}}}`;
+  });
+}
 
-export class SmsWrapperTwilio implements ISmsWrapper {
-  async getSMSTemplateById(templateId: string) {
-    const fetchResponse = await axios.get(
-      `${TWILIO_CONTENT_BASE_URL}/${templateId}`,
-      twiolioRequestOptions,
+export class SmsWrapperTwilio implements ISmsProvider {
+  readonly provider = "twilio";
+
+  async getSMSTemplateById(
+    providerTemplateId: string,
+    variableMapping: SmsTemplateVariableMapping,
+  ): Promise<ProviderSMSTemplate> {
+    const response = await axios.get(
+      `${TWILIO_CONTENT_BASE_URL}/${providerTemplateId}`,
+      twilioRequestOptions,
     );
-
-    const fetchResponseData = fetchResponse.data;
-
-    const templateWithNumberedVariables =
-      fetchResponseData.types["twilio/text"].body;
-    const templateWithMappedVariables = templateWithNumberedVariables.replace(
+    const numberedContent = response.data.types["twilio/text"].body as string;
+    const content = numberedContent.replace(
       numericalVariableRegex,
-      // @ts-ignore
-      (_, variableNumber) => {
-        // @ts-ignore
-        const variableKey = variablesMapping[variableNumber];
-        return `{{${variableKey}}}`;
+      (_, variableNumber: string) => {
+        const variableName = variableMapping[variableNumber];
+        if (!variableName) {
+          throw new Error(
+            `No local variable mapping exists for Twilio variable ${variableNumber}`,
+          );
+        }
+        return `{{${variableName}}}`;
       },
     );
-
-    const returnResult = {
-      id: fetchResponseData.sid,
-      name: fetchResponseData.friendly_name,
-      content: templateWithMappedVariables,
-      variables: Object.values(variablesMapping),
+    return {
+      providerTemplateId: response.data.sid,
+      name: response.data.friendly_name,
+      content,
+      variableMapping,
     };
-    console.log({ returnResult });
-    return returnResult;
+  }
+
+  async createSMSTemplate(
+    requestParams: UpdateSMSTemplateRequest,
+  ): Promise<ProviderSMSTemplate> {
+    const variableMapping = buildVariableMapping(requestParams.content);
+    const numberedContent = toNumberedVariables(
+      requestParams.content,
+      variableMapping,
+    );
+    const response = await axios.post(
+      TWILIO_CONTENT_BASE_URL,
+      {
+        friendly_name: requestParams.name,
+        language: "en",
+        variables: variableMapping,
+        types: { "twilio/text": { body: numberedContent } },
+      },
+      twilioRequestOptions,
+    );
+    return {
+      providerTemplateId: response.data.sid,
+      name: response.data.friendly_name,
+      content: requestParams.content,
+      variableMapping,
+    };
   }
 
   async updateSMSTemplate(
-    templateId: string,
-    updateParams: UpdateSMSTemplateRequest,
-  ): Promise<string> {
-    // Extract variables from the content and create a mapping to the provided variables
-    const extractedVariables = [
-      ...updateParams.content.matchAll(variableRegex),
-    ].map((match) => match[1]);
-
-    const variablesMapping = Object.fromEntries(
-      extractedVariables.map((variable, index) => [
-        String(index + 1),
-        variable,
-      ]),
+    providerTemplateId: string,
+    requestParams: UpdateSMSTemplateRequest,
+  ): Promise<ProviderSMSTemplate> {
+    const variableMapping = buildVariableMapping(requestParams.content);
+    const numberedContent = toNumberedVariables(
+      requestParams.content,
+      variableMapping,
     );
-    console.log({ variablesMapping });
-
-    // SAVE THE MAPPING
-    const templateWithNumberedVariables = updateParams.content.replace(
-      variableRegex,
-      (_, variableKey) => {
-        const variableNumber = Object.keys(variablesMapping).find(
-          (key) => variablesMapping[key] === variableKey,
-        );
-        return `{{${variableNumber}}}`;
-      },
-    );
-
-    const updateResponse = await axios.put(
-      `${TWILIO_CONTENT_BASE_URL}/${templateId}`,
+    const response = await axios.put(
+      `${TWILIO_CONTENT_BASE_URL}/${providerTemplateId}`,
       {
-        friendly_name: updateParams.name,
-        // variables: variablesMapping, // Should provide examples of each variable
-        types: {
-          "twilio/text": {
-            body: templateWithNumberedVariables,
-          },
-        },
+        friendly_name: requestParams.name,
+        variables: variableMapping,
+        types: { "twilio/text": { body: numberedContent } },
       },
-      twiolioRequestOptions,
+      twilioRequestOptions,
     );
-    const updateReponseData = updateResponse.data;
-    console.log({ updateReponseData });
-    return templateWithNumberedVariables;
+    return {
+      providerTemplateId: response.data.sid,
+      name: response.data.friendly_name,
+      content: requestParams.content,
+      variableMapping,
+    };
+  }
+
+  async deleteSMSTemplate(providerTemplateId: string): Promise<void> {
+    await axios.delete(
+      `${TWILIO_CONTENT_BASE_URL}/${providerTemplateId}`,
+      twilioRequestOptions,
+    );
   }
 
   async sendSMSTemplate(
-    templateId: string,
+    providerTemplateId: string,
     toPhoneNumber: string,
     templateVariables: Record<string, string>,
-  ) {
-    console.log({ toPhoneNumber, templateId, templateVariables });
-
-    const sendSMSParams = {
-      contentSid: templateId,
+    variableMapping: SmsTemplateVariableMapping,
+  ): Promise<void> {
+    const contentVariables = Object.fromEntries(
+      Object.entries(variableMapping).map(([number, variableName]) => {
+        const value = templateVariables[variableName];
+        if (value === undefined) {
+          throw new Error(`Missing SMS template variable: ${variableName}`);
+        }
+        return [number, value];
+      }),
+    );
+    await client.messages.create({
+      contentSid: providerTemplateId,
       to: toPhoneNumber,
       from: TWILIO_PHONE_NUMBER,
-      contentVariables: JSON.stringify(
-        Object.fromEntries(
-          Object.entries(templateVariables).map(([key, value], index) => [
-            index + 1,
-            value,
-          ]),
-        ),
-      ),
-    };
-    console.log({ sendSMSParams });
-
-    await client.messages.create(sendSMSParams);
+      contentVariables: JSON.stringify(contentVariables),
+    });
   }
 }

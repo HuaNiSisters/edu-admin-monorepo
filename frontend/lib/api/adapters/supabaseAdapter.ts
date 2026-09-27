@@ -666,7 +666,7 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
           student_mobile,
           parents:StudentParent (Parent (first_name, last_name, parent_mobile))
         ),
-        Term (term_id, name, year),
+        Term (term_id, name, year, start_date, end_date),
         ClassTime (
           day_of_week,
           start_time,
@@ -694,6 +694,8 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
         return parent
           ? [{
               name: `${parent.first_name} ${parent.last_name}`.trim(),
+              first_name: parent.first_name,
+              last_name: parent.last_name,
               phone: parent.parent_mobile,
             }]
           : [];
@@ -708,12 +710,16 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
         amount_outstanding: Number(offering.price_per_term),
         student_id: student.student_id,
         student_name: `${student.first_name} ${student.last_name}`.trim(),
+        student_first_name: student.first_name,
+        student_last_name: student.last_name,
         student_mobile: student.student_mobile,
         parents,
         term_id: term.term_id,
         term_name: term.name,
         term_year: term.year,
         term_label: `Term ${term.name} ${term.year}`,
+        term_start_date: term.start_date,
+        term_end_date: term.end_date,
         subject_name: offering.subject_name,
         grade: offering.grade,
         location: offering.location,

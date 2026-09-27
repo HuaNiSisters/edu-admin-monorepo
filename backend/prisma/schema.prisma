@@ -198,6 +198,7 @@ model Enrolment {
   term    Term      @relation(fields: [term_id], references: [term_id], onDelete: Cascade)
 
   payments Payment[]
+  smsSends OwingSmsSend[]
 
   @@unique([student_id, class_id, term_id])
 }
@@ -234,6 +235,20 @@ model Payment {
   notes        String?
 
   enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id])
+}
+
+model SmsTemplate {
+  sms_template_id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sms_provider         String
+  provider_template_id String
+  name                 String
+  variable_mapping     Json
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  owingSends OwingSmsSend[]
+
+  @@unique([sms_provider, provider_template_id])
 }
 
 generator prismabox {
@@ -276,4 +291,18 @@ model TutorDetails {
   police_check String?
   special_skills String?
   hsc_subjects String[] @default([])
+}
+
+// Successful provider submissions, isolated by enrolment and term.
+model OwingSmsSend {
+  enrolment_id String @db.Uuid
+  term_id String @db.Uuid
+  template_id String @db.Uuid
+  phone_number String
+  sent_at DateTime @default(now())
+
+  enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id], onDelete: Cascade)
+  template SmsTemplate @relation(fields: [template_id], references: [sms_template_id], onDelete: Cascade)
+
+  @@id([enrolment_id, term_id, template_id, phone_number])
 }

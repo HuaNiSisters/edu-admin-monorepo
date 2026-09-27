@@ -14,3 +14,14 @@ export function formatPhoneNumber(value: string | null | undefined): string {
     .filter(Boolean)
     .join(" ");
 }
+
+/** Convert an Australian mobile to E.164 for the SMS provider. */
+export function toSmsPhoneNumber(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  const digits = value.replace(/\D/g, "");
+  if (/^04\d{8}$/.test(digits)) return `+61${digits.slice(1)}`;
+  if (/^614\d{8}$/.test(digits)) return `+${digits}`;
+  if (/^00614\d{8}$/.test(digits)) return `+${digits.slice(2)}`;
+  return null;
+}

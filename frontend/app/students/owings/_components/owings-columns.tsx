@@ -1,3 +1,4 @@
+import type { SMSTemplateSummary } from "@/lib/api/types/sms";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, X } from "lucide-react";
@@ -11,7 +12,6 @@ const currency = new Intl.NumberFormat("en-AU", {
   maximumFractionDigits: 0,
 });
 
-export const OWING_SMS_TEMPLATES = ["Payment reminder", "Overdue follow-up"];
 export const OWING_SENT_FILTER_ID = "sent_templates";
 
 type OwingColumnOptions = {
@@ -19,6 +19,9 @@ type OwingColumnOptions = {
   onToggleSelected: (enrolmentId: string, selected: boolean) => void;
   allSelected: boolean;
   onToggleAll: (selected: boolean) => void;
+  templates: SMSTemplateSummary[];
+  statusLoading: boolean;
+  statusError: string;
 };
 
 function displayLocation(location: string) {
@@ -33,6 +36,9 @@ export const createOwingColumns = ({
   onToggleSelected,
   allSelected,
   onToggleAll,
+  templates,
+  statusLoading,
+  statusError,
 }: OwingColumnOptions): ColumnDef<StudentOwing>[] => [
   {
     id: "select",
@@ -61,25 +67,29 @@ export const createOwingColumns = ({
     header: "Sent",
     size: 210,
     cell: ({ row }) => {
-      const sent = row.original.sent_templates;
+      if (statusError) return <span className="text-sm text-destructive">Status unavailable</span>;
+      if (statusLoading) return <span className="text-sm text-muted-foreground">Loading…</span>;
+      if (!templates.length) return <span className="text-sm text-muted-foreground">No SMS templates</span>;
+      const sent = new Set(row.original.sent_templates);
       return (
         <div className="space-y-2 whitespace-normal">
-          {OWING_SMS_TEMPLATES.map((template) => (
+          {templates.map((template) => (
             <div
-              key={template}
+              key={template.id}
               className="flex items-center justify-start gap-2"
             >
-              <span className="text-base font-medium">{template}</span>
-              <span
-                className="shrink-0"
-                aria-label={sent.includes(template) ? "Sent" : "Not sent"}
-              >
-                {sent.includes(template) ? (
-                  <Check className="size-4 text-green-600" aria-hidden="true" />
-                ) : (
-                  <X className="size-4 text-red-600" aria-hidden="true" />
-                )}
-              </span>
+              <span className="text-base font-medium">{template.name}</span>
+              {sent.has(template.id) ? (
+                <Check
+                  className="size-4 shrink-0 text-green-600"
+                  aria-label="Sent"
+                />
+              ) : (
+                <X
+                  className="size-4 shrink-0 text-red-600"
+                  aria-label="Not sent"
+                />
+              )}
             </div>
           ))}
         </div>

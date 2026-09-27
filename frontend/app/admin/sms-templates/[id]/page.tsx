@@ -13,10 +13,14 @@ export default function ViewSMSTemplatePage() {
   return (
     <div>
       <div className="flex justify-between">
-        <b style={{ fontSize: "22px" }}>"{SMSAction.Owings}" SMS template</b>
+        <b style={{ fontSize: "22px" }}>SMS template</b>
         <Button onClick={() => router.push(`/admin/sms-templates/${templateId}/edit`)}>Edit</Button>
       </div>
-      <SMSTemplateData smsAction={SMSAction.Owings} isEditing={false} />
+      <SMSTemplateData
+        templateId={templateId}
+        smsAction={SMSAction.Owings}
+        isEditing={false}
+      />
     </div>
   );
 }
