@@ -17,7 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { formatPhoneNumber } from "@/utils/phone-utils";
+import { createClient } from "@/lib/api/supabase/client";
 import {
+  createEmployeeSchema,
   createEmployeeRequiredSchema,
   employeeCreationInput,
   EMPLOYEE_ROLE_OPTIONS,
@@ -89,14 +91,20 @@ export function EmployeeDialog({
   async function submit(values: Values) {
     setError(null);
     try {
-      const response = await fetch("/api/admin/employees", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(employeeCreationInput(values)),
+      const validated = createEmployeeSchema.safeParse(employeeCreationInput(values));
+      if (!validated.success) {
+        throw new Error(validated.error.issues[0]?.message ?? "Check the employee details.");
+      }
+      const { first_name, last_name, email, phone, ...details } = validated.data;
+      const { data: tutorId, error: createError } = await createClient().rpc("create_employee", {
+        p_first_name: first_name,
+        p_last_name: last_name,
+        p_email: email,
+        p_phone: phone,
+        p_details: details,
       });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error ?? "Could not create the employee.");
+      if (createError) throw new Error(createError.message || "Could not create the employee.");
+      if (!tutorId) throw new Error("Could not create the employee.");
       onOpenChange(false);
       toast.success("Employee created successfully!", {
         position: "top-center",
