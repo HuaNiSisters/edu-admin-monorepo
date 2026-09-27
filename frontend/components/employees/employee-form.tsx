@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatPhoneNumber } from "@/utils/phone-utils";
+import { createClient } from "@/lib/api/supabase/client";
 
 type EmployeeField = {
   key: string;
@@ -189,22 +190,33 @@ export function EmployeeForm({
     }
     setSaving(true);
     try {
-      const endpoint = creation
-        ? "/api/admin/employees"
-        : mode === "self"
-          ? "/api/profile"
-          : `/api/admin/employees/${initial.tutor_id}`;
-      // Send the input form; the server validates and normalizes it independently.
-      const response = await fetch(endpoint, {
-        method: creation ? "POST" : "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error ?? "Could not save employee details.");
+      const supabase = createClient();
+      let createdTutorId: string | null = null;
       if (creation) {
-        router.push(`/admin/employees/${result.tutorId}`);
+        const { first_name, last_name, email, phone, ...details } = validated.data;
+        const { data: tutorId, error: createError } = await supabase.rpc("create_employee", {
+          p_first_name: first_name,
+          p_last_name: last_name,
+          p_email: email,
+          p_phone: phone,
+          p_details: details,
+        });
+        if (createError) throw new Error(createError.message || "Could not create the employee.");
+        createdTutorId = tutorId;
+      } else {
+        const tutorId = initial.tutor_id;
+        if (!tutorId) throw new Error("The employee record could not be found.");
+        const { phone, ...details } = validated.data;
+        const { error: saveError } = await supabase.rpc("save_tutor_details", {
+          p_tutor_id: tutorId,
+          p_phone: phone,
+          p_details: details,
+        });
+        if (saveError) throw new Error(saveError.message || "Could not save employee details.");
+      }
+      if (creation) {
+        if (!createdTutorId) throw new Error("Could not create the employee.");
+        router.push(`/admin/employees/${createdTutorId}`);
       } else {
         const normalized = valuesFrom({ ...initial, ...validated.data });
         setValues(normalized);
