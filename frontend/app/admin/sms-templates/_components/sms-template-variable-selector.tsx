@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { RefObject } from "react";
 
 export type SmsTemplateContext = Record<
@@ -51,25 +50,11 @@ export function getContextValue(
   return group && field ? context[group]?.[field] : undefined;
 }
 
-function updateContextValue(
-  context: SmsTemplateContext,
-  path: string,
-  value: string,
-): SmsTemplateContext {
-  const [group, field] = path.split(".");
-  if (!group || !field || !context[group]) return context;
-  return {
-    ...context,
-    [group]: { ...context[group], [field]: value },
-  };
-}
-
 interface SmsTemplateVariableSelectorProps {
   content: string;
   context: SmsTemplateContext;
   editable: boolean;
   onContentChange: (content: string) => void;
-  onContextChange?: (context: SmsTemplateContext) => void;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
 }
 
@@ -78,7 +63,6 @@ export default function SmsTemplateVariableSelector({
   context,
   editable,
   onContentChange,
-  onContextChange,
   textareaRef,
 }: SmsTemplateVariableSelectorProps) {
   const contextFields = getContextFields(context);
@@ -98,7 +82,11 @@ export default function SmsTemplateVariableSelector({
     const end = textarea?.selectionEnd ?? content.length;
     const token = `{{${variable}}}`;
     const nextContent = content.slice(0, start) + token + content.slice(end);
-    if (textarea && textarea.maxLength >= 0 && nextContent.length > textarea.maxLength) {
+    if (
+      textarea &&
+      textarea.maxLength >= 0 &&
+      nextContent.length > textarea.maxLength
+    ) {
       return;
     }
 
@@ -116,7 +104,7 @@ export default function SmsTemplateVariableSelector({
   return (
     <div className="space-y-3">
       <div>
-        <h2 className="text-lg font-semibold">Variables</h2>
+        <h2 className="text-sm font-semibold">Tags</h2>
         {editable && (
           <p className="text-sm text-muted-foreground">
             Place the cursor in the message, then click a variable to insert it.
@@ -126,7 +114,7 @@ export default function SmsTemplateVariableSelector({
       </div>
 
       {editable ? (
-        <div className="grid gap-3 rounded-md border p-3 sm:grid-cols-2">
+        <div className="grid gap-4 rounded-md border p-4">
           {Object.entries(context).map(([group, values]) => (
             <div key={group} className="space-y-2">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -142,7 +130,7 @@ export default function SmsTemplateVariableSelector({
                       type="button"
                       size="xs"
                       variant="outline"
-                      className="font-mono"
+                      className="h-auto max-w-full whitespace-normal break-all rounded-full py-1 font-mono text-left"
                       title={`Example: ${values[field]}`}
                       aria-label={`Add ${variable} to message${count ? `; used ${count} times` : ""}`}
                       onMouseDown={(event) => event.preventDefault()}
@@ -162,27 +150,22 @@ export default function SmsTemplateVariableSelector({
           ))}
         </div>
       ) : templateVariables.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
+          <div className="grid grid-cols-2 gap-4 text-xs font-medium text-muted-foreground">
+            <span>Tag</span>
+            <span className="text-right">Example</span>
+          </div>
           {templateVariables.map((variable) => {
             const exampleValue = getContextValue(context, variable);
             return (
-              <label key={variable} className="space-y-1 text-sm">
-                <span className="font-mono text-xs">{variable}</span>
-                {onContextChange && exampleValue !== undefined ? (
-                  <Input
-                    value={String(exampleValue)}
-                    onChange={(event) =>
-                      onContextChange(
-                        updateContextValue(context, variable, event.target.value),
-                      )
-                    }
-                  />
-                ) : (
-                  <span className="block text-muted-foreground">
-                    {exampleValue ?? "No sample value available"}
-                  </span>
-                )}
-              </label>
+              <div key={variable} className="grid grid-cols-2 items-baseline gap-4 border-b pb-2 text-sm last:border-0">
+                <span className="min-w-0 break-words font-mono text-xs">{variable}</span>
+                <p className="min-w-0 break-words text-right text-muted-foreground">
+                  {exampleValue !== undefined
+                    ? String(exampleValue)
+                    : "No example available"}
+                </p>
+              </div>
             );
           })}
         </div>

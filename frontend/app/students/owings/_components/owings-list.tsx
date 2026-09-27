@@ -23,10 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
-import {
-  createOwingColumns,
-  OWING_SENT_FILTER_ID,
-} from "./owings-columns";
+import { createOwingColumns, OWING_SENT_FILTER_ID } from "./owings-columns";
 import { useRouter } from "next/navigation";
 import { smsService } from "@/lib/services";
 import type { SMSTemplateSummary } from "@/lib/api/types/sms";
@@ -93,7 +90,9 @@ function getOwingTemplateValues(
   if (!owing) return {};
   const parent = recipient?.parent ?? owing.parents[0];
 
-  const startDay = Date.parse(`${owing.term_start_date.slice(0, 10)}T00:00:00Z`);
+  const startDay = Date.parse(
+    `${owing.term_start_date.slice(0, 10)}T00:00:00Z`,
+  );
   const endDay = Date.parse(`${owing.term_end_date.slice(0, 10)}T00:00:00Z`);
   const today = new Date();
   const todayDay = Date.UTC(
@@ -103,11 +102,16 @@ function getOwingTemplateValues(
   );
   const numberOfWeeks = Math.max(
     1,
-    Math.ceil((endDay - startDay + dayInMilliseconds) / (7 * dayInMilliseconds)),
+    Math.ceil(
+      (endDay - startDay + dayInMilliseconds) / (7 * dayInMilliseconds),
+    ),
   );
   const currentWeek = Math.min(
     numberOfWeeks,
-    Math.max(1, Math.floor((todayDay - startDay) / (7 * dayInMilliseconds)) + 1),
+    Math.max(
+      1,
+      Math.floor((todayDay - startDay) / (7 * dayInMilliseconds)) + 1,
+    ),
   );
 
   return {
@@ -159,17 +163,28 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const [statusLoading, setStatusLoading] = useState(true);
   const [statusError, setStatusError] = useState("");
   const [reloadStatus, setReloadStatus] = useState(0);
-  const owingsWithStatus = useMemo(() => owings.map((owing) => ({
-    ...owing,
-    sent_templates: templates.filter((template) => {
-      const recipients = getOwingRecipients(owing);
-      return recipients.length > 0 && recipients.every((recipient) =>
-        recipient.phoneNumber && completedRecipientKeys.has(
-          `${template.id}:${owing.enrolment_id}:${owing.term_id}:${recipient.phoneNumber}`,
-        ),
-      );
-    }).map(({ id }) => id),
-  })), [owings, templates, completedRecipientKeys]);
+  const owingsWithStatus = useMemo(
+    () =>
+      owings.map((owing) => ({
+        ...owing,
+        sent_templates: templates
+          .filter((template) => {
+            const recipients = getOwingRecipients(owing);
+            return (
+              recipients.length > 0 &&
+              recipients.every(
+                (recipient) =>
+                  recipient.phoneNumber &&
+                  completedRecipientKeys.has(
+                    `${template.id}:${owing.enrolment_id}:${owing.term_id}:${recipient.phoneNumber}`,
+                  ),
+              )
+            );
+          })
+          .map(({ id }) => id),
+      })),
+    [owings, templates, completedRecipientKeys],
+  );
   const allSelected = owings.length > 0 && selectedIds.size === owings.length;
 
   const columns = useMemo(
@@ -232,24 +247,36 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
     let cancelled = false;
     setStatusLoading(true);
     setStatusError("");
-    Promise.all([smsService.getSMSTemplatesAsync(), smsService.getOwingSmsSendsAsync(), smsService.getSmsSendMode()])
+    Promise.all([
+      smsService.getSMSTemplatesAsync(),
+      smsService.getOwingSmsSendsAsync(),
+      smsService.getSmsSendMode(),
+    ])
       .then(([loadedTemplates, sends, mode]) => {
         if (cancelled) return;
         setTemplates(loadedTemplates);
         setMockSend(mode.mock);
-        setCompletedRecipientKeys(new Set(sends.map((send) =>
-          `${send.template_id}:${send.enrolment_id}:${send.term_id}:${send.phone_number}`,
-        )));
+        setCompletedRecipientKeys(
+          new Set(
+            sends.map(
+              (send) =>
+                `${send.template_id}:${send.enrolment_id}:${send.term_id}:${send.phone_number}`,
+            ),
+          ),
+        );
         setSelectedTemplate((current) =>
           loadedTemplates.some(({ id }) => id === current)
             ? current
-            : loadedTemplates[0]?.id ?? "",
+            : (loadedTemplates[0]?.id ?? ""),
         );
       })
       .catch(() => {
-        if (!cancelled) setStatusError("Unable to load SMS templates and sent status.");
+        if (!cancelled)
+          setStatusError("Unable to load SMS templates and sent status.");
       })
-      .finally(() => { if (!cancelled) setStatusLoading(false); });
+      .finally(() => {
+        if (!cancelled) setStatusLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -282,7 +309,9 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   const previewOwing =
     owings.find(({ enrolment_id }) => selectedIds.has(enrolment_id)) ??
     owings[0];
-  const previewRecipients = previewOwing ? getOwingRecipients(previewOwing) : [];
+  const previewRecipients = previewOwing
+    ? getOwingRecipients(previewOwing)
+    : [];
   const previewRecipient =
     previewRecipients[previewRecipientIndex] ?? previewRecipients[0];
   const previewValues = getOwingTemplateValues(previewOwing, previewRecipient);
@@ -339,7 +368,8 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
       !templateContent.trim() ||
       !pendingTargets.length ||
       sendBlockers.length
-    ) return;
+    )
+      return;
 
     setIsSending(true);
     setSendError("");
@@ -396,18 +426,35 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
   return (
     <div className="space-y-3">
       {mockSend && (
-        <p role="status" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+        <p
+          role="status"
+          className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950"
+        >
           Mock SMS mode: sending saves the Sent status, but no SMS is sent.
           These checkmarks persist even after mock mode is disabled.
         </p>
       )}
       <div className="flex justify-end">
-        <Button disabled={statusLoading || Boolean(statusError)} onClick={() => setSendDialogOpen(true)}>Send message</Button>
+        <Button
+          disabled={statusLoading || Boolean(statusError)}
+          onClick={() => setSendDialogOpen(true)}
+        >
+          Send message
+        </Button>
       </div>
       {statusError && (
-        <div role="alert" className="flex items-center gap-2 text-sm text-destructive">
+        <div
+          role="alert"
+          className="flex items-center gap-2 text-sm text-destructive"
+        >
           {statusError}
-          <Button variant="outline" size="sm" onClick={() => setReloadStatus((value) => value + 1)}>Retry</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setReloadStatus((value) => value + 1)}
+          >
+            Retry
+          </Button>
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2">
@@ -500,8 +547,12 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
 
           <div className="space-y-4">
             {mockSend && (
-              <p role="status" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
-                Mock SMS mode — this records sent status without sending any SMS.
+              <p
+                role="status"
+                className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950"
+              >
+                Mock SMS mode — this records sent status without sending any
+                SMS.
               </p>
             )}
             <Select
@@ -565,11 +616,11 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
                 <p className="text-xs text-muted-foreground">
                   {previewOwing
                     ? `Preview uses ${previewOwing.student_name}’s owing details for ${previewRecipient.label}.`
-                    : "Select an owing to preview variable values."}
+                    : "Select an owing to preview tag values."}
                 </p>
                 {!templateLoading && usedVariables.length > 0 && (
                   <div className="space-y-1 text-xs">
-                    <h4 className="font-medium">Variable values</h4>
+                    <h4 className="font-medium">Tag values</h4>
                     {usedVariables.map((variable) => (
                       <div
                         key={variable}
@@ -588,9 +639,7 @@ export default function OwingsList({ owings }: { owings: StudentOwing[] }) {
             <p className="text-sm text-muted-foreground">
               Send to the student and each parent for the{" "}
               {selectedOwings.length} selected owings ({pendingTargets.length}{" "}
-              {pendingTargets.length === 1 ? "message" : "messages"}). Duplicate
-              mobile numbers within an owing receive one message. Recipients already
-              sent this template for this enrolment and term are skipped.
+              {pendingTargets.length === 1 ? "message" : "messages"}).
             </p>
             {sendBlockers.length > 0 && (
               <div className="space-y-1 text-sm text-destructive" role="alert">

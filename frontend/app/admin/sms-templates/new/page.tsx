@@ -30,7 +30,7 @@ export default function CreateSMSTemplatePage() {
   const [templateName, setTemplateName] = useState("");
   const [content, setContent] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [sampleContext, setSampleContext] = useState(() =>
+  const [sampleContext] = useState(() =>
     cloneTemplateContext(actionToSampleContext[SMSAction.Owings]),
   );
   const invalidVariables = useMemo(
@@ -62,7 +62,7 @@ export default function CreateSMSTemplatePage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Button
           type="button"
@@ -94,6 +94,8 @@ export default function CreateSMSTemplatePage() {
         </CardHeader>
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+              <div className="min-w-0 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="template-name">Template name</Label>
               <Input
@@ -105,6 +107,17 @@ export default function CreateSMSTemplatePage() {
               />
             </div>
 
+            <SmsTemplateVariableSelector
+              textareaRef={textareaRef}
+              content={content}
+              context={sampleContext}
+              editable
+              onContentChange={setContent}
+
+            />
+
+              </div>
+              <div className="min-w-0 lg:sticky lg:top-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="template-content">Message</Label>
@@ -119,7 +132,7 @@ export default function CreateSMSTemplatePage() {
                 onChange={(event) => setContent(event.target.value)}
                 placeholder="Hi {{student.full_name}}, your balance is {{invoice.amount_due}}."
                 maxLength={1600}
-                className="min-h-40"
+                className="min-h-[360px] resize-y text-base leading-relaxed lg:min-h-[480px]"
               />
               {invalidVariables.length > 0 && (
                 <p className="text-destructive text-sm" role="alert">
@@ -128,14 +141,8 @@ export default function CreateSMSTemplatePage() {
               )}
             </div>
 
-            <SmsTemplateVariableSelector
-              textareaRef={textareaRef}
-              content={content}
-              context={sampleContext}
-              editable
-              onContentChange={setContent}
-              onContextChange={setSampleContext}
-            />
+              </div>
+            </div>
 
             <div className="flex justify-end gap-3">
               <Button

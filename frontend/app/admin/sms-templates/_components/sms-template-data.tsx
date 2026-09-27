@@ -99,63 +99,77 @@ const SMSTemplateData = ({
   }
 
   return (
-    <div className="space-y-6">
-      <Input
-        placeholder="Template name"
-        value={templateName}
-        onChange={(event) => setTemplateName(event.target.value)}
-        disabled={!isEditing}
-      />
-      <div className="space-y-2">
-        <Textarea
-          ref={textareaRef}
-          value={content}
-          placeholder="Template content e.g. Hi {{student.full_name}}"
-          onChange={(event) => setContent(event.target.value)}
-          disabled={!isEditing}
-          maxLength={1600}
-          className="min-h-40"
+    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className="min-w-0 space-y-6">
+        <div className="space-y-2">
+          <label htmlFor="sms-template-name" className="text-sm font-medium">Template name</label>
+          <Input
+            id="sms-template-name"
+            placeholder="Template name"
+            value={templateName}
+            onChange={(event) => setTemplateName(event.target.value)}
+            readOnly={!isEditing}
+          />
+        </div>
+        <SmsTemplateVariableSelector
+          textareaRef={textareaRef}
+          content={content}
+          context={sampleContext}
+          editable={Boolean(isEditing)}
+          onContentChange={setContent}
+
         />
-        {validationError && (
-          <p className="text-destructive text-sm" role="alert">
-            {validationError}
-          </p>
-        )}
+        <p className="rounded-md border bg-muted/40 p-4 text-sm text-muted-foreground">
+          Tags are replaced with real data before sending. Receiver name tags use
+          the name of each student or parent receiving the SMS.
+        </p>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        Receiver name variables use the name of each student or parent receiving
-        the SMS.
-      </p>
-      <SmsTemplateVariableSelector
-        textareaRef={textareaRef}
-        content={content}
-        context={sampleContext}
-        editable={Boolean(isEditing)}
-        onContentChange={setContent}
-        onContextChange={setSampleContext}
-      />
-
-      {isEditing ? (
-        <Button
-          onClick={saveTemplate}
-          disabled={!templateName.trim() || Boolean(validationError)}
-        >
-          Save template
-        </Button>
-      ) : (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="test-phone-number">Send test SMS to:</label>
-            <Input
-              id="test-phone-number"
-              value={toTestPhoneNumber}
-              onChange={(event) => setToTestPhoneNumber(event.target.value)}
-            />
+      <div className="min-w-0 space-y-4 lg:sticky lg:top-6">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="sms-template-message" className="text-sm font-medium">Message</label>
+            <span className="text-sm text-muted-foreground">{content.length}/1600</span>
           </div>
-          <Button onClick={sendTestSMS}>Send Test SMS</Button>
+          <Textarea
+            id="sms-template-message"
+            ref={textareaRef}
+            value={content}
+            placeholder="Template content e.g. Hi {{student.full_name}}"
+            onChange={(event) => setContent(event.target.value)}
+            readOnly={!isEditing}
+            maxLength={1600}
+            className="min-h-[360px] resize-y text-base leading-relaxed lg:min-h-[480px]"
+          />
+          {validationError && (
+            <p className="text-destructive text-sm" role="alert">
+              {validationError}
+            </p>
+          )}
         </div>
-      )}
+        {isEditing ? (
+          <div className="flex justify-end">
+            <Button
+              onClick={saveTemplate}
+              disabled={!templateName.trim() || Boolean(validationError)}
+            >
+              Save template
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-end gap-3 rounded-md border p-4">
+            <div className="min-w-0 flex-1 space-y-2">
+              <label htmlFor="test-phone-number" className="text-sm font-medium">Send test SMS to</label>
+              <Input
+                id="test-phone-number"
+                value={toTestPhoneNumber}
+                onChange={(event) => setToTestPhoneNumber(event.target.value)}
+              />
+            </div>
+            <Button onClick={sendTestSMS}>Send Test SMS</Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
