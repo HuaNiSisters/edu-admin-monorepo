@@ -28,7 +28,6 @@ import {
   CircleDollarSign,
   HandCoins,
   MessageCircleQuestion,
-  Users,
   BookOpenText,
   GraduationCap,
   MessageSquareMore,
@@ -38,6 +37,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { RECEPTION_ADMIN_ROUTES, ROUTES } from "@/core/routes/consts";
+import { isPathWithin } from "@/core/userRoles/access";
 
 const studentsSidebarItems = [
   {
@@ -73,11 +73,6 @@ const studentsSidebarItems = [
 ];
 
 const adminSidebarItems = [
-  {
-    name: "Users",
-    url: "/admin/users",
-    icon: Users,
-  },
   {
     name: "Subjects",
     url: "/admin/subjects",
@@ -145,7 +140,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Collapsible defaultOpen className="group/collapsible">
+        {(isUserAdmin() || isUserReceptionist()) && <Collapsible defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel className="flex justify-between">
               STUDENTS
@@ -173,7 +168,7 @@ export function AppSidebar() {
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
-        </Collapsible>
+        </Collapsible>}
 
         {(isUserAdmin() || isUserReceptionist()) && (
           <>
@@ -203,7 +198,7 @@ export function AppSidebar() {
                           <SidebarMenuItem key={item.name}>
                             <SidebarMenuButton
                               asChild
-                              isActive={pathname === item.url}
+                              isActive={isPathWithin(pathname, item.url)}
                             >
                               <Link href={item.url}>
                                 <item.icon />
