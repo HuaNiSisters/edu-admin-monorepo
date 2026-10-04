@@ -12,6 +12,7 @@ export const enquiryService = {
     const parsed = enquiryFormSchema.parse(values);
     const { data, error } = await createClient().from("Enquiry").insert({
       ...parsed,
+      parent_2_phone_number: parsed.parent_2_phone_number || null,
       grade: Number(parsed.grade),
       subject_selection: [...new Set(parsed.subject_selection.split(",").map(subject => subject.trim()).filter(Boolean))],
       preferred_campus: parsed.preferred_campus || null,

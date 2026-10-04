@@ -12,11 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ENQUIRY_CAMPUSES, Enquiry } from "@/lib/api/types/enquiry";
 import { enquiryDefaults, enquiryFormSchema, EnquiryFormValues } from "@/lib/validation/enquiry";
 import { enquiryService } from "@/lib/services/enquiryService";
+import { formatPhoneNumber } from "@/utils/phone-utils";
 
 const fields: { name: keyof EnquiryFormValues; label: string; required?: boolean; type?: string; placeholder?: string }[] = [
   { name: "first_name", label: "First Name", required: true },
   { name: "surname", label: "Last Name", required: true },
   { name: "parent_phone_number", label: "Parent Mobile", required: true, type: "tel" },
+  { name: "parent_2_phone_number", label: "Parent 2 Mobile", type: "tel" },
   { name: "parent_name", label: "Parent Name" },
   { name: "school", label: "School", required: true },
   { name: "grade", label: "Grade", required: true, type: "number" },
@@ -76,6 +78,10 @@ export default function EnquiryDialog({ open, onOpenChange, onSave }: {
                     <Textarea {...field} id={`enquiry-${name}`} disabled={isSubmitting} aria-invalid={fieldState.invalid} />
                   ) : (
                     <Input {...field} id={`enquiry-${name}`} type={type || "text"} placeholder={placeholder}
+                      value={type === "tel" ? formatPhoneNumber(field.value) : field.value}
+                      onChange={event => field.onChange(type === "tel"
+                        ? formatPhoneNumber(formatPhoneNumber(event.target.value).replace(/\D/g, "").slice(0, 10))
+                        : event.target.value)}
                       required={required} aria-required={required} aria-invalid={fieldState.invalid} disabled={isSubmitting}
                       {...(name === "grade" ? { min: 1, max: 12, step: 1 } : {})} />
                   )}
