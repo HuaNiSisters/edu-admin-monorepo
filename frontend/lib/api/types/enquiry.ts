@@ -11,16 +11,17 @@ export interface Enquiry {
   first_name: string;
   surname: string;
   gender: string | null;
-  school: string | null;
-  grade: number | null;
+  school: string;
+  grade: number;
   student_phone_number?: string | null;
   email_address: string | null;
   parent_name: string | null;
   parent_phone_number: string;
-  suburb_of_home: string | null;
+  suburb_of_home: string;
   subject_selection: string[];
   preferred_campus: (typeof ENQUIRY_CAMPUSES)[number] | null;
   preferred_class_days_times: string | null;
   hear_about_us: string | null;
+  reference: string | null;
   additional_comments: string | null;
 }

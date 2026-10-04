@@ -95,5 +95,6 @@ export const enquiryColumns: ColumnDef<Enquiry>[] = [
   column("preferred_campus", "Preferred Campus", 220),
   column("preferred_class_days_times", "Preferred Class Days / Times", 300),
   column("hear_about_us", "Hear about us", 220),
+  column("reference", "Reference", 220),
   column("additional_comments", "Additional comments/questions", 380),
 ];
