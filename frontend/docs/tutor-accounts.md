@@ -54,6 +54,13 @@ enabled until class-specific permissions are defined.
      functions, and immutable names/emails.
    - `20260926030000_employee_roles`: the three Job options, linked account role
      synchronization, staff self-profile access, and tutor-only class pickers.
+   - `20260927000000_staff_student_data_read`: ensures admin and reception roles
+     can read student, class, attendance, enrolment, and payment data when older
+     table policies are narrower.
+   - `20260930000000_tutor_student_data_read`: lets tutors read student, class,
+     enrolment, and attendance data for the search and attendance screens. Tutors
+     can search all students; writes to these tables remain limited to admin and
+     reception.
 
    If you already applied the earlier migrations, only apply the pending ones.
    If you apply SQL manually in Supabase, run the new migration's SQL rather
@@ -150,9 +157,10 @@ in again before changing the password.
   blocked for linked tutors, including privileged email changes; there is no
   email-change workflow in this release. Any future admin email workflow must
   update Auth and the tutor record together with explicit safeguards.
-- Other application tables have restrictive staff-only policies, preserving
-  existing permissive staff policies. Unknown or missing roles are denied.
-  The policies do not add tutor class access or redesign reception permissions.
+- Student, class, enrolment, and attendance tables allow tutors to read all rows
+  for the student search and attendance screens. Admins and reception retain
+  writes; tutor writes remain denied. Payment data remains staff-only. Unknown
+  or missing roles are denied.
 - RLS cannot protect routes using the service key, the separate Fastify API, or
   pre-existing `SECURITY DEFINER` RPCs. Before enabling production tutor accounts,
   audit these independently (in particular the deployed `search_students` RPC,
