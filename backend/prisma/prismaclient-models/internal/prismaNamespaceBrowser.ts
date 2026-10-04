@@ -61,7 +61,10 @@ export const ModelName = {
   Enrolment: 'Enrolment',
   Attendance: 'Attendance',
   Payment: 'Payment',
-  SmsTemplate: 'SmsTemplate'
+  SmsTemplate: 'SmsTemplate',
+  TutorDetails: 'TutorDetails',
+  OwingSmsSend: 'OwingSmsSend',
+  Enquiry: 'Enquiry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -121,6 +124,7 @@ export type StudentParentScalarFieldEnum = (typeof StudentParentScalarFieldEnum)
 
 
 export const TutorScalarFieldEnum = {
+  auth_user_id: 'auth_user_id',
   tutor_id: 'tutor_id',
   first_name: 'first_name',
   last_name: 'last_name',
@@ -219,6 +223,70 @@ export const SmsTemplateScalarFieldEnum = {
 } as const
 
 export type SmsTemplateScalarFieldEnum = (typeof SmsTemplateScalarFieldEnum)[keyof typeof SmsTemplateScalarFieldEnum]
+
+
+export const TutorDetailsScalarFieldEnum = {
+  tutor_id: 'tutor_id',
+  date_of_birth: 'date_of_birth',
+  gender: 'gender',
+  address: 'address',
+  job: 'job',
+  start_date: 'start_date',
+  end_date: 'end_date',
+  emergency_contact_name: 'emergency_contact_name',
+  emergency_contact_mobile: 'emergency_contact_mobile',
+  start_hourly_rate: 'start_hourly_rate',
+  tfn: 'tfn',
+  account_name: 'account_name',
+  bsb: 'bsb',
+  account_number: 'account_number',
+  super_name: 'super_name',
+  super_member_number: 'super_member_number',
+  high_school: 'high_school',
+  university_course: 'university_course',
+  working_with_children: 'working_with_children',
+  police_check: 'police_check',
+  special_skills: 'special_skills',
+  hsc_subjects: 'hsc_subjects'
+} as const
+
+export type TutorDetailsScalarFieldEnum = (typeof TutorDetailsScalarFieldEnum)[keyof typeof TutorDetailsScalarFieldEnum]
+
+
+export const OwingSmsSendScalarFieldEnum = {
+  enrolment_id: 'enrolment_id',
+  term_id: 'term_id',
+  template_id: 'template_id',
+  phone_number: 'phone_number',
+  sent_at: 'sent_at'
+} as const
+
+export type OwingSmsSendScalarFieldEnum = (typeof OwingSmsSendScalarFieldEnum)[keyof typeof OwingSmsSendScalarFieldEnum]
+
+
+export const EnquiryScalarFieldEnum = {
+  enquiry_id: 'enquiry_id',
+  created_at: 'created_at',
+  created_by: 'created_by',
+  first_name: 'first_name',
+  surname: 'surname',
+  parent_phone_number: 'parent_phone_number',
+  school: 'school',
+  grade: 'grade',
+  subject_selection: 'subject_selection',
+  suburb_of_home: 'suburb_of_home',
+  gender: 'gender',
+  student_phone_number: 'student_phone_number',
+  email_address: 'email_address',
+  parent_name: 'parent_name',
+  preferred_campus: 'preferred_campus',
+  preferred_class_days_times: 'preferred_class_days_times',
+  hear_about_us: 'hear_about_us',
+  reference: 'reference',
+  additional_comments: 'additional_comments'
+} as const
+
+export type EnquiryScalarFieldEnum = (typeof EnquiryScalarFieldEnum)[keyof typeof EnquiryScalarFieldEnum]
 
 
 export const SortOrder = {
