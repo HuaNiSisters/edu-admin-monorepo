@@ -7,17 +7,44 @@ import { classService } from "@/lib/services";
 import { ClassTimeWithSubjectAndTutor } from "@/lib/api/types";
 import { LoadingBar } from "@/components/loading-bar";
 import { Suspense } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { UserRole } from "@/core/userRoles/types";
+import { createClient } from "@/lib/api/supabase/client";
 
 const AttendancePage = () => {
   const { run, isPending } = useAsync();
+  const { currentUser } = useAuth();
   const [classes, setClasses] = useState<ClassTimeWithSubjectAndTutor[]>([]);
+  const [tutorName, setTutorName] = useState<string | null>(null);
+  const isTutor = currentUser?.app_metadata?.role === UserRole.Tutor;
+  const userId = currentUser?.id;
 
   const fetchClasses = useCallback(() => {
     run(async () => {
+      setClasses([]);
+      setTutorName(null);
+      let resolvedTutorName: string | null = null;
+
+      if (isTutor && userId) {
+        const supabase = createClient();
+        const { data: tutor, error } = await supabase
+          .from("Tutor")
+          .select("first_name, last_name")
+          .eq("auth_user_id", userId)
+          .maybeSingle();
+
+        if (error) {
+          throw new Error(`Failed to load tutor profile: ${error.message}`);
+        }
+        resolvedTutorName =
+          tutor ? `${tutor.first_name} ${tutor.last_name}`.trim() : null;
+      }
+
       const data = await classService.getClassTimesAsync();
+      setTutorName(resolvedTutorName);
       setClasses(data);
     });
-  }, [run]);
+  }, [isTutor, run, userId]);
 
   useEffect(() => {
     fetchClasses();
@@ -26,9 +53,12 @@ const AttendancePage = () => {
   return (
     <Suspense fallback={<span>...</span>}>
       <div>
-        {/* TODO: have it so that tutor users has the tutors filter disabled and pre-selected to them */}
         <LoadingBar isLoading={isPending} />
-        <ClassesList classes={classes} />
+        <ClassesList
+          classes={classes}
+          isTutor={isTutor}
+          tutorName={tutorName}
+        />
       </div>
     </Suspense>
   );

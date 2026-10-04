@@ -25,9 +25,16 @@ const DAY_ORDER = [
 interface ClassesListProps {
   classes: ClassTimeWithSubjectAndTutor[];
   onEdit?: (classTime: ClassTimeWithSubjectAndTutor) => void; // make optional
+  isTutor?: boolean;
+  tutorName?: string | null;
 }
 
-const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
+const ClassesList = ({
+  classes,
+  onEdit,
+  isTutor = false,
+  tutorName,
+}: ClassesListProps) => {
   const router = useRouter();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -162,14 +169,25 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
           setColumnFilters={setColumnFilters}
         />
 
-        <FilterContent
-          filterValue="tutor"
-          filterName="Tutor"
-          placeholderName="Tutor"
-          options={tutorOptions}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-        />
+        {isTutor ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-auto py-1.5"
+            disabled
+          >
+            Tutor: {tutorName ?? "Profile unavailable"}
+          </Button>
+        ) : (
+          <FilterContent
+            filterValue="tutor"
+            filterName="Tutor"
+            placeholderName="Tutor"
+            options={tutorOptions}
+            columnFilters={columnFilters}
+            setColumnFilters={setColumnFilters}
+          />
+        )}
 
         {hasActiveFilters && (
           <Button
@@ -186,7 +204,13 @@ const ClassesList = ({ classes, onEdit }: ClassesListProps) => {
 
       <DataTable
         columns={columns}
-        data={classes}
+        data={
+          isTutor && tutorName
+            ? classes.filter((item) => item.tutor === tutorName)
+            : isTutor
+              ? []
+              : classes
+        }
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
         onRowClick={(row: ClassTimeWithSubjectAndTutor) =>

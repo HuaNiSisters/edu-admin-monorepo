@@ -61,6 +61,8 @@ enabled until class-specific permissions are defined.
      enrolment, and attendance data for the search and attendance screens. Tutors
      can search all students; writes to these tables remain limited to admin and
      reception.
+   - `20261004000000_tutor_own_class_attendance`: narrows tutors' class,
+     enrolment, term, and attendance reads to classes assigned to their account.
 
    If you already applied the earlier migrations, only apply the pending ones.
    If you apply SQL manually in Supabase, run the new migration's SQL rather
@@ -157,10 +159,10 @@ in again before changing the password.
   blocked for linked tutors, including privileged email changes; there is no
   email-change workflow in this release. Any future admin email workflow must
   update Auth and the tutor record together with explicit safeguards.
-- Student, class, enrolment, and attendance tables allow tutors to read all rows
-  for the student search and attendance screens. Admins and reception retain
-  writes; tutor writes remain denied. Payment data remains staff-only. Unknown
-  or missing roles are denied.
+- Tutors can search all students, but class, enrolment, term, and attendance
+  reads are limited to classes assigned to their linked tutor record. Admins and
+  reception retain writes; tutor writes remain denied. Payment data remains
+  staff-only. Unknown or missing roles are denied.
 - RLS cannot protect routes using the service key, the separate Fastify API, or
   pre-existing `SECURITY DEFINER` RPCs. Before enabling production tutor accounts,
   audit these independently (in particular the deployed `search_students` RPC,
