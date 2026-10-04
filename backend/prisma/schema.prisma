@@ -306,3 +306,27 @@ model OwingSmsSend {
 
   @@id([enrolment_id, term_id, template_id, phone_number])
 }
+
+model Enquiry {
+  enquiry_id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  created_by                 String
+  first_name                 String
+  surname                    String
+  parent_phone_number        String
+  school                     String
+  grade                      Int
+  subject_selection          String[]
+  suburb_of_home             String
+  gender                     String?
+  student_phone_number       String?
+  email_address              String?
+  parent_name                String?
+  preferred_campus           String?
+  preferred_class_days_times String?
+  hear_about_us              String?
+  reference                  String?
+  additional_comments        String?
+
+  @@index([created_at(sort: Desc)], map: "enquiry_created_at_idx")
+}
