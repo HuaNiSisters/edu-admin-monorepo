@@ -43,6 +43,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useAsync } from "@/hooks/use-async";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 import { CreateParentDataParams } from "@/lib/api/types/person/parent";
 import { CreateStudentDataParams } from "@/lib/api/types/person/student";
 import { formatPhoneNumber } from "@/utils/phone-utils";
@@ -218,6 +219,7 @@ const StudentDataForm = ({
 
   const { run, isPending, error } = useAsync();
   const router = useRouter();
+  const { isUserTutor } = useAuth();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -399,7 +401,7 @@ const StudentDataForm = ({
         <div className="grid grid-cols-4 gap-5">
           <div className="mt-8 col-span-4 flex justify-between">
             <span className="text-xl font-bold">Student Details</span>
-            {isViewingMode && (
+            {isViewingMode && !isUserTutor() && (
               <Button
                 type="button"
                 onClick={() => router.push(`/student/update/${studentId}`)}

@@ -96,8 +96,12 @@ const adminSidebarItems = [
 ];
 
 export function AppSidebar() {
-  const { isUserAdmin, isUserReceptionist } = useAuth();
+  const { isUserAdmin, isUserReceptionist, isUserTutor } = useAuth();
   const pathname = usePathname();
+  const isTutor = isUserTutor();
+  const visibleStudentItems = studentsSidebarItems.filter(
+    (item) => !isTutor || ["Search", "Attendance"].includes(item.name),
+  );
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -140,35 +144,37 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {(isUserAdmin() || isUserReceptionist()) && <Collapsible defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel className="flex justify-between">
-              STUDENTS
-              <CollapsibleTrigger>
-                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {studentsSidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.url}
-                      >
-                        <Link href={item.url}>
-                          <item.icon />
-                          <span>{item.name}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>}
+        {(isUserAdmin() || isUserReceptionist() || isTutor) && (
+          <Collapsible defaultOpen className="group/collapsible">
+            <SidebarGroup>
+              <SidebarGroupLabel className="flex justify-between">
+                STUDENTS
+                <CollapsibleTrigger>
+                  <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                </CollapsibleTrigger>
+              </SidebarGroupLabel>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {visibleStudentItems.map((item) => (
+                      <SidebarMenuItem key={item.name}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isPathWithin(pathname, item.url)}
+                        >
+                          <Link href={item.url}>
+                            <item.icon />
+                            <span>{item.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        )}
 
         {(isUserAdmin() || isUserReceptionist()) && (
           <>
