@@ -96,3 +96,18 @@ export type Payment = Prisma.PaymentModel
  * 
  */
 export type SmsTemplate = Prisma.SmsTemplateModel
+/**
+ * Model TutorDetails
+ * 
+ */
+export type TutorDetails = Prisma.TutorDetailsModel
+/**
+ * Model OwingSmsSend
+ * 
+ */
+export type OwingSmsSend = Prisma.OwingSmsSendModel
+/**
+ * Model Enquiry
+ * 
+ */
+export type Enquiry = Prisma.EnquiryModel

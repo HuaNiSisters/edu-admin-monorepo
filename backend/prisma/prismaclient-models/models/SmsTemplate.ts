@@ -194,6 +194,7 @@ export type SmsTemplateWhereInput = {
   variable_mapping?: Prisma.JsonFilter<"SmsTemplate">
   created_at?: Prisma.DateTimeFilter<"SmsTemplate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SmsTemplate"> | Date | string
+  owingSends?: Prisma.OwingSmsSendListRelationFilter
 }
 
 export type SmsTemplateOrderByWithRelationInput = {
@@ -204,6 +205,7 @@ export type SmsTemplateOrderByWithRelationInput = {
   variable_mapping?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  owingSends?: Prisma.OwingSmsSendOrderByRelationAggregateInput
 }
 
 export type SmsTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -218,6 +220,7 @@ export type SmsTemplateWhereUniqueInput = Prisma.AtLeast<{
   variable_mapping?: Prisma.JsonFilter<"SmsTemplate">
   created_at?: Prisma.DateTimeFilter<"SmsTemplate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SmsTemplate"> | Date | string
+  owingSends?: Prisma.OwingSmsSendListRelationFilter
 }, "sms_template_id" | "sms_provider_provider_template_id">
 
 export type SmsTemplateOrderByWithAggregationInput = {
@@ -254,6 +257,7 @@ export type SmsTemplateCreateInput = {
   variable_mapping: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  owingSends?: Prisma.OwingSmsSendCreateNestedManyWithoutTemplateInput
 }
 
 export type SmsTemplateUncheckedCreateInput = {
@@ -264,6 +268,7 @@ export type SmsTemplateUncheckedCreateInput = {
   variable_mapping: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  owingSends?: Prisma.OwingSmsSendUncheckedCreateNestedManyWithoutTemplateInput
 }
 
 export type SmsTemplateUpdateInput = {
@@ -274,6 +279,7 @@ export type SmsTemplateUpdateInput = {
   variable_mapping?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owingSends?: Prisma.OwingSmsSendUpdateManyWithoutTemplateNestedInput
 }
 
 export type SmsTemplateUncheckedUpdateInput = {
@@ -284,6 +290,7 @@ export type SmsTemplateUncheckedUpdateInput = {
   variable_mapping?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owingSends?: Prisma.OwingSmsSendUncheckedUpdateManyWithoutTemplateNestedInput
 }
 
 export type SmsTemplateCreateManyInput = {
@@ -349,6 +356,110 @@ export type SmsTemplateMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type SmsTemplateScalarRelationFilter = {
+  is?: Prisma.SmsTemplateWhereInput
+  isNot?: Prisma.SmsTemplateWhereInput
+}
+
+export type SmsTemplateCreateNestedOneWithoutOwingSendsInput = {
+  create?: Prisma.XOR<Prisma.SmsTemplateCreateWithoutOwingSendsInput, Prisma.SmsTemplateUncheckedCreateWithoutOwingSendsInput>
+  connectOrCreate?: Prisma.SmsTemplateCreateOrConnectWithoutOwingSendsInput
+  connect?: Prisma.SmsTemplateWhereUniqueInput
+}
+
+export type SmsTemplateUpdateOneRequiredWithoutOwingSendsNestedInput = {
+  create?: Prisma.XOR<Prisma.SmsTemplateCreateWithoutOwingSendsInput, Prisma.SmsTemplateUncheckedCreateWithoutOwingSendsInput>
+  connectOrCreate?: Prisma.SmsTemplateCreateOrConnectWithoutOwingSendsInput
+  upsert?: Prisma.SmsTemplateUpsertWithoutOwingSendsInput
+  connect?: Prisma.SmsTemplateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SmsTemplateUpdateToOneWithWhereWithoutOwingSendsInput, Prisma.SmsTemplateUpdateWithoutOwingSendsInput>, Prisma.SmsTemplateUncheckedUpdateWithoutOwingSendsInput>
+}
+
+export type SmsTemplateCreateWithoutOwingSendsInput = {
+  sms_template_id?: string
+  sms_provider: string
+  provider_template_id: string
+  name: string
+  variable_mapping: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SmsTemplateUncheckedCreateWithoutOwingSendsInput = {
+  sms_template_id?: string
+  sms_provider: string
+  provider_template_id: string
+  name: string
+  variable_mapping: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SmsTemplateCreateOrConnectWithoutOwingSendsInput = {
+  where: Prisma.SmsTemplateWhereUniqueInput
+  create: Prisma.XOR<Prisma.SmsTemplateCreateWithoutOwingSendsInput, Prisma.SmsTemplateUncheckedCreateWithoutOwingSendsInput>
+}
+
+export type SmsTemplateUpsertWithoutOwingSendsInput = {
+  update: Prisma.XOR<Prisma.SmsTemplateUpdateWithoutOwingSendsInput, Prisma.SmsTemplateUncheckedUpdateWithoutOwingSendsInput>
+  create: Prisma.XOR<Prisma.SmsTemplateCreateWithoutOwingSendsInput, Prisma.SmsTemplateUncheckedCreateWithoutOwingSendsInput>
+  where?: Prisma.SmsTemplateWhereInput
+}
+
+export type SmsTemplateUpdateToOneWithWhereWithoutOwingSendsInput = {
+  where?: Prisma.SmsTemplateWhereInput
+  data: Prisma.XOR<Prisma.SmsTemplateUpdateWithoutOwingSendsInput, Prisma.SmsTemplateUncheckedUpdateWithoutOwingSendsInput>
+}
+
+export type SmsTemplateUpdateWithoutOwingSendsInput = {
+  sms_template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  sms_provider?: Prisma.StringFieldUpdateOperationsInput | string
+  provider_template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  variable_mapping?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SmsTemplateUncheckedUpdateWithoutOwingSendsInput = {
+  sms_template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  sms_provider?: Prisma.StringFieldUpdateOperationsInput | string
+  provider_template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  variable_mapping?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type SmsTemplateCountOutputType
+ */
+
+export type SmsTemplateCountOutputType = {
+  owingSends: number
+}
+
+export type SmsTemplateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owingSends?: boolean | SmsTemplateCountOutputTypeCountOwingSendsArgs
+}
+
+/**
+ * SmsTemplateCountOutputType without action
+ */
+export type SmsTemplateCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SmsTemplateCountOutputType
+   */
+  select?: Prisma.SmsTemplateCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SmsTemplateCountOutputType without action
+ */
+export type SmsTemplateCountOutputTypeCountOwingSendsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OwingSmsSendWhereInput
+}
 
 
 export type SmsTemplateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -359,6 +470,8 @@ export type SmsTemplateSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   variable_mapping?: boolean
   created_at?: boolean
   updated_at?: boolean
+  owingSends?: boolean | Prisma.SmsTemplate$owingSendsArgs<ExtArgs>
+  _count?: boolean | Prisma.SmsTemplateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["smsTemplate"]>
 
 export type SmsTemplateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -392,10 +505,18 @@ export type SmsTemplateSelectScalar = {
 }
 
 export type SmsTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"sms_template_id" | "sms_provider" | "provider_template_id" | "name" | "variable_mapping" | "created_at" | "updated_at", ExtArgs["result"]["smsTemplate"]>
+export type SmsTemplateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owingSends?: boolean | Prisma.SmsTemplate$owingSendsArgs<ExtArgs>
+  _count?: boolean | Prisma.SmsTemplateCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type SmsTemplateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type SmsTemplateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $SmsTemplatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SmsTemplate"
-  objects: {}
+  objects: {
+    owingSends: Prisma.$OwingSmsSendPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     sms_template_id: string
     sms_provider: string
@@ -798,6 +919,7 @@ readonly fields: SmsTemplateFieldRefs;
  */
 export interface Prisma__SmsTemplateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  owingSends<T extends Prisma.SmsTemplate$owingSendsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SmsTemplate$owingSendsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OwingSmsSendPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -851,6 +973,10 @@ export type SmsTemplateFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which SmsTemplate to fetch.
    */
   where: Prisma.SmsTemplateWhereUniqueInput
@@ -869,6 +995,10 @@ export type SmsTemplateFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which SmsTemplate to fetch.
    */
   where: Prisma.SmsTemplateWhereUniqueInput
@@ -886,6 +1016,10 @@ export type SmsTemplateFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the SmsTemplate
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
   /**
    * Filter, which SmsTemplate to fetch.
    */
@@ -935,6 +1069,10 @@ export type SmsTemplateFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which SmsTemplate to fetch.
    */
   where?: Prisma.SmsTemplateWhereInput
@@ -983,6 +1121,10 @@ export type SmsTemplateFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which SmsTemplates to fetch.
    */
   where?: Prisma.SmsTemplateWhereInput
@@ -1025,6 +1167,10 @@ export type SmsTemplateCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SmsTemplate
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
   /**
    * The data needed to create a SmsTemplate.
    */
@@ -1073,6 +1219,10 @@ export type SmsTemplateUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SmsTemplate
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
   /**
    * The data needed to update a SmsTemplate.
    */
@@ -1140,6 +1290,10 @@ export type SmsTemplateUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
+  /**
    * The filter to search for the SmsTemplate to update in case it exists.
    */
   where: Prisma.SmsTemplateWhereUniqueInput
@@ -1166,6 +1320,10 @@ export type SmsTemplateDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
+  /**
    * Filter which SmsTemplate to delete.
    */
   where: Prisma.SmsTemplateWhereUniqueInput
@@ -1186,6 +1344,30 @@ export type SmsTemplateDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * SmsTemplate.owingSends
+ */
+export type SmsTemplate$owingSendsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OwingSmsSend
+   */
+  select?: Prisma.OwingSmsSendSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OwingSmsSend
+   */
+  omit?: Prisma.OwingSmsSendOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OwingSmsSendInclude<ExtArgs> | null
+  where?: Prisma.OwingSmsSendWhereInput
+  orderBy?: Prisma.OwingSmsSendOrderByWithRelationInput | Prisma.OwingSmsSendOrderByWithRelationInput[]
+  cursor?: Prisma.OwingSmsSendWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OwingSmsSendScalarFieldEnum | Prisma.OwingSmsSendScalarFieldEnum[]
+}
+
+/**
  * SmsTemplate without action
  */
 export type SmsTemplateDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1197,4 +1379,8 @@ export type SmsTemplateDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the SmsTemplate
    */
   omit?: Prisma.SmsTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsTemplateInclude<ExtArgs> | null
 }

@@ -194,6 +194,7 @@ export type EnrolmentWhereInput = {
   class?: Prisma.XOR<Prisma.ClassTimeScalarRelationFilter, Prisma.ClassTimeWhereInput>
   term?: Prisma.XOR<Prisma.TermScalarRelationFilter, Prisma.TermWhereInput>
   payments?: Prisma.PaymentListRelationFilter
+  smsSends?: Prisma.OwingSmsSendListRelationFilter
 }
 
 export type EnrolmentOrderByWithRelationInput = {
@@ -207,6 +208,7 @@ export type EnrolmentOrderByWithRelationInput = {
   class?: Prisma.ClassTimeOrderByWithRelationInput
   term?: Prisma.TermOrderByWithRelationInput
   payments?: Prisma.PaymentOrderByRelationAggregateInput
+  smsSends?: Prisma.OwingSmsSendOrderByRelationAggregateInput
 }
 
 export type EnrolmentWhereUniqueInput = Prisma.AtLeast<{
@@ -224,6 +226,7 @@ export type EnrolmentWhereUniqueInput = Prisma.AtLeast<{
   class?: Prisma.XOR<Prisma.ClassTimeScalarRelationFilter, Prisma.ClassTimeWhereInput>
   term?: Prisma.XOR<Prisma.TermScalarRelationFilter, Prisma.TermWhereInput>
   payments?: Prisma.PaymentListRelationFilter
+  smsSends?: Prisma.OwingSmsSendListRelationFilter
 }, "enrolment_id" | "student_id_class_id_term_id">
 
 export type EnrolmentOrderByWithAggregationInput = {
@@ -258,6 +261,7 @@ export type EnrolmentCreateInput = {
   class: Prisma.ClassTimeCreateNestedOneWithoutEnrolmentsInput
   term: Prisma.TermCreateNestedOneWithoutEnrolmentsInput
   payments?: Prisma.PaymentCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentUncheckedCreateInput = {
@@ -268,6 +272,7 @@ export type EnrolmentUncheckedCreateInput = {
   enrolment_date?: Date | string
   status?: $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendUncheckedCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentUpdateInput = {
@@ -278,6 +283,7 @@ export type EnrolmentUpdateInput = {
   class?: Prisma.ClassTimeUpdateOneRequiredWithoutEnrolmentsNestedInput
   term?: Prisma.TermUpdateOneRequiredWithoutEnrolmentsNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateInput = {
@@ -288,6 +294,7 @@ export type EnrolmentUncheckedUpdateInput = {
   enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUncheckedUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentCreateManyInput = {
@@ -506,6 +513,20 @@ export type EnrolmentUpdateOneRequiredWithoutPaymentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnrolmentUpdateToOneWithWhereWithoutPaymentsInput, Prisma.EnrolmentUpdateWithoutPaymentsInput>, Prisma.EnrolmentUncheckedUpdateWithoutPaymentsInput>
 }
 
+export type EnrolmentCreateNestedOneWithoutSmsSendsInput = {
+  create?: Prisma.XOR<Prisma.EnrolmentCreateWithoutSmsSendsInput, Prisma.EnrolmentUncheckedCreateWithoutSmsSendsInput>
+  connectOrCreate?: Prisma.EnrolmentCreateOrConnectWithoutSmsSendsInput
+  connect?: Prisma.EnrolmentWhereUniqueInput
+}
+
+export type EnrolmentUpdateOneRequiredWithoutSmsSendsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnrolmentCreateWithoutSmsSendsInput, Prisma.EnrolmentUncheckedCreateWithoutSmsSendsInput>
+  connectOrCreate?: Prisma.EnrolmentCreateOrConnectWithoutSmsSendsInput
+  upsert?: Prisma.EnrolmentUpsertWithoutSmsSendsInput
+  connect?: Prisma.EnrolmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnrolmentUpdateToOneWithWhereWithoutSmsSendsInput, Prisma.EnrolmentUpdateWithoutSmsSendsInput>, Prisma.EnrolmentUncheckedUpdateWithoutSmsSendsInput>
+}
+
 export type EnrolmentCreateWithoutStudentInput = {
   enrolment_id?: string
   enrolment_date?: Date | string
@@ -513,6 +534,7 @@ export type EnrolmentCreateWithoutStudentInput = {
   class: Prisma.ClassTimeCreateNestedOneWithoutEnrolmentsInput
   term: Prisma.TermCreateNestedOneWithoutEnrolmentsInput
   payments?: Prisma.PaymentCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentUncheckedCreateWithoutStudentInput = {
@@ -522,6 +544,7 @@ export type EnrolmentUncheckedCreateWithoutStudentInput = {
   enrolment_date?: Date | string
   status?: $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendUncheckedCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentCreateOrConnectWithoutStudentInput = {
@@ -569,6 +592,7 @@ export type EnrolmentCreateWithoutClassInput = {
   student: Prisma.StudentCreateNestedOneWithoutEnrolmentsInput
   term: Prisma.TermCreateNestedOneWithoutEnrolmentsInput
   payments?: Prisma.PaymentCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentUncheckedCreateWithoutClassInput = {
@@ -578,6 +602,7 @@ export type EnrolmentUncheckedCreateWithoutClassInput = {
   enrolment_date?: Date | string
   status?: $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendUncheckedCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentCreateOrConnectWithoutClassInput = {
@@ -613,6 +638,7 @@ export type EnrolmentCreateWithoutTermInput = {
   student: Prisma.StudentCreateNestedOneWithoutEnrolmentsInput
   class: Prisma.ClassTimeCreateNestedOneWithoutEnrolmentsInput
   payments?: Prisma.PaymentCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentUncheckedCreateWithoutTermInput = {
@@ -622,6 +648,7 @@ export type EnrolmentUncheckedCreateWithoutTermInput = {
   enrolment_date?: Date | string
   status?: $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutEnrolmentInput
+  smsSends?: Prisma.OwingSmsSendUncheckedCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentCreateOrConnectWithoutTermInput = {
@@ -657,6 +684,7 @@ export type EnrolmentCreateWithoutPaymentsInput = {
   student: Prisma.StudentCreateNestedOneWithoutEnrolmentsInput
   class: Prisma.ClassTimeCreateNestedOneWithoutEnrolmentsInput
   term: Prisma.TermCreateNestedOneWithoutEnrolmentsInput
+  smsSends?: Prisma.OwingSmsSendCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentUncheckedCreateWithoutPaymentsInput = {
@@ -666,6 +694,7 @@ export type EnrolmentUncheckedCreateWithoutPaymentsInput = {
   term_id: string
   enrolment_date?: Date | string
   status?: $Enums.EnrolmentStatus
+  smsSends?: Prisma.OwingSmsSendUncheckedCreateNestedManyWithoutEnrolmentInput
 }
 
 export type EnrolmentCreateOrConnectWithoutPaymentsInput = {
@@ -691,6 +720,7 @@ export type EnrolmentUpdateWithoutPaymentsInput = {
   student?: Prisma.StudentUpdateOneRequiredWithoutEnrolmentsNestedInput
   class?: Prisma.ClassTimeUpdateOneRequiredWithoutEnrolmentsNestedInput
   term?: Prisma.TermUpdateOneRequiredWithoutEnrolmentsNestedInput
+  smsSends?: Prisma.OwingSmsSendUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateWithoutPaymentsInput = {
@@ -700,6 +730,63 @@ export type EnrolmentUncheckedUpdateWithoutPaymentsInput = {
   term_id?: Prisma.StringFieldUpdateOperationsInput | string
   enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
+  smsSends?: Prisma.OwingSmsSendUncheckedUpdateManyWithoutEnrolmentNestedInput
+}
+
+export type EnrolmentCreateWithoutSmsSendsInput = {
+  enrolment_id?: string
+  enrolment_date?: Date | string
+  status?: $Enums.EnrolmentStatus
+  student: Prisma.StudentCreateNestedOneWithoutEnrolmentsInput
+  class: Prisma.ClassTimeCreateNestedOneWithoutEnrolmentsInput
+  term: Prisma.TermCreateNestedOneWithoutEnrolmentsInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutEnrolmentInput
+}
+
+export type EnrolmentUncheckedCreateWithoutSmsSendsInput = {
+  enrolment_id?: string
+  student_id: string
+  class_id: string
+  term_id: string
+  enrolment_date?: Date | string
+  status?: $Enums.EnrolmentStatus
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutEnrolmentInput
+}
+
+export type EnrolmentCreateOrConnectWithoutSmsSendsInput = {
+  where: Prisma.EnrolmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnrolmentCreateWithoutSmsSendsInput, Prisma.EnrolmentUncheckedCreateWithoutSmsSendsInput>
+}
+
+export type EnrolmentUpsertWithoutSmsSendsInput = {
+  update: Prisma.XOR<Prisma.EnrolmentUpdateWithoutSmsSendsInput, Prisma.EnrolmentUncheckedUpdateWithoutSmsSendsInput>
+  create: Prisma.XOR<Prisma.EnrolmentCreateWithoutSmsSendsInput, Prisma.EnrolmentUncheckedCreateWithoutSmsSendsInput>
+  where?: Prisma.EnrolmentWhereInput
+}
+
+export type EnrolmentUpdateToOneWithWhereWithoutSmsSendsInput = {
+  where?: Prisma.EnrolmentWhereInput
+  data: Prisma.XOR<Prisma.EnrolmentUpdateWithoutSmsSendsInput, Prisma.EnrolmentUncheckedUpdateWithoutSmsSendsInput>
+}
+
+export type EnrolmentUpdateWithoutSmsSendsInput = {
+  enrolment_id?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
+  student?: Prisma.StudentUpdateOneRequiredWithoutEnrolmentsNestedInput
+  class?: Prisma.ClassTimeUpdateOneRequiredWithoutEnrolmentsNestedInput
+  term?: Prisma.TermUpdateOneRequiredWithoutEnrolmentsNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutEnrolmentNestedInput
+}
+
+export type EnrolmentUncheckedUpdateWithoutSmsSendsInput = {
+  enrolment_id?: Prisma.StringFieldUpdateOperationsInput | string
+  student_id?: Prisma.StringFieldUpdateOperationsInput | string
+  class_id?: Prisma.StringFieldUpdateOperationsInput | string
+  term_id?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentCreateManyStudentInput = {
@@ -717,6 +804,7 @@ export type EnrolmentUpdateWithoutStudentInput = {
   class?: Prisma.ClassTimeUpdateOneRequiredWithoutEnrolmentsNestedInput
   term?: Prisma.TermUpdateOneRequiredWithoutEnrolmentsNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateWithoutStudentInput = {
@@ -726,6 +814,7 @@ export type EnrolmentUncheckedUpdateWithoutStudentInput = {
   enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUncheckedUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateManyWithoutStudentInput = {
@@ -751,6 +840,7 @@ export type EnrolmentUpdateWithoutClassInput = {
   student?: Prisma.StudentUpdateOneRequiredWithoutEnrolmentsNestedInput
   term?: Prisma.TermUpdateOneRequiredWithoutEnrolmentsNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateWithoutClassInput = {
@@ -760,6 +850,7 @@ export type EnrolmentUncheckedUpdateWithoutClassInput = {
   enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUncheckedUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateManyWithoutClassInput = {
@@ -785,6 +876,7 @@ export type EnrolmentUpdateWithoutTermInput = {
   student?: Prisma.StudentUpdateOneRequiredWithoutEnrolmentsNestedInput
   class?: Prisma.ClassTimeUpdateOneRequiredWithoutEnrolmentsNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateWithoutTermInput = {
@@ -794,6 +886,7 @@ export type EnrolmentUncheckedUpdateWithoutTermInput = {
   enrolment_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumEnrolmentStatusFieldUpdateOperationsInput | $Enums.EnrolmentStatus
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutEnrolmentNestedInput
+  smsSends?: Prisma.OwingSmsSendUncheckedUpdateManyWithoutEnrolmentNestedInput
 }
 
 export type EnrolmentUncheckedUpdateManyWithoutTermInput = {
@@ -811,10 +904,12 @@ export type EnrolmentUncheckedUpdateManyWithoutTermInput = {
 
 export type EnrolmentCountOutputType = {
   payments: number
+  smsSends: number
 }
 
 export type EnrolmentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payments?: boolean | EnrolmentCountOutputTypeCountPaymentsArgs
+  smsSends?: boolean | EnrolmentCountOutputTypeCountSmsSendsArgs
 }
 
 /**
@@ -834,6 +929,13 @@ export type EnrolmentCountOutputTypeCountPaymentsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.PaymentWhereInput
 }
 
+/**
+ * EnrolmentCountOutputType without action
+ */
+export type EnrolmentCountOutputTypeCountSmsSendsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OwingSmsSendWhereInput
+}
+
 
 export type EnrolmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   enrolment_id?: boolean
@@ -846,6 +948,7 @@ export type EnrolmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
   term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
   payments?: boolean | Prisma.Enrolment$paymentsArgs<ExtArgs>
+  smsSends?: boolean | Prisma.Enrolment$smsSendsArgs<ExtArgs>
   _count?: boolean | Prisma.EnrolmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["enrolment"]>
 
@@ -888,6 +991,7 @@ export type EnrolmentInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   class?: boolean | Prisma.ClassTimeDefaultArgs<ExtArgs>
   term?: boolean | Prisma.TermDefaultArgs<ExtArgs>
   payments?: boolean | Prisma.Enrolment$paymentsArgs<ExtArgs>
+  smsSends?: boolean | Prisma.Enrolment$smsSendsArgs<ExtArgs>
   _count?: boolean | Prisma.EnrolmentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnrolmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -908,6 +1012,7 @@ export type $EnrolmentPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     class: Prisma.$ClassTimePayload<ExtArgs>
     term: Prisma.$TermPayload<ExtArgs>
     payments: Prisma.$PaymentPayload<ExtArgs>[]
+    smsSends: Prisma.$OwingSmsSendPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     enrolment_id: string
@@ -1314,6 +1419,7 @@ export interface Prisma__EnrolmentClient<T, Null = never, ExtArgs extends runtim
   class<T extends Prisma.ClassTimeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClassTimeDefaultArgs<ExtArgs>>): Prisma.Prisma__ClassTimeClient<runtime.Types.Result.GetResult<Prisma.$ClassTimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   term<T extends Prisma.TermDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TermDefaultArgs<ExtArgs>>): Prisma.Prisma__TermClient<runtime.Types.Result.GetResult<Prisma.$TermPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   payments<T extends Prisma.Enrolment$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Enrolment$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  smsSends<T extends Prisma.Enrolment$smsSendsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Enrolment$smsSendsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OwingSmsSendPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1766,6 +1872,30 @@ export type Enrolment$paymentsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
+}
+
+/**
+ * Enrolment.smsSends
+ */
+export type Enrolment$smsSendsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OwingSmsSend
+   */
+  select?: Prisma.OwingSmsSendSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OwingSmsSend
+   */
+  omit?: Prisma.OwingSmsSendOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OwingSmsSendInclude<ExtArgs> | null
+  where?: Prisma.OwingSmsSendWhereInput
+  orderBy?: Prisma.OwingSmsSendOrderByWithRelationInput | Prisma.OwingSmsSendOrderByWithRelationInput[]
+  cursor?: Prisma.OwingSmsSendWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OwingSmsSendScalarFieldEnum | Prisma.OwingSmsSendScalarFieldEnum[]
 }
 
 /**
