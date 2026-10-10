@@ -17,6 +17,7 @@ export interface Enquiry {
   email_address: string | null;
   parent_name: string | null;
   parent_phone_number: string;
+  parent_2_phone_number?: string | null;
   suburb_of_home: string;
   subject_selection: string[];
   preferred_campus: (typeof ENQUIRY_CAMPUSES)[number] | null;

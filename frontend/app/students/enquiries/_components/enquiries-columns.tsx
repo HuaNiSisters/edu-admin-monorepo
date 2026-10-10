@@ -78,6 +78,7 @@ export const enquiryColumns: ColumnDef<Enquiry>[] = [
   column("email_address", "Email Address", 260),
   column("parent_name", "Parent Name", 180),
   column("parent_phone_number", "Parent’s Phone Number", 240),
+  column("parent_2_phone_number", "Parent 2 Phone Number", 240),
   column("suburb_of_home", "Suburb of Home", 180),
   column("subject_selection", "Subject Selection", 220, {
     filterFn: "arrIncludesSome",
