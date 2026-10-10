@@ -5,13 +5,15 @@
   "main": "app.ts",
   "type": "module",
   "scripts": {
-    "prisma-migrate": "npx prisma migrate dev --name init --schema ./prisma/schema.prisma",
+    "prisma-migrate": "prisma migrate deploy",
+    "prisma-migrate-old-wrong": "npx prisma migrate dev --name init --schema ./prisma/schema.prisma",
     "dbstudio": "npx prisma studio --config ./prisma.config.ts",
     "generate-schema": "npx prisma generate",
     "seed:sample": "npm run generate-schema && node --loader ts-node/esm scripts/sample-data.ts",
     "clean:sample": "npm run generate-schema && node --loader ts-node/esm scripts/sample-data.ts --clean",
     "predev": "prisma generate --generator client",
     "dev": "nodemon --exec node --loader ts-node/esm src/app.ts",
+    "prebuild": "prisma generate --generator client",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -9,7 +9,7 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-    "types": [],
+    "types": ["node"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -46,5 +46,7 @@
     "emitDeclarationOnly": true,
     "allowImportingTsExtensions": true,
     "noStrictGenericChecks": false,
-  }
+  },
+  // Supabase Edge Functions use Deno and are checked in that runtime.
+  "exclude": ["node_modules", "dist", "supabase"]
 }

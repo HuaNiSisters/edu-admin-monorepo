@@ -8,8 +8,40 @@ Ensure you are on nvm v22.12.0
 You can do that by running: 
 `nvm use`
 
-## Update Prisma Schema
-`npm run prisma-migrate`
+## Apply existing database migrations
+
+From `backend`, run `npm run prisma-migrate` to apply pending migrations to the
+database configured by `DATABASE_URL`. This runs `prisma migrate deploy`, which
+uses the existing migration files without creating a shadow database.
+
+The account migrations require a Supabase database with its existing `auth`
+schema and database-owner privileges. A plain PostgreSQL database does not
+provide those Supabase dependencies.
+
+If `migrate dev` fails with `schema "auth" does not exist` in the shadow database
+while you are applying existing migrations, use `npm run prisma-migrate` instead.
+Creating new migrations with `migrate dev` is a separate workflow that requires
+a shadow database prepared with the Supabase Auth dependencies.
+
+## TypeScript checks
+
+Run `npm run build` from `backend` to regenerate the Prisma client and check
+the Fastify backend, scripts, and Prisma configuration. The current TypeScript
+configuration uses `noEmit`, so this command does not produce JavaScript files.
+
+Run the reminder tests with
+`node --experimental-strip-types --test src/service/smsReminderCore.test.ts`
+on Node 22.12 or later.
+
+Supabase Edge Functions run under Deno and are excluded from the Node TypeScript
+project. Check them separately with
+`deno check supabase/functions/manage-employee-account/index.ts`.
+
+The reminder schema matches the existing
+`20261011000000_sms_reminder_tracking` migration. Apply it with
+`npm run prisma-migrate` before using reminder tracking. Ordinary template
+listing, previews, creation, updates, and sending select only their existing
+columns and do not require reminder tracking to be deployed.
 
 ## Deploy employee account management
 
@@ -42,7 +74,7 @@ If you see the error:
 If you are getting errors like: 
 `The table `public.Student` does not exist in the current database.`
 Run: 
-`npx prisma migrate dev --name init` 
+`npm run prisma-migrate`
 Then you can seed your sample data
 
 ## Reset Prisma database

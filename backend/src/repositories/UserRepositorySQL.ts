@@ -1,11 +1,10 @@
 import type { IUserRepository } from "../interfaces/UserRepository.ts";
 
 export class UserRepositorySQL implements IUserRepository {
-  async getUserById(id: string) {
+  async getUserById(id: string): ReturnType<IUserRepository["getUserById"]> {
     // return database.query(`SELECT * FROM users WHERE id = ?`, [id]);
-    return {
-      id,
-    };
+    // No SQL lookup is implemented yet, so there is no user to return.
+    return null;
   }
   async updateUserEmail(id: string, email: string) {
     return;

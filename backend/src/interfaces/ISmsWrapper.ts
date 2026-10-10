@@ -1,3 +1,7 @@
+import type { SmsReminderType } from "../../generated/prisma/enums.ts";
+
+export type ReminderType = SmsReminderType;
+
 // MAKE THIS SHARED
 export interface GetSMSTemplateResponse {
   id: string;
@@ -52,5 +56,5 @@ export interface ISmsProvider {
     toPhoneNumber: string,
     variables: Record<string, string>,
     variableMapping: SmsTemplateVariableMapping,
-  ): Promise<void>;
+  ): Promise<string>;
 }

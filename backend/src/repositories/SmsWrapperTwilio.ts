@@ -148,7 +148,7 @@ export class SmsWrapperTwilio implements ISmsProvider {
     toPhoneNumber: string,
     templateVariables: Record<string, string>,
     variableMapping: SmsTemplateVariableMapping,
-  ): Promise<void> {
+  ): Promise<string> {
     const contentVariables = Object.fromEntries(
       Object.entries(variableMapping).map(([number, variableName]) => {
         const value = templateVariables[variableName];
@@ -158,11 +158,12 @@ export class SmsWrapperTwilio implements ISmsProvider {
         return [number, value];
       }),
     );
-    await client.messages.create({
+    const message = await client.messages.create({
       contentSid: providerTemplateId,
       to: toPhoneNumber,
       from: TWILIO_PHONE_NUMBER,
       contentVariables: JSON.stringify(contentVariables),
     });
+    return message.sid;
   }
 }

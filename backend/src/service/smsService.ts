@@ -129,7 +129,7 @@ async function sendSMSTemplateAsync(
   toPhoneNumber: string,
   variables: Record<string, string> = {},
   owing?: { enrolmentId: string; termId: string },
-) {
+): Promise<string | null> {
   const { mock } = getSmsSendMode();
   const storedTemplate = await smsTemplateRepository.getById(templateId);
   if (!storedTemplate) throw notFound(templateId);
@@ -150,11 +150,12 @@ async function sendSMSTemplateAsync(
     const previous = await prisma.owingSmsSend.findUnique({
       where: { enrolment_id_term_id_template_id_phone_number: sendKey },
     });
-    if (previous) return;
+    if (previous) return null;
   }
+  let providerMessageId: string | null = null;
   if (!mock) {
     const provider = getProvider(storedTemplate.provider);
-    await provider.sendSMSTemplate(
+    providerMessageId = await provider.sendSMSTemplate(
       storedTemplate.providerTemplateId,
       toPhoneNumber,
       variables,
@@ -170,6 +171,7 @@ async function sendSMSTemplateAsync(
       update: {},
     });
   }
+  return providerMessageId;
 }
 
 async function getOwingSmsSendsAsync() {

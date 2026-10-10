@@ -1,5 +1,15 @@
-import type { SmsTemplateVariableMapping } from "../interfaces/ISmsWrapper.ts";
+import type { ReminderType, SmsTemplateVariableMapping } from "../interfaces/ISmsWrapper.ts";
+import type { Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../lib/prisma.ts";
+
+// Ordinary template operations also work before reminder tracking is deployed.
+const templateSelect = {
+  sms_template_id: true,
+  sms_provider: true,
+  provider_template_id: true,
+  name: true,
+  variable_mapping: true,
+} satisfies Prisma.SmsTemplateSelect;
 
 export interface SmsTemplateRecord {
   id: string;
@@ -28,6 +38,7 @@ function toRecord(template: {
 export class SmsTemplateRepositoryPrisma {
   async getAll(): Promise<SmsTemplateRecord[]> {
     const templates = await prisma.smsTemplate.findMany({
+      select: templateSelect,
       orderBy: { created_at: "desc" },
     });
     return templates.map(toRecord);
@@ -35,9 +46,18 @@ export class SmsTemplateRepositoryPrisma {
 
   async getById(id: string): Promise<SmsTemplateRecord | null> {
     const template = await prisma.smsTemplate.findUnique({
+      select: templateSelect,
       where: { sms_template_id: id },
     });
     return template ? toRecord(template) : null;
+  }
+
+  async getReminderById(id: string): Promise<{ reminderType: ReminderType | null } | null> {
+    const template = await prisma.smsTemplate.findUnique({
+      where: { sms_template_id: id },
+      select: { reminder_type: true },
+    });
+    return template ? { reminderType: template.reminder_type } : null;
   }
 
   async create(params: {
@@ -47,6 +67,7 @@ export class SmsTemplateRepositoryPrisma {
     variableMapping: SmsTemplateVariableMapping;
   }): Promise<SmsTemplateRecord> {
     const template = await prisma.smsTemplate.create({
+      select: templateSelect,
       data: {
         sms_provider: params.provider,
         provider_template_id: params.providerTemplateId,
@@ -62,6 +83,7 @@ export class SmsTemplateRepositoryPrisma {
     params: { name: string; variableMapping: SmsTemplateVariableMapping },
   ): Promise<SmsTemplateRecord> {
     const template = await prisma.smsTemplate.update({
+      select: templateSelect,
       where: { sms_template_id: id },
       data: {
         name: params.name,

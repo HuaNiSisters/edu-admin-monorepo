@@ -54,6 +54,22 @@ enum PaymentStatus {
   paid
 }
 
+enum SmsReminderType {
+  upcoming_payment
+  overdue_no_class_entry
+}
+
+enum SmsSendStatus {
+  pending
+  sent
+  failed
+}
+
+enum SmsRecipientRole {
+  student
+  parent
+}
+
 // Relationships: 
 // Student ↔ Parent (Many-to-Many): A student can have multiple parents, and a parent can have multiple students.
 
@@ -199,6 +215,7 @@ model Enrolment {
 
   payments Payment[]
   smsSends OwingSmsSend[]
+  smsSendAttempts SmsSendAttempt[]
 
   @@unique([student_id, class_id, term_id])
 }
@@ -243,10 +260,12 @@ model SmsTemplate {
   provider_template_id String
   name                 String
   variable_mapping     Json
+  reminder_type        SmsReminderType? @unique
   created_at           DateTime @default(now())
   updated_at           DateTime @updatedAt
 
   owingSends OwingSmsSend[]
+  sendAttempts SmsSendAttempt[]
 
   @@unique([sms_provider, provider_template_id])
 }
@@ -305,6 +324,28 @@ model OwingSmsSend {
   template SmsTemplate @relation(fields: [template_id], references: [sms_template_id], onDelete: Cascade)
 
   @@id([enrolment_id, term_id, template_id, phone_number])
+}
+
+model SmsSendAttempt {
+  sms_send_attempt_id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  request_id String @unique @db.Uuid
+  enrolment_id String @db.Uuid
+  sms_template_id String @db.Uuid
+  reminder_type SmsReminderType
+  recipient_phone String
+  recipient_role SmsRecipientRole
+  recipient_id String @db.Uuid
+  status SmsSendStatus @default(pending)
+  provider_message_id String?
+  error_message String?
+  created_at DateTime @default(now())
+  sent_at DateTime?
+
+  enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id], onDelete: Restrict)
+  template SmsTemplate @relation(fields: [sms_template_id], references: [sms_template_id], onDelete: Restrict)
+
+  @@index([enrolment_id, reminder_type, status])
+  @@index([enrolment_id, reminder_type, recipient_phone])
 }
 
 model Enquiry {
