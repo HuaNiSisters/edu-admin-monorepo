@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import {
   Sidebar,
   SidebarGroupContent,
@@ -11,7 +12,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarContent,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -96,6 +96,14 @@ const adminSidebarItems = [
 ];
 
 export function AppSidebar() {
+  return (
+    <Suspense fallback={<Sidebar collapsible="icon" variant="inset" />}>
+      <AppSidebarContent />
+    </Suspense>
+  );
+}
+
+function AppSidebarContent() {
   const { isUserAdmin, isUserReceptionist, isUserTutor } = useAuth();
   const pathname = usePathname();
   const isTutor = isUserTutor();

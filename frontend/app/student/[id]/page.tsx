@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { StudentWithParents } from "@/lib/api/types";
 import { studentService } from "@/lib/services";
 import StudentDataForm from "@/components/_reusable-form-components/student-data-form";
@@ -9,6 +9,14 @@ import { useAsync } from "@/hooks/use-async";
 import EnrolledClasses from "../_components/enrolled-classes";
 
 export default function ViewStudentPage() {
+  return (
+    <Suspense fallback={<div role="status">Loading student...</div>}>
+      <ViewStudentContent />
+    </Suspense>
+  );
+}
+
+function ViewStudentContent() {
   const params = useParams();
   const studentId = params.id as string;
 

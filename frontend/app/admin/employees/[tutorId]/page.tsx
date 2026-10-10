@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
@@ -13,11 +14,19 @@ import {
   type EmployeeRecord,
 } from "@/lib/employees/schema";
 
-export default async function EmployeePage({
-  params,
-}: {
+type EmployeePageProps = {
   params: Promise<{ tutorId: string }>;
-}) {
+};
+
+export default function EmployeePage({ params }: EmployeePageProps) {
+  return (
+    <Suspense fallback={<div role="status">Loading employee...</div>}>
+      <EmployeeContent params={params} />
+    </Suspense>
+  );
+}
+
+async function EmployeeContent({ params }: EmployeePageProps) {
   const { supabase, user, role } = await getActor();
   if (!user) redirect("/auth/login");
   if (role !== UserRole.Admin && role !== UserRole.Receptionist)

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAsync } from "@/hooks/use-async";
 import { classService, termService } from "@/lib/services";
@@ -10,7 +10,15 @@ import AttendanceTable from "../_components/attendance-table";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
 import { LoadingBar } from "@/components/loading-bar";
 
-const ViewClassAttendance = () => {
+export default function ViewClassAttendance() {
+  return (
+    <Suspense fallback={<div role="status">Loading attendance...</div>}>
+      <ClassAttendanceContent />
+    </Suspense>
+  );
+}
+
+const ClassAttendanceContent = () => {
   const params = useParams();
   const classId = params.id as string;
 
@@ -69,5 +77,3 @@ const ViewClassAttendance = () => {
     </div>
   );
 };
-
-export default ViewClassAttendance;

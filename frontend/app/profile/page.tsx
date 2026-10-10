@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getActor } from "@/lib/auth/server";
 import Link from "next/link";
@@ -8,7 +9,15 @@ import {
   type EmployeeRecord,
 } from "@/lib/employees/schema";
 
-export default async function ProfilePage() {
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div role="status">Loading profile...</div>}>
+      <ProfileContent />
+    </Suspense>
+  );
+}
+
+async function ProfileContent() {
   const { supabase, user, role } = await getActor();
   if (!user) redirect("/auth/login");
   if (!role) redirect("/forbidden");

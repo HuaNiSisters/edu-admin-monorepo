@@ -1,10 +1,19 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getActor } from "@/lib/auth/server";
 import { UserRole } from "@/core/userRoles/types";
 import { EmployeeForm } from "@/components/employees/employee-form";
 
-export default async function NewEmployeePage() {
+export default function NewEmployeePage() {
+  return (
+    <Suspense fallback={<div role="status">Loading employee form...</div>}>
+      <NewEmployeeContent />
+    </Suspense>
+  );
+}
+
+async function NewEmployeeContent() {
   const { user, role } = await getActor();
   if (!user) redirect("/auth/login");
   if (role !== UserRole.Admin) redirect("/forbidden");
