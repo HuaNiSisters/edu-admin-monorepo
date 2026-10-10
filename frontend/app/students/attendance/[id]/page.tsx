@@ -1,7 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import React, { Suspense, use, useEffect, useState } from "react";
 import { useAsync } from "@/hooks/use-async";
 import { classService, termService } from "@/lib/services";
 import { ClassTimeWithSubjectAndTutor, Term } from "@/lib/api/types";
@@ -10,17 +9,20 @@ import AttendanceTable from "../_components/attendance-table";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
 import { LoadingBar } from "@/components/loading-bar";
 
-export default function ViewClassAttendance() {
+type ClassAttendancePageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default function ViewClassAttendance({ params }: ClassAttendancePageProps) {
   return (
     <Suspense fallback={<div role="status">Loading attendance...</div>}>
-      <ClassAttendanceContent />
+      <ClassAttendanceContent params={params} />
     </Suspense>
   );
 }
 
-const ClassAttendanceContent = () => {
-  const params = useParams();
-  const classId = params.id as string;
+const ClassAttendanceContent = ({ params }: ClassAttendancePageProps) => {
+  const { id: classId } = use(params);
 
   const [classData, setClassData] = useState<ClassTimeWithSubjectAndTutor>();
   const [selectedTermId, setSelectedTermId] = useState<string>("");

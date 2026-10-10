@@ -1,36 +1,35 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 import { StudentWithParents } from "@/lib/api/types";
 import { studentService } from "@/lib/services";
 import StudentDataForm from "@/components/_reusable-form-components/student-data-form";
-import { useParams } from "next/navigation";
 import { useAsync } from "@/hooks/use-async";
 
-export default function StudentUpdatePage() {
+type StudentPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default function StudentUpdatePage({ params }: StudentPageProps) {
   return (
     <Suspense fallback={<div role="status">Loading student...</div>}>
-      <StudentUpdateContent />
+      <StudentUpdateContent params={params} />
     </Suspense>
   );
 }
 
-function StudentUpdateContent() {
-  const params = useParams();
-  const studentId = params.id as string;
+function StudentUpdateContent({ params }: StudentPageProps) {
+  const { id: studentId } = use(params);
 
   const [studentData, setStudentData] = useState<StudentWithParents>();
   const { run, isPending } = useAsync();
 
-  const fetchStudentData = async () => {
-    const data = await studentService.getStudentByIdAsync(studentId);
-    console.log({ fetchedStudentData: data });
-    setStudentData(data);
-  };
-
   useEffect(() => {
-    run(fetchStudentData);
-  }, [params.id]);
+    run(async () => {
+      const data = await studentService.getStudentByIdAsync(studentId);
+      setStudentData(data);
+    });
+  }, [studentId, run]);
 
   return (
     <div>

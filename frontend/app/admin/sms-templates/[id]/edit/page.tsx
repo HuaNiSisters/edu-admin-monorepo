@@ -1,20 +1,22 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, use } from "react";
 import { SMSAction } from "@/types/smsActions";
-import { useParams } from "next/navigation";
 import SMSTemplateData from "../../_components/sms-template-data";
 
-export default function UpdateSMSTemplatePage() {
+type SMSTemplatePageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default function UpdateSMSTemplatePage({ params }: SMSTemplatePageProps) {
   return (
     <Suspense fallback={<div role="status">Loading SMS template...</div>}>
-      <UpdateSMSTemplateContent />
+      <UpdateSMSTemplateContent params={params} />
     </Suspense>
   );
 }
 
-function UpdateSMSTemplateContent() {
-  const params = useParams();
-  const templateId = params.id as string;
+function UpdateSMSTemplateContent({ params }: SMSTemplatePageProps) {
+  const { id: templateId } = use(params);
 
   return (
     <div>
