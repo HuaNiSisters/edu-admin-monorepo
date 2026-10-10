@@ -5,7 +5,7 @@ import type {
   ProviderSMSTemplate,
   SmsTemplateVariableMapping,
   UpdateSMSTemplateRequest,
-} from "../interfaces/ISmsWrapper.ts";
+} from "../interfaces/ISmsWrapper.js";
 
 const TWILIO_CONTENT_BASE_URL =
   process.env.TWILIO_CONTENT_BASE_URL ||

@@ -1,4 +1,4 @@
-import type { IUserRepository } from "../interfaces/UserRepository.ts";
+import type { IUserRepository } from "../interfaces/UserRepository.js";
 
 export class UserRepositorySQL implements IUserRepository {
   async getUserById(id: string): ReturnType<IUserRepository["getUserById"]> {

@@ -3,8 +3,8 @@ import type {
   FastifyPluginOptions,
 } from "fastify";
 import swaggerUi from "@fastify/swagger-ui";
-import userRoutes from "./routes/user.ts";
-import broadcastRoutes from "./routes/broadcast.ts";
+import userRoutes from "./routes/user.js";
+import broadcastRoutes from "./routes/broadcast.js";
 
 export default async function (
   fastify: FastifyInstance,

@@ -1,6 +1,6 @@
-import type { ReminderType, SmsTemplateVariableMapping } from "../interfaces/ISmsWrapper.ts";
-import type { Prisma } from "../../generated/prisma/client.ts";
-import { prisma } from "../lib/prisma.ts";
+import type { ReminderType, SmsTemplateVariableMapping } from "../interfaces/ISmsWrapper.js";
+import type { Prisma } from "../../generated/prisma/client.js";
+import { prisma } from "../lib/prisma.js";
 
 // Ordinary template operations also work before reminder tracking is deployed.
 const templateSelect = {

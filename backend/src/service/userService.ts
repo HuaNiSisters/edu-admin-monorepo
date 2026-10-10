@@ -1,4 +1,4 @@
-import { UserRepositoryPrisma } from "../repositories/UserRepositoryPrisma.ts";
+import { UserRepositoryPrisma } from "../repositories/UserRepositoryPrisma.js";
 
 const UserRepository = new UserRepositoryPrisma();
 

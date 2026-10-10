@@ -11,8 +11,8 @@ import {
   getSMSTemplatesAsync,
   sendSMSTemplateAsync,
   updateSMSTemplateAsync,
-} from "../service/smsService.ts";
-import type { GetSMSTemplateResponse } from "../interfaces/ISmsWrapper.ts";
+} from "../service/smsService.js";
+import type { GetSMSTemplateResponse } from "../interfaces/ISmsWrapper.js";
 
 async function routes(
   fastify: FastifyInstance,

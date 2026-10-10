@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma.ts";
-import type { IUserRepository } from "../interfaces/UserRepository.ts";
+import { prisma } from "../lib/prisma.js";
+import type { IUserRepository } from "../interfaces/UserRepository.js";
 
 export class UserRepositoryPrisma implements IUserRepository {
   async getUserById(id: string) {

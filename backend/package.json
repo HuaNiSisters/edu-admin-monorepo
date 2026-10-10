@@ -2,9 +2,10 @@
   "name": "eduportal-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.ts",
+  "main": "dist/src/app.js",
   "type": "module",
   "scripts": {
+    "postinstall": "prisma generate --generator client",
     "prisma-migrate": "prisma migrate deploy",
     "prisma-migrate-old-wrong": "npx prisma migrate dev --name init --schema ./prisma/schema.prisma",
     "dbstudio": "npx prisma studio --config ./prisma.config.ts",
@@ -14,9 +15,10 @@
     "predev": "prisma generate --generator client",
     "dev": "nodemon --exec node --loader ts-node/esm src/app.ts",
     "prebuild": "prisma generate --generator client",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "start": "node dist/src/app.js",
+    "test": "npm run build && node --test dist/src/service/smsReminderCore.test.js"
   },
   "author": "",
   "license": "ISC",

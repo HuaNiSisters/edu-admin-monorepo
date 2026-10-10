@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyPluginOptions, FastifyRequest } from "fastify";
-import { getUserByIdAsync } from "../service/userService.ts";
+import { getUserByIdAsync } from "../service/userService.js";
 
 async function routes(
   fastify: FastifyInstance,

@@ -1,4 +1,4 @@
-import { prisma } from "../src/lib/prisma.ts";
+import { prisma } from "../src/lib/prisma.js";
 
 /**
  * Test-data identifiers are intentionally kept in one place.  Cleanup only

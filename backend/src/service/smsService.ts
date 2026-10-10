@@ -1,12 +1,12 @@
-import { prisma } from "../lib/prisma.ts";
+import { prisma } from "../lib/prisma.js";
 import type {
   CreateSMSTemplateRequest,
   GetSMSTemplateResponse,
   ISmsProvider,
   SMSTemplateSummary,
-} from "../interfaces/ISmsWrapper.ts";
-import { SmsTemplateRepositoryPrisma } from "../repositories/SmsTemplateRepositoryPrisma.ts";
-import { SmsWrapperTwilio } from "../repositories/SmsWrapperTwilio.ts";
+} from "../interfaces/ISmsWrapper.js";
+import { SmsTemplateRepositoryPrisma } from "../repositories/SmsTemplateRepositoryPrisma.js";
+import { SmsWrapperTwilio } from "../repositories/SmsWrapperTwilio.js";
 
 const smsTemplateRepository = new SmsTemplateRepositoryPrisma();
 const providers: ISmsProvider[] = [new SmsWrapperTwilio()];

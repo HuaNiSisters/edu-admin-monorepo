@@ -1,5 +1,5 @@
-import { Location } from "../generated/prisma/enums.ts";
-import { prisma } from "../src/lib/prisma.ts";
+import { Location } from "../generated/prisma/enums.js";
+import { prisma } from "../src/lib/prisma.js";
 
 async function main() {
   // Create a new user with a post

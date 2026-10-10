@@ -1,4 +1,4 @@
-import type { SmsReminderType } from "../../generated/prisma/enums.ts";
+import type { SmsReminderType } from "../../generated/prisma/enums.js";
 
 export type ReminderType = SmsReminderType;
 

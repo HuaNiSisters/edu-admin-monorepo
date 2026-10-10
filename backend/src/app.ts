@@ -1,12 +1,13 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
-import cors, { fastifyCors } from "@fastify/cors";
-import routesV1 from "./routesV1.ts";
+import cors from "@fastify/cors";
+import routesV1 from "./routesV1.js";
 
-const PORT_NUMBER = 8888;
+const PORT_NUMBER = Number(process.env.PORT || 8888);
+const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
 
 const fastify = Fastify({
-  logger: {
+  logger: isProduction ? { level: "info" } : {
     level: "debug",
     transport: {
       target: "pino-pretty",
@@ -17,6 +18,8 @@ const fastify = Fastify({
     },
   },
 });
+
+fastify.get("/", async () => ({ status: "ok" }));
 
 /**
  * Run the server!
@@ -34,7 +37,7 @@ const start = async () => {
       },
     });
 
-    await fastify.register(fastifyCors, {
+    await fastify.register(cors, {
       origin: ['http://localhost:3000'], // TODO: Use env vars for final URLs
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
