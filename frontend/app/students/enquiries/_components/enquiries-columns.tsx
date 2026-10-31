@@ -1,9 +1,11 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Enquiry } from "@/lib/api/types/enquiry";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function column(
   key: keyof Enquiry,
@@ -47,7 +49,46 @@ function column(
   };
 }
 
-export const enquiryColumns: ColumnDef<Enquiry>[] = [
+export function createEnquiryColumns({
+  selectedIds,
+  onSelectionChange,
+}: {
+  selectedIds: Set<string>;
+  onSelectionChange: (id: string, selected: boolean) => void;
+}): ColumnDef<Enquiry>[] {
+  return [
+  {
+    id: "select",
+    size: 48,
+    header: "",
+    enableSorting: false,
+    cell: ({ row }) => (
+      <Checkbox
+        checked={selectedIds.has(row.original.enquiry_id)}
+        onCheckedChange={checked => onSelectionChange(row.original.enquiry_id, checked === true)}
+        aria-label={`Select enquiry for ${row.original.first_name} ${row.original.surname}`}
+      />
+    ),
+  },
+  {
+    id: "actions",
+    size: 64,
+    header: "",
+    enableSorting: false,
+    cell: ({ row }) => (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="size-8 p-0"
+        aria-label={`Edit enquiry for ${row.original.first_name} ${row.original.surname}`}
+        asChild
+      >
+        <Link href={`/enquiry/${row.original.enquiry_id}`}>
+          <Pencil className="size-3.5" />
+        </Link>
+      </Button>
+    ),
+  },
   column("created_at", "Created at", 220, {
     sortingFn: (a, b) =>
       Date.parse(a.original.created_at) - Date.parse(b.original.created_at),
@@ -98,4 +139,5 @@ export const enquiryColumns: ColumnDef<Enquiry>[] = [
   column("hear_about_us", "Hear about us", 220),
   column("reference", "Reference", 220),
   column("additional_comments", "Additional comments/questions", 380),
-];
+  ];
+}

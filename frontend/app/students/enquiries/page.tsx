@@ -45,7 +45,7 @@ export default function EnquiriesPage() {
           <Button variant="outline" size="sm" onClick={() => void loadEnquiries()}>Retry</Button>
         </div>
       )}
-      <EnquiriesList enquiries={enquiries} />
+      <EnquiriesList enquiries={enquiries} onEnquiriesChanged={loadEnquiries} />
       <EnquiryDialog open={dialogOpen} onOpenChange={setDialogOpen} onSave={enquiry => {
         setEnquiries(current => [enquiry, ...current]);
         toast.success("Enquiry created");
