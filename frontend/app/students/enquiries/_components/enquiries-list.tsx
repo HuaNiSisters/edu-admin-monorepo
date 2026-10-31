@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, RotateCcw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -9,7 +9,7 @@ import { Enquiry } from "@/lib/api/types/enquiry";
 import { enquiryService } from "@/lib/services/enquiryService";
 import { createEnquiryColumns } from "./enquiries-columns";
 
-type EnquiryView = "open" | "closed" | "all";
+type EnquiryView = "open" | "closed";
 
 export default function EnquiriesList({
   enquiries,
@@ -20,16 +20,12 @@ export default function EnquiriesList({
 }) {
   const [view, setView] = useState<EnquiryView>("open");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isClosing, setIsClosing] = useState(false);
-  const [closeError, setCloseError] = useState<string | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   const displayedEnquiries = useMemo(
-    () => enquiries.filter(enquiry => view === "all" || (view === "closed" ? enquiry.is_closed : !enquiry.is_closed)),
+    () => enquiries.filter(enquiry => view === "closed" ? enquiry.is_closed : !enquiry.is_closed),
     [enquiries, view],
-  );
-  const selectedOpenIds = useMemo(
-    () => [...selectedIds].filter(id => enquiries.some(enquiry => enquiry.enquiry_id === id && !enquiry.is_closed)),
-    [enquiries, selectedIds],
   );
   const columns = useMemo(() => createEnquiryColumns({
     selectedIds,
@@ -44,18 +40,22 @@ export default function EnquiriesList({
     }),
   }), [selectedIds]);
 
-  async function closeSelected() {
-    if (selectedOpenIds.length === 0) return;
-    setIsClosing(true);
-    setCloseError(null);
+  async function updateSelectedStatus() {
+    if (selectedIds.size === 0) return;
+    setIsUpdatingStatus(true);
+    setStatusError(null);
     try {
-      await enquiryService.close(selectedOpenIds);
+      if (view === "open") {
+        await enquiryService.close([...selectedIds]);
+      } else {
+        await enquiryService.reopen([...selectedIds]);
+      }
       setSelectedIds(new Set());
       await onEnquiriesChanged();
     } catch (error) {
-      setCloseError(error instanceof Error ? error.message : "Unable to close enquiries.");
+      setStatusError(error instanceof Error ? error.message : "Unable to update enquiries.");
     } finally {
-      setIsClosing(false);
+      setIsUpdatingStatus(false);
     }
   }
 
@@ -74,13 +74,14 @@ export default function EnquiriesList({
         >
           <ToggleGroupItem value="open">Open</ToggleGroupItem>
           <ToggleGroupItem value="closed">Closed</ToggleGroupItem>
-          <ToggleGroupItem value="all">All</ToggleGroupItem>
         </ToggleGroup>
         <div className="flex items-center gap-3">
-          {selectedOpenIds.length > 0 && (
-            <Button size="sm" onClick={() => void closeSelected()} disabled={isClosing}>
-              <CheckCircle2 className="mr-2 size-4" />
-              {isClosing ? "Closing…" : `Close ${selectedOpenIds.length} selected`}
+          {selectedIds.size > 0 && (
+            <Button size="sm" onClick={() => void updateSelectedStatus()} disabled={isUpdatingStatus}>
+              {view === "open" ? <CheckCircle2 className="mr-2 size-4" /> : <RotateCcw className="mr-2 size-4" />}
+              {isUpdatingStatus
+                ? view === "open" ? "Closing…" : "Reopening…"
+                : view === "open" ? `Close ${selectedIds.size} selected` : `Reopen ${selectedIds.size} selected`}
             </Button>
           )}
         <span className="text-sm text-muted-foreground">
@@ -88,7 +89,7 @@ export default function EnquiriesList({
         </span>
         </div>
       </div>
-      {closeError && <p role="alert" className="text-sm text-destructive">{closeError}</p>}
+      {statusError && <p role="alert" className="text-sm text-destructive">{statusError}</p>}
       <DataTable columns={columns} data={displayedEnquiries} />
     </div>
   );

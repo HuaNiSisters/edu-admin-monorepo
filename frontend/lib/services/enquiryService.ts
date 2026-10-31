@@ -44,4 +44,11 @@ export const enquiryService = {
       .in("enquiry_id", ids);
     if (error) throw new Error(error.message);
   },
+  async reopen(ids: string[]): Promise<void> {
+    const { error } = await createClient()
+      .from("Enquiry")
+      .update({ is_closed: false, closed_at: null })
+      .in("enquiry_id", ids);
+    if (error) throw new Error(error.message);
+  },
 };
