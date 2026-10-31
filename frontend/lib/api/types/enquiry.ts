@@ -6,6 +6,8 @@ export const ENQUIRY_CAMPUSES = [
 export interface Enquiry {
   enquiry_id: string;
   created_at: string;
+  is_closed: boolean;
+  closed_at: string | null;
   // "Website" for online submissions, or the staff member's name.
   created_by: string;
   first_name: string;

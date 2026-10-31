@@ -37,4 +37,11 @@ export const enquiryService = {
     if (error) throw new Error(error.message);
     return data as Enquiry;
   },
+  async close(ids: string[]): Promise<void> {
+    const { error } = await createClient()
+      .from("Enquiry")
+      .update({ is_closed: true, closed_at: new Date().toISOString() })
+      .in("enquiry_id", ids);
+    if (error) throw new Error(error.message);
+  },
 };

@@ -352,6 +352,8 @@ model SmsSendAttempt {
 model Enquiry {
   enquiry_id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  is_closed                  Boolean  @default(false)
+  closed_at                  DateTime? @db.Timestamptz(6)
   created_by                 String
   first_name                 String
   surname                    String
