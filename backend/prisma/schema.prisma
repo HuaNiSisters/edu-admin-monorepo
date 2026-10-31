@@ -360,6 +360,7 @@ model Enquiry {
   grade                      Int
   subject_selection          String[]
   suburb_of_home             String
+  parent_2_phone_number      String?
   gender                     String?
   student_phone_number       String?
   email_address              String?

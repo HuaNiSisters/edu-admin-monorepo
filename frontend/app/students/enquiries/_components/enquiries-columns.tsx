@@ -1,8 +1,9 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Enquiry } from "@/lib/api/types/enquiry";
 
 function column(
@@ -48,6 +49,25 @@ function column(
 }
 
 export const enquiryColumns: ColumnDef<Enquiry>[] = [
+  {
+    id: "actions",
+    size: 64,
+    header: "",
+    enableSorting: false,
+    cell: ({ row }) => (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="size-8 p-0"
+        aria-label={`Edit enquiry for ${row.original.first_name} ${row.original.surname}`}
+        asChild
+      >
+        <Link href={`/enquiry/${row.original.enquiry_id}`}>
+          <Pencil className="size-3.5" />
+        </Link>
+      </Button>
+    ),
+  },
   column("created_at", "Created at", 220, {
     sortingFn: (a, b) =>
       Date.parse(a.original.created_at) - Date.parse(b.original.created_at),
