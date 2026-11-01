@@ -43,6 +43,8 @@ type PaymentFormState = {
   notes: string;
 };
 
+const CREATE_TERM_OPTION = "__create_future_term__";
+
 const toDateInputValue = (date?: string | null) => {
   if (!date) return new Date().toISOString().slice(0, 10);
   return new Date(date).toISOString().slice(0, 10);
@@ -58,32 +60,30 @@ const PaymentDialog = ({
 }: PaymentDialogProps) => {
   const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([]);
   const [paymentStatuses, setPaymentStatuses] = useState<PaymentStatus[]>([]);
-  const [availableEnrolments, setAvailableEnrolments] = useState(enrolments);
+  const [studentEnrolments, setStudentEnrolments] = useState(enrolments);
   const [availableTerms, setAvailableTerms] = useState<Term[]>([term]);
+  const [termsLoaded, setTermsLoaded] = useState(false);
   const [selectedTermId, setSelectedTermId] = useState(term.term_id);
-  const [selectedEnrolmentIds, setSelectedEnrolmentIds] = useState<string[]>(
-    () => enrolments.map((enrolment) => enrolment.enrolment_id),
+  const [newTermStartDate, setNewTermStartDate] = useState("");
+  const [newTermEndDate, setNewTermEndDate] = useState("");
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>(
+    () => enrolments.map((enrolment) => enrolment.class_id),
   );
 
-  const enrolmentsForTerm = useMemo(
-    () =>
-      availableEnrolments.filter(
-        (enrolment) => enrolment.term_id === selectedTermId,
-      ),
-    [availableEnrolments, selectedTermId],
-  );
-
-  const selectableEnrolments = useMemo(
-    () => (enrolmentsForTerm.length > 0 ? enrolmentsForTerm : enrolments),
-    [enrolments, enrolmentsForTerm],
-  );
+  const latestTerm = [...availableTerms].sort(
+    (a, b) => b.year - a.year || b.name - a.name,
+  )[0] ?? term;
+  const nextTerm =
+    latestTerm.name < 4
+      ? { year: latestTerm.year, name: latestTerm.name + 1 }
+      : { year: latestTerm.year + 1, name: 1 };
 
   const selectedEnrolments = useMemo(
     () =>
-      selectableEnrolments.filter((enrolment) =>
-        selectedEnrolmentIds.includes(enrolment.enrolment_id),
+      enrolments.filter((enrolment) =>
+        selectedClassIds.includes(enrolment.class_id),
       ),
-    [selectableEnrolments, selectedEnrolmentIds],
+    [enrolments, selectedClassIds],
   );
 
   const defaultAmountDue = useMemo(
@@ -116,40 +116,48 @@ const PaymentDialog = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const initialEnrolmentIds = enrolments.map(
-      (enrolment) => enrolment.enrolment_id,
-    );
-    setAvailableEnrolments(enrolments);
+    const initialClassIds = enrolments.map((enrolment) => enrolment.class_id);
+    setStudentEnrolments(enrolments);
     setAvailableTerms([term]);
+    setTermsLoaded(false);
     setSelectedTermId(term.term_id);
-    setSelectedEnrolmentIds(initialEnrolmentIds);
+    setNewTermStartDate("");
+    setNewTermEndDate("");
+    setSelectedClassIds(initialClassIds);
 
     const studentId = enrolments[0]?.student_id;
     if (!studentId) return;
 
     const fetchStudentPaymentOptions = async () => {
-      const [studentEnrolments, terms] = await Promise.all([
-        enrolmentService.getEnrolmentsByStudentIdAsync(studentId),
-        termService.getTermsAsync(),
-      ]);
+      try {
+        const [studentEnrolments, terms] = await Promise.all([
+          enrolmentService.getEnrolmentsByStudentIdAsync(studentId),
+          termService.getTermsAsync(),
+        ]);
 
-      setAvailableEnrolments(studentEnrolments);
-      setAvailableTerms(
-        Array.from(
-          new Map(
-            [term, ...terms]
-              .filter(
-                (availableTerm) =>
-                  new Date(availableTerm.start_date) >=
-                  new Date(term.start_date),
-              )
-              .map((availableTerm) => [
-                availableTerm.term_id,
-                availableTerm,
-              ]),
-          ).values(),
-        ),
-      );
+        setStudentEnrolments(studentEnrolments);
+        setAvailableTerms(
+          Array.from(
+            new Map(
+              [term, ...terms]
+                .filter(
+                  (availableTerm) =>
+                    new Date(availableTerm.start_date) >=
+                    new Date(term.start_date),
+                )
+                .map((availableTerm) => [
+                  availableTerm.term_id,
+                  availableTerm,
+                ]),
+            ).values(),
+          ),
+        );
+        setTermsLoaded(true);
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to load terms.",
+        );
+      }
     };
 
     fetchStudentPaymentOptions();
@@ -197,20 +205,14 @@ const PaymentDialog = ({
 
   const selectTerm = (termId: string) => {
     setSelectedTermId(termId);
-    setSelectedEnrolmentIds(
-      (availableEnrolments.some((enrolment) => enrolment.term_id === termId)
-        ? availableEnrolments.filter((enrolment) => enrolment.term_id === termId)
-        : enrolments
-      )
-        .map((enrolment) => enrolment.enrolment_id),
-    );
+    setSelectedClassIds(enrolments.map((enrolment) => enrolment.class_id));
   };
 
-  const toggleEnrolment = (enrolmentId: string, isSelected: boolean) => {
-    setSelectedEnrolmentIds((current) =>
+  const toggleEnrolment = (classId: string, isSelected: boolean) => {
+    setSelectedClassIds((current) =>
       isSelected
-        ? [...current, enrolmentId]
-        : current.filter((id) => id !== enrolmentId),
+        ? [...new Set([...current, classId])]
+        : current.filter((id) => id !== classId),
     );
   };
 
@@ -256,18 +258,67 @@ const PaymentDialog = ({
     }
 
     let paymentEnrolmentId = paymentAnchorEnrolmentId;
+    let targetTermId = selectedTermId;
 
-    if (!payment && enrolmentsForTerm.length === 0) {
-      const newEnrolments = await Promise.all(
-        selectedEnrolments.map((enrolment) =>
-          enrolmentService.enrolAsync({
-            studentId: enrolment.student_id,
-            classId: enrolment.class_id,
-            termId: selectedTermId,
-          }),
-        ),
+    if (selectedTermId === CREATE_TERM_OPTION) {
+      if (!newTermStartDate || !newTermEndDate) {
+        toast.error("Enter the start and end dates for the new term.");
+        return;
+      }
+      if (new Date(newTermEndDate) < new Date(newTermStartDate)) {
+        toast.error("The term end date must be after its start date.");
+        return;
+      }
+
+      try {
+        const createdTerm = await termService.createTermAsync({
+          year: nextTerm.year,
+          name: nextTerm.name,
+          start_date: new Date(`${newTermStartDate}T12:00:00`).toISOString(),
+          end_date: new Date(`${newTermEndDate}T12:00:00`).toISOString(),
+        });
+        targetTermId = createdTerm.term_id;
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to create the term.",
+        );
+        return;
+      }
+    }
+
+    if (!payment) {
+      const selectedTerm = availableTerms.find(
+        (availableTerm) => availableTerm.term_id === targetTermId,
       );
-      paymentEnrolmentId = newEnrolments[0]?.enrolment_id;
+      try {
+        const targetEnrolments = await Promise.all(
+          selectedEnrolments.map(async (enrolment) => {
+            const existingEnrolment = studentEnrolments.find(
+              (existing) =>
+                existing.term_id === targetTermId &&
+                existing.class_id === enrolment.class_id,
+            );
+            if (existingEnrolment) return existingEnrolment;
+
+            return enrolmentService.enrolAsync({
+              studentId: enrolment.student_id,
+              classId: enrolment.class_id,
+              termId: targetTermId,
+              classStartDate:
+                selectedTerm?.start_date ??
+                new Date(`${newTermStartDate}T12:00:00`).toISOString(),
+            });
+          }),
+        );
+        paymentEnrolmentId = targetEnrolments[0]?.enrolment_id;
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to create term enrolments.",
+        );
+        return;
+      }
     }
 
     if (!paymentEnrolmentId) {
@@ -288,12 +339,19 @@ const PaymentDialog = ({
       notes: formState.notes.trim() || null,
     };
 
-    if (payment) {
-      await paymentService.updatePaymentAsync(payment.payment_id, paymentData);
-      toast.success("Payment updated.");
-    } else {
-      await paymentService.createPaymentAsync(paymentData);
-      toast.success("Payment added.");
+    try {
+      if (payment) {
+        await paymentService.updatePaymentAsync(payment.payment_id, paymentData);
+        toast.success("Payment updated.");
+      } else {
+        await paymentService.createPaymentAsync(paymentData);
+        toast.success("Payment added.");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save payment.",
+      );
+      return;
     }
 
     onSaved();
@@ -312,7 +370,11 @@ const PaymentDialog = ({
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label>Term</Label>
-          <Select value={selectedTermId} onValueChange={selectTerm}>
+          <Select
+            value={selectedTermId}
+            onValueChange={selectTerm}
+            disabled={Boolean(payment) || !termsLoaded}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -322,26 +384,59 @@ const PaymentDialog = ({
                   {availableTerm.year} Term {availableTerm.name}
                 </SelectItem>
               ))}
+              <SelectItem value={CREATE_TERM_OPTION}>
+                Set up {nextTerm.year} Term {nextTerm.name}…
+              </SelectItem>
             </SelectContent>
           </Select>
+          {!termsLoaded && (
+            <p className="text-xs text-muted-foreground">Loading terms…</p>
+          )}
+          {termsLoaded && selectedTermId === CREATE_TERM_OPTION && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="new-term-start-date">Term start date</Label>
+                <Input
+                  id="new-term-start-date"
+                  type="date"
+                  value={newTermStartDate}
+                  onChange={(event) => setNewTermStartDate(event.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new-term-end-date">Term end date</Label>
+                <Input
+                  id="new-term-end-date"
+                  type="date"
+                  value={newTermEndDate}
+                  onChange={(event) => setNewTermEndDate(event.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          {!payment && (
+            <p className="text-xs text-muted-foreground">
+              Saving for a future term enrols the selected classes in that term.
+            </p>
+          )}
         </div>
 
         <div className="grid gap-2">
           <Label>Enrolments</Label>
           <div className="rounded-md border divide-y">
-            {selectableEnrolments.map((enrolment) => {
-              const enrolmentId = enrolment.enrolment_id;
+            {enrolments.map((enrolment) => {
+              const classId = enrolment.class_id;
               const subjectOffering = enrolment.ClassTime.SubjectOffering;
 
               return (
                 <label
-                  key={enrolmentId}
+                  key={classId}
                   className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm"
                 >
                   <Checkbox
-                    checked={selectedEnrolmentIds.includes(enrolmentId)}
+                    checked={selectedClassIds.includes(classId)}
                     onCheckedChange={(checked) =>
-                      toggleEnrolment(enrolmentId, checked === true)
+                      toggleEnrolment(classId, checked === true)
                     }
                   />
                   {subjectOffering.subject_name} (Grade {subjectOffering.grade})
