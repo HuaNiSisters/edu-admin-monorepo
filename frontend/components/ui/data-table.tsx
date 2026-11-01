@@ -80,6 +80,7 @@ export function DataTable<TData, TValue>({
       columnVisibility,
     },
   });
+  const pageCount = Math.max(1, table.getPageCount());
 
   return (
     <div>
@@ -161,7 +162,7 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-between py-4">
         <div className="text-muted-foreground text-sm">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+          {pageCount}
         </div>
         <div className="flex items-center gap-2">
           <Button
