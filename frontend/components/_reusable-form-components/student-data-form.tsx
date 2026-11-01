@@ -104,6 +104,7 @@ const normaliseMobileNumber = (value: string) => value.replace(/\D/g, "");
 type PendingEnrolment = {
   classTime: ClassTimeWithSubjectAndTutor;
   termId: string;
+  classStartDate: string;
 };
 
 const StudentDataForm = ({
@@ -293,6 +294,7 @@ const StudentDataForm = ({
               studentId: createStudentResponse.student_id,
               classId: pendingEnrolment.classTime.class_id,
               termId: pendingEnrolment.termId,
+              classStartDate: pendingEnrolment.classStartDate,
             }),
           ),
         );
@@ -321,9 +323,11 @@ const StudentDataForm = ({
   const addClassToEnrolment = async ({
     classId,
     termId,
+    classStartDate,
   }: {
     classId: string;
     termId: string;
+    classStartDate: string;
   }) => {
     const isDuplicate = pendingEnrolments.some(
       (pendingEnrolment) =>
@@ -338,7 +342,7 @@ const StudentDataForm = ({
     }
 
     const classTime = await classService.getClassByIdAsync(classId);
-    const updatedEnrolment = { classTime, termId };
+    const updatedEnrolment = { classTime, termId, classStartDate };
     setPendingEnrolments((current) =>
       editingPendingEnrolment
         ? current.map((pendingEnrolment) =>
@@ -773,6 +777,7 @@ const StudentDataForm = ({
                       ? {
                           classId: editingPendingEnrolment.classTime.class_id,
                           termId: editingPendingEnrolment.termId,
+                          classStartDate: editingPendingEnrolment.classStartDate,
                         }
                       : { termId: defaultTermId }
                   }

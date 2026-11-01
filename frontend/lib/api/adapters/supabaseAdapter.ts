@@ -915,26 +915,19 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
     if (error) throw new Error("Failed to delete enrolment: " + error.message);
   }
 
-  // async updateEnrolmentAsync(
-  //   id: string,
-  //   data: Omit<
-  //     CreateEnrolmentDataParams,
-  //     "student_id" | "class_id" | "term_id"
-  //   >,
-  // ) {
-  //   const { enrolment_date, status } = data;
-  //   const { data: responseData, error } = await this.supabase
-  //     .from("Enrolment")
-  //     .update({
-  //       enrolment_date,
-  //       status,
-  //     })
-  //     .eq("enrolment_id", id)
-  //     .select()
-  //     .single();
-  //   if (error) throw new Error("Failed to update enrolment: " + error.message);
-  //   return responseData;
-  // }
+  async updateEnrolmentDateAsync(
+    enrolmentId: string,
+    enrolmentDate: string,
+  ) {
+    const { data: responseData, error } = await this.supabase
+      .from("Enrolment")
+      .update({ enrolment_date: enrolmentDate })
+      .eq("enrolment_id", enrolmentId)
+      .select()
+      .single();
+    if (error) throw new Error("Failed to update enrolment: " + error.message);
+    return responseData;
+  }
 }
 
 export default SupabaseApiWrapper;

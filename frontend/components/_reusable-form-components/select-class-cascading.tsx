@@ -232,8 +232,8 @@ export function SelectClassCascading({
           <SelectContent>
             {matchingClasses.map((classTime) => (
               <SelectItem key={classTime.class_id} value={classTime.class_id}>
-                {classTime.day_of_week} {classTime.start_time}–
-                {classTime.end_time}
+                {classTime.day_of_week} {classTime.start_time} - {classTime.end_time}
+                {classTime.tutor ? ` (${classTime.tutor})` : ""}
               </SelectItem>
             ))}
           </SelectContent>

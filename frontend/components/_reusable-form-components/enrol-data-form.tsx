@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
 import { SelectClassCascading } from "@/components/_reusable-form-components/select-class-cascading";
 import { SelectTerm } from "@/components/_reusable-form-components/select-term";
-import { Field, FieldError } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { enrolmentService, termService } from "@/lib/services";
 import { toast } from "sonner";
 import { Term } from "@/lib/api/types";
@@ -16,6 +16,7 @@ export interface EnrolmentData {
   studentId: string;
   classId: string;
   termId: string;
+  classStartDate: string;
 }
 
 export interface EnrolDataFormHandle {
@@ -25,12 +26,20 @@ export interface EnrolDataFormHandle {
 interface EnrolDataFormProps {
   studentId?: string;
   // Pre-fill the form, e.g. when editing a previously-added pending enrolment.
-  defaultValues?: { classId?: string; termId?: string };
+  defaultValues?: {
+    classId?: string;
+    termId?: string;
+    classStartDate?: string;
+  };
   // If provided, submission calls this instead of enrolling via the API
   // directly. Lets the form be reused before a student exists yet (e.g. the
   // create-student flow, which only wants the selected classId/termId to
   // stash locally and enrol later once the student has been created).
-  onEnrol?: (data: { classId: string; termId: string }) => Promise<void> | void;
+  onEnrol?: (data: {
+    classId: string;
+    termId: string;
+    classStartDate: string;
+  }) => Promise<void> | void;
   afterSubmit?: () => void;
   ref?: React.Ref<EnrolDataFormHandle>;
 }
@@ -50,6 +59,7 @@ export default function EnrolDataForm({
   const formSchema = zod.object({
     classId: zod.string().nonempty("Class is required"),
     termId: zod.string().nonempty("Term is required"),
+    classStartDate: zod.string().nonempty("Class start date is required"),
   });
 
   // Do all classes always run every term?
@@ -58,12 +68,22 @@ export default function EnrolDataForm({
     defaultValues: {
       classId: defaultValues?.classId ?? "",
       termId: defaultValues?.termId ?? "",
+      classStartDate:
+        defaultValues?.classStartDate ??
+        (() => {
+          const today = new Date();
+          return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        })(),
     },
   });
 
   async function onSubmit(data: zod.infer<typeof formSchema>) {
     console.log({ formData: data });
-    toast.success("Successfully enrolled student in class");
+    toast.success(
+      onEnrol
+        ? "Class added. It will be enrolled when the student is created."
+        : "Successfully enrolled student in class",
+    );
     afterSubmit?.();
   }
 
@@ -116,6 +136,7 @@ export default function EnrolDataForm({
               studentId: studentId!,
               classId: data.classId,
               termId: data.termId,
+              classStartDate: data.classStartDate,
             });
           }
 
@@ -167,14 +188,34 @@ export default function EnrolDataForm({
             )}
           />
         </div>
-        <div className="flex gap-2 items-center w-full">
-          <div className="flex-1 min-w-0">
+        <div className="grid w-full items-start gap-4 sm:grid-cols-2">
+          <div className="min-w-0">
             <Controller
               name="termId"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field className="flex">
                   <SelectTerm value={field.value} onChange={onTermChange} />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+          <div className="grid gap-2">
+            <FieldLabel htmlFor="class-start-date">Class Start Date</FieldLabel>
+            <Controller
+              name="classStartDate"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field>
+                  <input
+                    id="class-start-date"
+                    type="date"
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                    {...field}
+                  />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}

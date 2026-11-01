@@ -6,8 +6,11 @@ function EnrolmentService(enrolmentRepo: IEnrolmentRepo) {
     studentId: string;
     classId: string;
     termId: string;
+    classStartDate?: string;
   }) {
-    const enrolmentDate = new Date().toISOString();
+    const enrolmentDate = data.classStartDate
+      ? new Date(`${data.classStartDate}T12:00:00`).toISOString()
+      : new Date().toISOString();
     const defaultStatus = "active" as EnrolmentStatus;
 
     return await enrolmentRepo.createEnrolmentAsync({
@@ -23,6 +26,17 @@ function EnrolmentService(enrolmentRepo: IEnrolmentRepo) {
     return await enrolmentRepo.getEnrolmentsByStudentIdAsync(studentId);
   }
 
+  async function updateEnrolmentDateAsync(
+    enrolmentId: string,
+    classStartDate: string,
+  ) {
+    const enrolmentDate = new Date(`${classStartDate}T12:00:00`).toISOString();
+    return await enrolmentRepo.updateEnrolmentDateAsync(
+      enrolmentId,
+      enrolmentDate,
+    );
+  }
+
   async function getEnrolmentsByClassIdAsync(classId: string) {
     return await enrolmentRepo.getEnrolmentsByClassIdAsync(classId);
   }
@@ -34,6 +48,7 @@ function EnrolmentService(enrolmentRepo: IEnrolmentRepo) {
   return {
     enrolAsync,
     getEnrolmentsByStudentIdAsync,
+    updateEnrolmentDateAsync,
     getEnrolmentsByClassIdAsync,
     deleteEnrolmentAsync,
   };

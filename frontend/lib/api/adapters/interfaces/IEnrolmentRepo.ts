@@ -3,10 +3,10 @@ import { CreateEnrolmentDataParams } from "../../types/enrolment";
 
 interface IEnrolmentRepo {
   createEnrolmentAsync: (data: CreateEnrolmentDataParams) => Promise<Enrolment>;
-  // updateEnrolmentAsync: (
-  //   id: string,
-  //   data: UpdateEnrolmentDataParams,
-  // ) => Promise<Enrolment>;
+  updateEnrolmentDateAsync: (
+    enrolmentId: string,
+    enrolmentDate: string,
+  ) => Promise<Enrolment>;
   getEnrolmentsByStudentIdAsync: (
     studentId: string,
   ) => Promise<EnrolmentWithClassAndTerm[]>;

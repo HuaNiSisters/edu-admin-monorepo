@@ -17,6 +17,7 @@ interface ReusableDialogProps extends React.PropsWithChildren {
   onConfirm: (data: any) => void;
   cancelText?: string;
   confirmText?: string;
+  contentClassName?: string;
 }
 
 export const ReusableDialog = ({
@@ -29,11 +30,12 @@ export const ReusableDialog = ({
   onCancel,
   cancelText = "Cancel",
   confirmText = "OK",
+  contentClassName,
   children,
 }: ReusableDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent showCloseButton={canClose}>
+      <DialogContent showCloseButton={canClose} className={contentClassName}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

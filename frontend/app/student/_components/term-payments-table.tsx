@@ -48,6 +48,9 @@ const TermPaymentsTable = ({
     useState<PaymentWithDetails | null>(null);
   const [enrolmentToDelete, setEnrolmentToDelete] =
     useState<EnrolmentWithClassAndTerm | null>(null);
+  const [editingEnrolment, setEditingEnrolment] =
+    useState<EnrolmentWithClassAndTerm | null>(null);
+  const [classStartDate, setClassStartDate] = useState("");
 
   const openEditDialog = (payment: PaymentWithDetails) => {
     setEditingPayment(payment);
@@ -78,6 +81,35 @@ const TermPaymentsTable = ({
     }
 
     setEnrolmentToDelete(enrolment);
+  };
+
+  const openEnrolmentEditor = (row: EnrolmentSubjectRow) => {
+    const enrolment = enrolments.find((item) => item.enrolment_id === row.id);
+    if (!enrolment) return;
+
+    const date = new Date(enrolment.enrolment_date);
+    setClassStartDate(
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+    );
+    setEditingEnrolment(enrolment);
+  };
+
+  const saveEnrolmentDate = async () => {
+    if (!editingEnrolment || !classStartDate) return;
+
+    try {
+      await enrolmentService.updateEnrolmentDateAsync(
+        editingEnrolment.enrolment_id,
+        classStartDate,
+      );
+      toast.success("Class start date updated.");
+      setEditingEnrolment(null);
+      onChange();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update class start date.",
+      );
+    }
   };
 
   const deleteEnrolment = async () => {
@@ -189,6 +221,40 @@ const TermPaymentsTable = ({
   return (
     <div className="space-y-6">
       <ReusableDialog
+        isOpen={editingEnrolment !== null}
+        title="Edit class start date"
+        onClose={() => setEditingEnrolment(null)}
+        onCancel={() => setEditingEnrolment(null)}
+        onConfirm={saveEnrolmentDate}
+        confirmText="Save changes"
+      >
+        {editingEnrolment && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {editingEnrolment.ClassTime.day_of_week}{" "}
+              {editingEnrolment.ClassTime.start_time} - {editingEnrolment.ClassTime.end_time}
+              {editingEnrolment.ClassTime.Tutor
+                ? ` (${editingEnrolment.ClassTime.Tutor.first_name} ${editingEnrolment.ClassTime.Tutor.last_name})`
+                : ""}
+              {" · "}Term {term.name} {term.year}
+            </p>
+            <div className="grid gap-2">
+              <label htmlFor="edit-class-start-date" className="text-sm font-medium">
+                Class Start Date
+              </label>
+              <input
+                id="edit-class-start-date"
+                type="date"
+                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                value={classStartDate}
+                onChange={(event) => setClassStartDate(event.target.value)}
+              />
+            </div>
+          </div>
+        )}
+      </ReusableDialog>
+
+      <ReusableDialog
         isOpen={enrolmentToDelete !== null}
         title="Remove enrolment?"
         onClose={() => setEnrolmentToDelete(null)}
@@ -217,7 +283,7 @@ const TermPaymentsTable = ({
         <EnrolmentSubjectsTable
           term={term}
           enrolments={subjectRows}
-          onEdit={() => toast.info("Enrolment editing is coming soon.")}
+          onEdit={openEnrolmentEditor}
           onDelete={(subjectRow) => {
             const enrolment = enrolments.find(
               (item) => item.enrolment_id === subjectRow.id,
