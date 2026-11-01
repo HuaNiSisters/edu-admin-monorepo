@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import EnrolDialog from "./enrol-dialog";
+import EnrolInClass from "@/components/_reusable-form-components/enrol-in-class";
 import {
   Attendance,
   EnrolmentWithClassAndTerm,
@@ -100,18 +100,18 @@ export default function EnrolledClasses({ studentId }: EnrolledClassesProps) {
 
   return (
     <div>
-      <EnrolDialog
-        studentId={studentId}
-        isOpen={isEnrolDialogOpen}
-        onClose={() => {
-          setIsEnrolDialogOpen(false);
-          run(fetchEnrolments);
-        }}
-      />
       <div className="py-4">
         <div className="flex justify-between">
           <span className="text-xl font-bold">Enrolments</span>
-          <Button onClick={() => setIsEnrolDialogOpen(true)}>Enrol</Button>
+          <EnrolInClass
+            studentId={studentId}
+            isOpen={isEnrolDialogOpen}
+            onOpen={() => setIsEnrolDialogOpen(true)}
+            onClose={() => {
+              setIsEnrolDialogOpen(false);
+              run(fetchEnrolments);
+            }}
+          />
         </div>
       </div>
 

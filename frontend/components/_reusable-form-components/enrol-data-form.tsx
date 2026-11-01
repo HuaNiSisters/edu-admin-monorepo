@@ -71,11 +71,46 @@ export default function EnrolDataForm({
     submit() {
       form.handleSubmit((data) => {
         run(async () => {
+          if (studentId) {
+            const existingEnrolments =
+              await enrolmentService.getEnrolmentsByStudentIdAsync(studentId);
+            const alreadyEnrolled = existingEnrolments.some(
+              (enrolment) =>
+                enrolment.class_id === data.classId &&
+                enrolment.term_id === data.termId,
+            );
+
+            if (alreadyEnrolled) {
+              form.setError("classId", {
+                type: "validate",
+                message:
+                  "This class has already been added for the selected term.",
+              });
+              return;
+            }
+          }
+
           if (onEnrol) {
             // Deferred/local mode: let the caller decide what to do with
             // the selection (e.g. add to a pending list) instead of
             // hitting the enrolment API directly.
-            await onEnrol(data);
+            try {
+              await onEnrol(data);
+            } catch (error) {
+              if (
+                error instanceof Error &&
+                error.message ===
+                  "This class has already been added for the selected term."
+              ) {
+                form.setError("classId", {
+                  type: "validate",
+                  message: error.message,
+                });
+                return;
+              }
+
+              throw error;
+            }
           } else {
             await enrolmentService.enrolAsync({
               studentId: studentId!,
