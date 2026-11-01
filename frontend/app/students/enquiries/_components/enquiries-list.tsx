@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, RotateCcw, UserPlus } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -18,6 +19,7 @@ export default function EnquiriesList({
   enquiries: Enquiry[];
   onEnquiriesChanged: () => Promise<void>;
 }) {
+  const router = useRouter();
   const [view, setView] = useState<EnquiryView>("open");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -82,6 +84,15 @@ export default function EnquiriesList({
               {isUpdatingStatus
                 ? view === "open" ? "Closing…" : "Reopening…"
                 : view === "open" ? `Close ${selectedIds.size} selected` : `Reopen ${selectedIds.size} selected`}
+            </Button>
+          )}
+          {view === "closed" && selectedIds.size === 1 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => router.push(`/students/create?enquiryId=${[...selectedIds][0]}`)}
+            >
+              <UserPlus className="mr-2 size-4" />Create student
             </Button>
           )}
         <span className="text-sm text-muted-foreground">

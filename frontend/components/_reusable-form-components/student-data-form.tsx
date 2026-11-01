@@ -78,6 +78,26 @@ const formSchema = zod.object({
   parent2Mobile: zod.string().optional(),
 });
 
+export type StudentFormInitialValues = Partial<zod.infer<typeof formSchema>>;
+
+const studentFormDefaults: zod.infer<typeof formSchema> = {
+  firstName: "",
+  lastName: "",
+  gender: "",
+  email: "",
+  grade: "",
+  school: "",
+  location: "",
+  status: "Active",
+  notes: "",
+  mobile: "",
+  suburb: "",
+  parent1FullName: "",
+  parent1Mobile: "",
+  parent2FullName: "",
+  parent2Mobile: "",
+};
+
 const formatMobileNumber = (value: string | undefined) => {
   return formatPhoneNumber(value);
 };
@@ -92,9 +112,11 @@ type PendingEnrolment = {
 const StudentDataForm = ({
   studentData,
   isEditing,
+  initialValues,
 }: {
   studentData?: StudentWithParents;
   isEditing?: boolean;
+  initialValues?: StudentFormInitialValues;
 }) => {
   const isEditMode = !!studentData && isEditing;
   const isViewingMode = !!studentData && !isEditing;
@@ -114,23 +136,7 @@ const StudentDataForm = ({
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      gender: "",
-      email: "",
-      grade: "",
-      school: "",
-      location: "",
-      status: "Active",
-      notes: "",
-      mobile: "",
-      suburb: "",
-      parent1FullName: "",
-      parent1Mobile: "",
-      parent2FullName: "",
-      parent2Mobile: "",
-    },
+    defaultValues: { ...studentFormDefaults, ...initialValues },
   });
 
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
@@ -189,10 +195,12 @@ const StudentDataForm = ({
         form.setValue("parent1Mobile", parent1Mobile || "");
         form.setValue("parent2FullName", parent2FullName || "");
         form.setValue("parent2Mobile", parent2Mobile || "");
+      } else if (initialValues) {
+        form.reset({ ...studentFormDefaults, ...initialValues });
       }
     }
     fetchAndPopulate();
-  }, [studentData]);
+  }, [studentData, initialValues, form]);
 
   useEffect(() => {
     if (studentData) return;
