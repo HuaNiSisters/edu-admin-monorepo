@@ -17,7 +17,7 @@ import {
   termService,
 } from "@/lib/services";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as zod from "zod";
@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectLocation } from "@/components/_reusable-form-components/select-location";
 import { SelectStatus } from "@/components/_reusable-form-components/select-status";
-import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
+import EnrolInClass from "@/components/_reusable-form-components/enrol-in-class";
 import {
   EnrolmentSubjectsTable,
   EnrolmentSubjectRow,
@@ -47,9 +47,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { CreateParentDataParams } from "@/lib/api/types/person/parent";
 import { CreateStudentDataParams } from "@/lib/api/types/person/student";
 import { formatPhoneNumber } from "@/utils/phone-utils";
-import EnrolDataForm, {
-  EnrolDataFormHandle,
-} from "@/app/student/_components/enrol-data-form";
 
 const formSchema = zod.object({
   firstName: zod.string().min(1, "First name is required"),
@@ -107,6 +104,7 @@ const normaliseMobileNumber = (value: string) => value.replace(/\D/g, "");
 type PendingEnrolment = {
   classTime: ClassTimeWithSubjectAndTutor;
   termId: string;
+  classStartDate: string;
 };
 
 const StudentDataForm = ({
@@ -132,7 +130,6 @@ const StudentDataForm = ({
   >([]);
   const [editingPendingEnrolment, setEditingPendingEnrolment] =
     useState<PendingEnrolment | null>(null);
-  const enrolFormRef = useRef<EnrolDataFormHandle>(null);
 
   const form = useForm<zod.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -297,6 +294,7 @@ const StudentDataForm = ({
               studentId: createStudentResponse.student_id,
               classId: pendingEnrolment.classTime.class_id,
               termId: pendingEnrolment.termId,
+              classStartDate: pendingEnrolment.classStartDate,
             }),
           ),
         );
@@ -325,9 +323,11 @@ const StudentDataForm = ({
   const addClassToEnrolment = async ({
     classId,
     termId,
+    classStartDate,
   }: {
     classId: string;
     termId: string;
+    classStartDate: string;
   }) => {
     const isDuplicate = pendingEnrolments.some(
       (pendingEnrolment) =>
@@ -336,12 +336,13 @@ const StudentDataForm = ({
         pendingEnrolment !== editingPendingEnrolment,
     );
     if (isDuplicate) {
-      toast.error("This class has already been added for the selected term.");
-      throw new Error("Duplicate pending enrolment");
+      throw new Error(
+        "This class has already been added for the selected term.",
+      );
     }
 
     const classTime = await classService.getClassByIdAsync(classId);
-    const updatedEnrolment = { classTime, termId };
+    const updatedEnrolment = { classTime, termId, classStartDate };
     setPendingEnrolments((current) =>
       editingPendingEnrolment
         ? current.map((pendingEnrolment) =>
@@ -767,44 +768,27 @@ const StudentDataForm = ({
             <div className="py-4">
               <div className="flex justify-between">
                 <span className="text-xl font-bold">Enrolments</span>
-                <Button
-                  type="button"
-                  onClick={() => setIsEnrolDialogOpen(true)}
-                >
-                  Enrol
-                </Button>
+                <EnrolInClass
+                  isOpen={isEnrolDialogOpen}
+                  onOpen={() => setIsEnrolDialogOpen(true)}
+                  onClose={closeEnrolDialog}
+                  defaultValues={
+                    editingPendingEnrolment
+                      ? {
+                          classId: editingPendingEnrolment.classTime.class_id,
+                          termId: editingPendingEnrolment.termId,
+                          classStartDate: editingPendingEnrolment.classStartDate,
+                        }
+                      : { termId: defaultTermId }
+                  }
+                  confirmText={
+                    editingPendingEnrolment ? "Save changes" : "Add class"
+                  }
+                  onEnrol={addClassToEnrolment}
+                  afterSubmit={closeEnrolDialog}
+                />
               </div>
             </div>
-
-            <ReusableDialog
-              title="Enrol in a class"
-              isOpen={isEnrolDialogOpen}
-              onClose={closeEnrolDialog}
-              onConfirm={() => enrolFormRef.current?.submit()}
-              onCancel={closeEnrolDialog}
-              confirmText={
-                editingPendingEnrolment ? "Save changes" : "Add class"
-              }
-            >
-              <EnrolDataForm
-                key={
-                  editingPendingEnrolment
-                    ? `${editingPendingEnrolment.classTime.class_id}-${editingPendingEnrolment.termId}`
-                    : "new"
-                }
-                ref={enrolFormRef}
-                defaultValues={
-                  editingPendingEnrolment
-                    ? {
-                        classId: editingPendingEnrolment.classTime.class_id,
-                        termId: editingPendingEnrolment.termId,
-                      }
-                    : { termId: defaultTermId }
-                }
-                onEnrol={addClassToEnrolment}
-                afterSubmit={closeEnrolDialog}
-              />
-            </ReusableDialog>
 
             {pendingEnrolmentsByTerm.map(({ term, enrolments }) => (
               <div key={term.term_id} className="mt-4">
