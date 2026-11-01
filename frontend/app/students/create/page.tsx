@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import StudentDataForm, {
   StudentFormInitialValues,
@@ -33,7 +33,7 @@ function enquiryToStudentValues(enquiry: Enquiry): StudentFormInitialValues {
   };
 }
 
-export default function CreateStudentPage() {
+function CreateStudentContent() {
   const searchParams = useSearchParams();
   const enquiryId = searchParams.get("enquiryId");
   const [enquiry, setEnquiry] = useState<Enquiry | null>(null);
@@ -59,5 +59,13 @@ export default function CreateStudentPage() {
         {(!enquiryId || enquiry) && <StudentDataForm initialValues={initialValues} />}
       </div>
     </div>
+  );
+}
+
+export default function CreateStudentPage() {
+  return (
+    <Suspense fallback={<p role="status">Loading student form…</p>}>
+      <CreateStudentContent />
+    </Suspense>
   );
 }
