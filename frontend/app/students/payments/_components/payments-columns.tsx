@@ -110,19 +110,7 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     header: "Receipt",
     cell: ({ row }) => row.original.receipt || "—",
   },
-  {
-    id: "receipt_status",
-    size: 140,
-    header: "Receipt Status",
-    cell: ({ row }) => (row.original.receipt ? "Receipt sent" : "Not sent"),
-  },
-  {
-    accessorKey: "status",
-    size: 110,
-    header: "Status",
-    filterFn: "arrIncludesSome",
-    cell: () => "Follow up",
-  },
+
   {
     accessorKey: "payment_type",
     size: 140,
