@@ -19,6 +19,7 @@ import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import PaymentDialog from "./payment-dialog";
 import { formatDate } from "@/utils/date-utils";
 import { formatCurrency } from "@/utils/currency-utils";
+import { downloadStudentInvoice } from "@/lib/utils/student-invoice";
 import StudentAttendanceGrid from "./student-attendance-grid";
 import AddPaymentButton from "./add-payment-button";
 import {
@@ -66,6 +67,16 @@ const TermPaymentsTable = ({
     await paymentService.deletePaymentAsync(payment.payment_id);
     toast.success("Payment deleted.");
     onChange();
+  };
+
+  const downloadInvoice = async (payment: PaymentWithDetails) => {
+    try {
+      await downloadStudentInvoice({ payment, term, enrolments });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to download invoice.",
+      );
+    }
   };
 
   const requestDeleteEnrolment = (enrolment: EnrolmentWithClassAndTerm) => {
@@ -152,12 +163,13 @@ const TermPaymentsTable = ({
     {
       key: "date_paid",
       header: "Date Paid",
-      cell: (payment) => formatDate(payment.payment_date),
+      cell: (payment: PaymentWithDetails) => formatDate(payment.payment_date),
     },
     {
       key: "amount",
       header: "Amount",
-      cell: (payment) => formatCurrency(payment.amount_paid),
+      cell: (payment: PaymentWithDetails) =>
+        formatCurrency(payment.amount_paid),
     },
     {
       key: "subject",
@@ -167,13 +179,14 @@ const TermPaymentsTable = ({
     {
       key: "payment_type",
       header: "Payment Type",
-      cell: (payment) => formatValuesRemoveUnderscores(payment.payment_type),
+      cell: (payment: PaymentWithDetails) =>
+        formatValuesRemoveUnderscores(payment.payment_type),
     },
     {
       key: "notes",
       header: "Notes",
       className: "whitespace-normal",
-      cell: (payment) => (
+      cell: (payment: PaymentWithDetails) => (
         <div className="max-w-[420px] whitespace-normal">
           {payment.notes || "—"}
         </div>
@@ -182,7 +195,7 @@ const TermPaymentsTable = ({
     {
       key: "actions",
       header: "Actions",
-      cell: (payment) => (
+      cell: (payment: PaymentWithDetails) => (
         <div className="flex gap-2">
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
@@ -193,22 +206,21 @@ const TermPaymentsTable = ({
             <Edit className="size-4" />
           </Button>
           <Button
+            className="bg-lime-600 text-white hover:bg-lime-700"
+            size="icon"
+            onClick={() => downloadInvoice(payment)}
+            aria-label="Download PDF invoice"
+            title="Download PDF invoice"
+          >
+            <FileText className="size-4" />
+          </Button>
+          <Button
             className="bg-red-600 text-white hover:bg-red-700"
             size="icon"
             onClick={() => deletePayment(payment)}
             aria-label="Delete payment"
           >
             <Trash2 className="size-4" />
-          </Button>
-          <Button
-            className="bg-lime-600 text-white hover:bg-lime-700"
-            size="icon"
-            onClick={() =>
-              toast.info("Receipt download is not implemented yet.")
-            }
-            aria-label="Receipt download not implemented"
-          >
-            <FileText className="size-4" />
           </Button>
         </div>
       ),

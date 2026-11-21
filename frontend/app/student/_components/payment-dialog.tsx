@@ -282,7 +282,7 @@ const PaymentDialog = ({
       payment_date: formState.paymentDate
         ? new Date(formState.paymentDate).toISOString()
         : null,
-      payment_type: formState.paymentType,
+      payment_type: formState.paymentType as PaymentType,
       status: (amountPaid <= 0
         ? "unpaid"
         : amountPaid >= amountDue
