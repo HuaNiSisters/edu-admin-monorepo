@@ -19,7 +19,7 @@ import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import PaymentDialog from "./payment-dialog";
 import { formatDate } from "@/utils/date-utils";
 import { formatCurrency } from "@/utils/currency-utils";
-import { openStudentInvoice } from "@/lib/utils/student-invoice";
+import { downloadStudentInvoice } from "@/lib/utils/student-invoice";
 import StudentAttendanceGrid from "./student-attendance-grid";
 import AddPaymentButton from "./add-payment-button";
 import {
@@ -69,9 +69,9 @@ const TermPaymentsTable = ({
     onChange();
   };
 
-  const openInvoice = async (payment: PaymentWithDetails) => {
+  const downloadInvoice = async (payment: PaymentWithDetails) => {
     try {
-      await openStudentInvoice({ payment, term, enrolments });
+      await downloadStudentInvoice({ payment, term, enrolments });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to download invoice.",
@@ -208,9 +208,9 @@ const TermPaymentsTable = ({
           <Button
             className="bg-lime-600 text-white hover:bg-lime-700"
             size="icon"
-            onClick={() => openInvoice(payment)}
-            aria-label="Open PDF invoice in a new tab"
-            title="Open PDF invoice in a new tab"
+            onClick={() => downloadInvoice(payment)}
+            aria-label="Download PDF invoice"
+            title="Download PDF invoice"
           >
             <FileText className="size-4" />
           </Button>
