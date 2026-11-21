@@ -235,21 +235,38 @@ export const createStudentInvoicePdf = async ({
   );
   drawText(page, "place for the following term.", 41.5, 764, regularFont, 11, 500);
 
+  pdf.setTitle(invoiceFileName({ payment, term, enrolments }));
   return pdf.save();
 };
 
-export const downloadStudentInvoice = async (data: StudentInvoiceData) => {
-  const bytes = await createStudentInvoicePdf(data);
-  const blob = new Blob([Uint8Array.from(bytes).buffer], {
-    type: "application/pdf",
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  const safeName = data.payment.student_name
+const invoiceFileName = ({ payment, term }: StudentInvoiceData) => {
+  const safeName = payment.student_name
     .replace(/[^a-z0-9]+/gi, "-")
     .replace(/^-|-$/g, "");
-  link.href = url;
-  link.download = `Invoice-${safeName}-T${data.term.name}-${data.term.year}.pdf`;
-  link.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return `Invoice-${safeName}-T${term.name}-${term.year}.pdf`;
+};
+
+export const openStudentInvoice = async (data: StudentInvoiceData) => {
+  // Open the tab before awaiting PDF generation so the browser recognizes it
+  // as part of the user's click and does not block it as a popup.
+  const invoiceTab = window.open("about:blank", "_blank");
+  if (!invoiceTab) {
+    throw new Error("Allow pop-ups to open the invoice in a new tab.");
+  }
+
+  try {
+    const bytes = await createStudentInvoicePdf(data);
+    const blob = new Blob([Uint8Array.from(bytes).buffer], {
+      type: "application/pdf",
+    });
+    const url = URL.createObjectURL(blob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = invoiceFileName(data);
+    downloadLink.click();
+    invoiceTab.location.href = url;
+  } catch (error) {
+    invoiceTab.close();
+    throw error;
+  }
 };
