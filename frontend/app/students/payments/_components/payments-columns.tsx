@@ -1,6 +1,7 @@
 "use client";
 
 import { PaymentWithDetails } from "@/lib/api/types";
+import Link from "next/link";
 import { formatValuesRemoveUnderscores } from "@/utils/text-utils";
 import { formatPhoneNumber } from "@/utils/phone-utils";
 import { ColumnDef } from "@tanstack/react-table";
@@ -32,9 +33,18 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     filterFn: "equalsString",
     cell: ({ row }) => (
       <div className="space-y-1">
-        <div className="font-medium text-primary">
-          {row.original.student_name}
-        </div>
+        {row.original.student_id ? (
+          <Link
+            href={`/student/${row.original.student_id}`}
+            className="font-medium text-blue-600 hover:underline"
+          >
+            {row.original.student_name}
+          </Link>
+        ) : (
+          <div className="font-medium text-primary">
+            {row.original.student_name}
+          </div>
+        )}
         <div className="text-xs text-muted-foreground">
           {formatPhoneNumber(row.original.student_mobile) || "—"}
         </div>
@@ -110,19 +120,7 @@ export const createPaymentColumns = (): ColumnDef<PaymentWithDetails>[] => [
     header: "Receipt",
     cell: ({ row }) => row.original.receipt || "—",
   },
-  {
-    id: "receipt_status",
-    size: 140,
-    header: "Receipt Status",
-    cell: ({ row }) => (row.original.receipt ? "Receipt sent" : "Not sent"),
-  },
-  {
-    accessorKey: "status",
-    size: 110,
-    header: "Status",
-    filterFn: "arrIncludesSome",
-    cell: () => "Follow up",
-  },
+
   {
     accessorKey: "payment_type",
     size: 140,

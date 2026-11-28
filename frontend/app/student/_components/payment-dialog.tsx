@@ -34,19 +34,34 @@ type PaymentDialogProps = {
 };
 
 type PaymentFormState = {
-  amountDue: string;
   amountPaid: string;
   paymentDate: string;
   paymentType: PaymentType | "";
-  status: PaymentStatus | "";
   receipt: string;
   notes: string;
 };
+
+type PaymentDialogErrors = Partial<
+  Record<
+    | "amountPaid"
+    | "receipt"
+    | "enrolments"
+    | "paymentType"
+    | "form",
+    string
+  >
+>;
 
 const toDateInputValue = (date?: string | null) => {
   if (!date) return new Date().toISOString().slice(0, 10);
   return new Date(date).toISOString().slice(0, 10);
 };
+
+const RequiredMark = () => (
+  <span className="text-red-600" aria-hidden="true">
+    *
+  </span>
+);
 
 const PaymentDialog = ({
   term,
@@ -57,43 +72,27 @@ const PaymentDialog = ({
   onSaved,
 }: PaymentDialogProps) => {
   const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([]);
-  const [paymentStatuses, setPaymentStatuses] = useState<PaymentStatus[]>([]);
-  const [availableEnrolments, setAvailableEnrolments] = useState(enrolments);
+  const [studentEnrolments, setStudentEnrolments] = useState(enrolments);
   const [availableTerms, setAvailableTerms] = useState<Term[]>([term]);
   const [selectedTermId, setSelectedTermId] = useState(term.term_id);
-  const [selectedEnrolmentIds, setSelectedEnrolmentIds] = useState<string[]>(
-    () => enrolments.map((enrolment) => enrolment.enrolment_id),
-  );
-
-  const enrolmentsForTerm = useMemo(
-    () =>
-      availableEnrolments.filter(
-        (enrolment) => enrolment.term_id === selectedTermId,
-      ),
-    [availableEnrolments, selectedTermId],
-  );
-
-  const selectableEnrolments = useMemo(
-    () => (enrolmentsForTerm.length > 0 ? enrolmentsForTerm : enrolments),
-    [enrolments, enrolmentsForTerm],
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>(
+    () => enrolments.map((enrolment) => enrolment.class_id),
   );
 
   const selectedEnrolments = useMemo(
     () =>
-      selectableEnrolments.filter((enrolment) =>
-        selectedEnrolmentIds.includes(enrolment.enrolment_id),
+      enrolments.filter((enrolment) =>
+        selectedClassIds.includes(enrolment.class_id),
       ),
-    [selectableEnrolments, selectedEnrolmentIds],
+    [enrolments, selectedClassIds],
   );
 
-  const defaultAmountDue = useMemo(
+  const calculatedAmountDue = useMemo(
     () =>
-      String(
-        selectedEnrolments.reduce(
-          (total, enrolment) =>
-            total + Number(enrolment.ClassTime.SubjectOffering.price_per_term),
-          0,
-        ),
+      selectedEnrolments.reduce(
+        (total, enrolment) =>
+          total + Number(enrolment.ClassTime.SubjectOffering.price_per_term),
+        0,
       ),
     [selectedEnrolments],
   );
@@ -104,25 +103,23 @@ const PaymentDialog = ({
   );
 
   const [formState, setFormState] = useState<PaymentFormState>({
-    amountDue: defaultAmountDue,
     amountPaid: "",
     paymentDate: toDateInputValue(),
     paymentType: "",
-    status: "",
     receipt: "",
     notes: "",
   });
+  const [errors, setErrors] = useState<PaymentDialogErrors>({});
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const initialEnrolmentIds = enrolments.map(
-      (enrolment) => enrolment.enrolment_id,
-    );
-    setAvailableEnrolments(enrolments);
+    const initialClassIds = enrolments.map((enrolment) => enrolment.class_id);
+    setStudentEnrolments(enrolments);
     setAvailableTerms([term]);
     setSelectedTermId(term.term_id);
-    setSelectedEnrolmentIds(initialEnrolmentIds);
+    setSelectedClassIds(initialClassIds);
+    setErrors({});
 
     const studentId = enrolments[0]?.student_id;
     if (!studentId) return;
@@ -133,7 +130,7 @@ const PaymentDialog = ({
         termService.getTermsAsync(),
       ]);
 
-      setAvailableEnrolments(studentEnrolments);
+      setStudentEnrolments(studentEnrolments);
       setAvailableTerms(
         Array.from(
           new Map(
@@ -159,13 +156,8 @@ const PaymentDialog = ({
     if (!isOpen) return;
 
     const fetchPaymentOptions = async () => {
-      const [types, statuses] = await Promise.all([
-        paymentService.getPaymentTypesAsync(),
-        paymentService.getPaymentStatusesAsync(),
-      ]);
-
+      const types = await paymentService.getPaymentTypesAsync();
       setPaymentTypes(types);
-      setPaymentStatuses(statuses);
     };
 
     fetchPaymentOptions();
@@ -176,42 +168,32 @@ const PaymentDialog = ({
 
     const defaultPaymentType =
       payment?.payment_type ?? paymentTypes[0] ?? "";
-    const defaultPaymentStatus = payment?.status ?? paymentStatuses[0] ?? "";
-
     setFormState({
-      amountDue: String(payment?.amount_due ?? defaultAmountDue),
       amountPaid: String(payment?.amount_paid ?? ""),
       paymentDate: toDateInputValue(payment?.payment_date),
       paymentType: defaultPaymentType,
-      status: defaultPaymentStatus,
       receipt: payment?.receipt ?? "",
       notes: payment?.notes ?? "",
     });
   }, [
-    defaultAmountDue,
     isOpen,
     payment,
-    paymentStatuses,
     paymentTypes,
   ]);
 
   const selectTerm = (termId: string) => {
     setSelectedTermId(termId);
-    setSelectedEnrolmentIds(
-      (availableEnrolments.some((enrolment) => enrolment.term_id === termId)
-        ? availableEnrolments.filter((enrolment) => enrolment.term_id === termId)
-        : enrolments
-      )
-        .map((enrolment) => enrolment.enrolment_id),
-    );
+    setSelectedClassIds(enrolments.map((enrolment) => enrolment.class_id));
+    setErrors((current) => ({ ...current, form: undefined }));
   };
 
-  const toggleEnrolment = (enrolmentId: string, isSelected: boolean) => {
-    setSelectedEnrolmentIds((current) =>
+  const toggleEnrolment = (classId: string, isSelected: boolean) => {
+    setSelectedClassIds((current) =>
       isSelected
-        ? [...current, enrolmentId]
-        : current.filter((id) => id !== enrolmentId),
+        ? [...new Set([...current, classId])]
+        : current.filter((id) => id !== classId),
     );
+    setErrors((current) => ({ ...current, enrolments: undefined }));
   };
 
   const updateField = <TKey extends keyof PaymentFormState>(
@@ -219,59 +201,77 @@ const PaymentDialog = ({
     value: PaymentFormState[TKey],
   ) => {
     setFormState((current) => ({ ...current, [key]: value }));
+    setErrors((current) => ({ ...current, [key]: undefined, form: undefined }));
   };
 
   const handleConfirm = async () => {
-    const amountDue = Number(formState.amountDue);
     const amountPaid = Number(formState.amountPaid);
+    const amountDue = Number(payment?.amount_due ?? calculatedAmountDue);
+    const nextErrors: PaymentDialogErrors = {};
 
-    if (Number.isNaN(amountDue) || amountDue < 0) {
-      toast.error("Amount due must be a valid number.");
-      return;
-    }
-
-    if (Number.isNaN(amountPaid) || amountPaid < 0) {
-      toast.error("Amount paid must be a valid number.");
-      return;
+    if (!formState.amountPaid.trim()) {
+      nextErrors.amountPaid = "Amount paid is required.";
+    } else if (!Number.isFinite(amountPaid) || amountPaid < 0) {
+      nextErrors.amountPaid = "Amount paid must be a valid number.";
     }
 
     if (!formState.receipt.trim()) {
-      toast.error("Receipt/reference is required.");
-      return;
+      nextErrors.receipt = "Receipt/reference is required.";
     }
 
     if (selectedEnrolments.length === 0) {
-      toast.error("Select at least one enrolment to pay for.");
-      return;
+      nextErrors.enrolments = "Select at least one enrolment to pay for.";
     }
 
     if (!formState.paymentType) {
-      toast.error("Payment type is required.");
+      nextErrors.paymentType = "Payment type is required.";
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
-    if (!formState.status) {
-      toast.error("Payment status is required.");
-      return;
-    }
+    setErrors({});
 
     let paymentEnrolmentId = paymentAnchorEnrolmentId;
 
-    if (!payment && enrolmentsForTerm.length === 0) {
-      const newEnrolments = await Promise.all(
-        selectedEnrolments.map((enrolment) =>
-          enrolmentService.enrolAsync({
-            studentId: enrolment.student_id,
-            classId: enrolment.class_id,
-            termId: selectedTermId,
-          }),
-        ),
+    if (!payment) {
+      const selectedTerm = availableTerms.find(
+        (availableTerm) => availableTerm.term_id === selectedTermId,
       );
-      paymentEnrolmentId = newEnrolments[0]?.enrolment_id;
+      try {
+        const targetEnrolments = await Promise.all(
+          selectedEnrolments.map(async (enrolment) => {
+            const existingEnrolment = studentEnrolments.find(
+              (existing) =>
+                existing.term_id === selectedTermId &&
+                existing.class_id === enrolment.class_id,
+            );
+            if (existingEnrolment) return existingEnrolment;
+
+            return enrolmentService.enrolAsync({
+              studentId: enrolment.student_id,
+              classId: enrolment.class_id,
+              termId: selectedTermId,
+              classStartDate: selectedTerm?.start_date,
+            });
+          }),
+        );
+        paymentEnrolmentId = targetEnrolments[0]?.enrolment_id;
+      } catch (error) {
+        setErrors({
+          form:
+            error instanceof Error
+              ? error.message
+              : "Failed to create term enrolments.",
+        });
+        return;
+      }
     }
 
     if (!paymentEnrolmentId) {
-      toast.error("Unable to create an enrolment for this payment.");
+      setErrors({ form: "Unable to create an enrolment for this payment." });
       return;
     }
 
@@ -282,18 +282,30 @@ const PaymentDialog = ({
       payment_date: formState.paymentDate
         ? new Date(formState.paymentDate).toISOString()
         : null,
-      payment_type: formState.paymentType,
-      status: formState.status,
+      payment_type: formState.paymentType as PaymentType,
+      status: (amountPaid <= 0
+        ? "unpaid"
+        : amountPaid >= amountDue
+          ? "paid"
+          : "partial") as PaymentStatus,
       receipt: formState.receipt.trim(),
       notes: formState.notes.trim() || null,
     };
 
-    if (payment) {
-      await paymentService.updatePaymentAsync(payment.payment_id, paymentData);
-      toast.success("Payment updated.");
-    } else {
-      await paymentService.createPaymentAsync(paymentData);
-      toast.success("Payment added.");
+    try {
+      if (payment) {
+        await paymentService.updatePaymentAsync(payment.payment_id, paymentData);
+        toast.success("Payment updated.");
+      } else {
+        await paymentService.createPaymentAsync(paymentData);
+        toast.success("Payment added.");
+      }
+    } catch (error) {
+      setErrors({
+        form:
+          error instanceof Error ? error.message : "Failed to save payment.",
+      });
+      return;
     }
 
     onSaved();
@@ -310,9 +322,20 @@ const PaymentDialog = ({
       confirmText={payment ? "Save Payment" : "Add Payment"}
     >
       <div className="grid gap-4">
+        {errors.form && (
+          <p className="text-sm text-red-600" role="alert">
+            {errors.form}
+          </p>
+        )}
         <div className="grid gap-2">
-          <Label>Term</Label>
-          <Select value={selectedTermId} onValueChange={selectTerm}>
+          <Label>
+            Term <RequiredMark />
+          </Label>
+          <Select
+            value={selectedTermId}
+            onValueChange={selectTerm}
+            disabled={Boolean(payment)}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -324,24 +347,33 @@ const PaymentDialog = ({
               ))}
             </SelectContent>
           </Select>
+          {!payment && (
+            <p className="text-xs text-muted-foreground">
+              Saving for a future term enrols the selected classes in that term.
+            </p>
+          )}
         </div>
 
         <div className="grid gap-2">
-          <Label>Enrolments</Label>
-          <div className="rounded-md border divide-y">
-            {selectableEnrolments.map((enrolment) => {
-              const enrolmentId = enrolment.enrolment_id;
+          <Label>
+            Enrolments <RequiredMark />
+          </Label>
+          <div
+            className={`rounded-md border divide-y ${errors.enrolments ? "border-destructive" : ""}`}
+          >
+            {enrolments.map((enrolment) => {
+              const classId = enrolment.class_id;
               const subjectOffering = enrolment.ClassTime.SubjectOffering;
 
               return (
                 <label
-                  key={enrolmentId}
+                  key={classId}
                   className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm"
                 >
                   <Checkbox
-                    checked={selectedEnrolmentIds.includes(enrolmentId)}
+                    checked={selectedClassIds.includes(classId)}
                     onCheckedChange={(checked) =>
-                      toggleEnrolment(enrolmentId, checked === true)
+                      toggleEnrolment(classId, checked === true)
                     }
                   />
                   {subjectOffering.subject_name} (Grade {subjectOffering.grade})
@@ -349,32 +381,34 @@ const PaymentDialog = ({
               );
             })}
           </div>
+          {errors.enrolments && (
+            <p className="text-sm text-red-600" role="alert">
+              {errors.enrolments}
+            </p>
+          )}
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
           <div className="grid gap-2">
-            <Label htmlFor="amount_due">Amount Due</Label>
-            <Input
-              id="amount_due"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formState.amountDue}
-              onChange={(event) => updateField("amountDue", event.target.value)}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="amount_paid">Amount Paid</Label>
+            <Label htmlFor="amount_paid">
+              Amount Paid <RequiredMark />
+            </Label>
             <Input
               id="amount_paid"
               type="number"
               min="0"
               step="0.01"
               value={formState.amountPaid}
+              aria-invalid={Boolean(errors.amountPaid)}
               onChange={(event) =>
                 updateField("amountPaid", event.target.value)
               }
             />
+            {errors.amountPaid && (
+              <p className="text-sm text-red-600" role="alert">
+                {errors.amountPaid}
+              </p>
+            )}
           </div>
         </div>
 
@@ -391,14 +425,19 @@ const PaymentDialog = ({
             />
           </div>
           <div className="grid gap-2">
-            <Label>Payment Type</Label>
+            <Label>
+              Payment Type <RequiredMark />
+            </Label>
             <Select
               value={formState.paymentType}
               onValueChange={(value: PaymentType) =>
                 updateField("paymentType", value)
               }
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger
+                className="w-full"
+                aria-invalid={Boolean(errors.paymentType)}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -409,37 +448,30 @@ const PaymentDialog = ({
                 ))}
               </SelectContent>
             </Select>
+            {errors.paymentType && (
+              <p className="text-sm text-red-600" role="alert">
+                {errors.paymentType}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
           <div className="grid gap-2">
-            <Label>Payment Status</Label>
-            <Select
-              value={formState.status}
-              onValueChange={(value: PaymentStatus) =>
-                updateField("status", value)
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {formatValuesRemoveUnderscores(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="receipt">Receipt / Reference</Label>
+            <Label htmlFor="receipt">
+              Receipt / Reference <RequiredMark />
+            </Label>
             <Input
               id="receipt"
               value={formState.receipt}
+              aria-invalid={Boolean(errors.receipt)}
               onChange={(event) => updateField("receipt", event.target.value)}
             />
+            {errors.receipt && (
+              <p className="text-sm text-red-600" role="alert">
+                {errors.receipt}
+              </p>
+            )}
           </div>
         </div>
 

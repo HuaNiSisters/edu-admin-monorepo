@@ -63,12 +63,8 @@ const PaymentsFilters = ({
     [payments],
   );
 
-  const gradeOptions = useMemo(
-    () =>
-      [...new Set(payments.map((payment) => String(payment.grade)))]
-        .filter((grade) => grade !== "0")
-        .sort((a, b) => Number(a) - Number(b)),
-    [payments],
+  const gradeOptions = Array.from({ length: 11 }, (_, index) =>
+    String(index + 2),
   );
 
   const subjectOptions = useMemo(
