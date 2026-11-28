@@ -28,6 +28,7 @@ import {
   CircleDollarSign,
   HandCoins,
   MessageCircleQuestion,
+  CalendarCheck,
   BookOpenText,
   GraduationCap,
   MessageSquareMore,
@@ -70,6 +71,11 @@ const studentsSidebarItems = [
     url: "/students/enquiries",
     icon: MessageCircleQuestion,
   },
+  {
+    name: "Follow-up",
+    url: "/students/follow-up",
+    icon: CalendarCheck,
+  },
 ];
 
 const adminSidebarItems = [
@@ -108,7 +114,10 @@ function AppSidebarContent() {
   const pathname = usePathname();
   const isTutor = isUserTutor();
   const visibleStudentItems = studentsSidebarItems.filter(
-    (item) => !isTutor || ["Search", "Attendance"].includes(item.name),
+    (item) =>
+      item.url === "/students/follow-up"
+        ? isUserAdmin() || isUserReceptionist()
+        : !isTutor || ["Search", "Attendance"].includes(item.name),
   );
 
   return (

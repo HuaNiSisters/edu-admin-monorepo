@@ -89,6 +89,7 @@ class SupabaseApiWrapper
       amount_due: number;
       amount_paid: number;
       payment_date: string | null;
+      follow_up_date: string | null;
       payment_type: PaymentWithDetails["payment_type"];
       status: PaymentWithDetails["status"];
       receipt: string;
@@ -139,6 +140,7 @@ class SupabaseApiWrapper
       amount_due: amountDue,
       amount_paid: amountPaid,
       payment_date: payment.payment_date,
+      follow_up_date: payment.follow_up_date,
       payment_type: payment.payment_type,
       status: payment.status,
       receipt: payment.receipt,
@@ -609,6 +611,7 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
         amount_due,
         amount_paid,
         payment_date,
+        follow_up_date,
         payment_type,
         status,
         receipt,
@@ -743,6 +746,7 @@ async getEnrolmentsWithAttendanceByClassAndTermAsync(classId: string, termId: st
         amount_due,
         amount_paid,
         payment_date,
+        follow_up_date,
         payment_type,
         status,
         receipt,

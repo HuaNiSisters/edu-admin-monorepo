@@ -183,6 +183,11 @@ const TermPaymentsTable = ({
         formatValuesRemoveUnderscores(payment.payment_type),
     },
     {
+      key: "receipt",
+      header: "Receipt Number",
+      cell: (payment: PaymentWithDetails) => payment.receipt?.trim() || "—",
+    },
+    {
       key: "notes",
       header: "Notes",
       className: "whitespace-normal",

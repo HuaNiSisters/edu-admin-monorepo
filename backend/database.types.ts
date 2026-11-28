@@ -228,6 +228,7 @@ export type Database = {
           amount_due: number
           amount_paid: number
           enrolment_id: string
+          follow_up_date: string | null
           notes: string | null
           payment_date: string | null
           payment_id: number
@@ -239,6 +240,7 @@ export type Database = {
           amount_due: number
           amount_paid: number
           enrolment_id: string
+          follow_up_date?: string | null
           notes?: string | null
           payment_date?: string | null
           payment_id?: number
@@ -250,6 +252,7 @@ export type Database = {
           amount_due?: number
           amount_paid?: number
           enrolment_id?: string
+          follow_up_date?: string | null
           notes?: string | null
           payment_date?: string | null
           payment_id?: number
@@ -264,6 +267,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Enrolment"
             referencedColumns: ["enrolment_id"]
+          },
+        ]
+      }
+      PaymentFollowUp: {
+        Row: {
+          due_date: string
+          follow_up_id: number
+          is_completed: boolean
+          payment_id: number
+        }
+        Insert: {
+          due_date: string
+          follow_up_id?: number
+          is_completed?: boolean
+          payment_id: number
+        }
+        Update: {
+          due_date?: string
+          follow_up_id?: number
+          is_completed?: boolean
+          payment_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "PaymentFollowUp_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "Payment"
+            referencedColumns: ["payment_id"]
           },
         ]
       }

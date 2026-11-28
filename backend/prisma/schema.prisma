@@ -242,17 +242,31 @@ model Attendance {
 ////////////////////
 
 model Payment {
-  payment_id   Int           @id @default(autoincrement())
-  enrolment_id String        @db.Uuid
-  amount_due   Decimal       @db.Decimal(10, 2)
-  amount_paid  Decimal       @db.Decimal(10, 2)
-  payment_date DateTime?
-  payment_type PaymentType
-  status       PaymentStatus
-  receipt      String // Store files externally? e.g. (S3, Cloudflare R2, local filesystem) and save the path/URL here
-  notes        String?
+  payment_id     Int           @id @default(autoincrement())
+  enrolment_id   String        @db.Uuid
+  amount_due     Decimal       @db.Decimal(10, 2)
+  amount_paid    Decimal       @db.Decimal(10, 2)
+  payment_date   DateTime?
+  follow_up_date DateTime?     @db.Date
+  payment_type   PaymentType
+  status         PaymentStatus
+  receipt        String        // Store files externally? e.g. (S3, Cloudflare R2, local filesystem) and save the path/URL here
+  notes          String?
 
+  followUps PaymentFollowUp[]
   enrolment Enrolment @relation(fields: [enrolment_id], references: [enrolment_id])
+}
+
+model PaymentFollowUp {
+  follow_up_id Int      @id @default(autoincrement())
+  payment_id   Int
+  due_date     DateTime @db.Date
+  is_completed Boolean  @default(false)
+
+  payment Payment @relation(fields: [payment_id], references: [payment_id], onDelete: Cascade)
+
+  @@index([payment_id], map: "payment_follow_up_payment_idx")
+  @@index([is_completed, due_date, payment_id], map: "payment_follow_up_status_due_date_idx")
 }
 
 model SmsTemplate {

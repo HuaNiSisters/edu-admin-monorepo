@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { addWeeks, format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { ReusableDialog } from "@/components/_reusable/reuseable-dialog";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +38,9 @@ type PaymentDialogProps = {
 type PaymentFormState = {
   amountPaid: string;
   paymentDate: string;
+  followUpNeeded: boolean;
+  followUpDate: string;
+  useTrialFollowUp: boolean;
   paymentType: PaymentType | "";
   receipt: string;
   notes: string;
@@ -43,17 +48,13 @@ type PaymentFormState = {
 
 type PaymentDialogErrors = Partial<
   Record<
-    | "amountPaid"
-    | "receipt"
-    | "enrolments"
-    | "paymentType"
-    | "form",
+    "amountPaid" | "receipt" | "enrolments" | "paymentType" | "followUpDate" | "form",
     string
   >
 >;
 
 const toDateInputValue = (date?: string | null) => {
-  if (!date) return new Date().toISOString().slice(0, 10);
+  if (!date) return format(new Date(), "yyyy-MM-dd");
   return new Date(date).toISOString().slice(0, 10);
 };
 
@@ -75,8 +76,17 @@ const PaymentDialog = ({
   const [studentEnrolments, setStudentEnrolments] = useState(enrolments);
   const [availableTerms, setAvailableTerms] = useState<Term[]>([term]);
   const [selectedTermId, setSelectedTermId] = useState(term.term_id);
-  const [selectedClassIds, setSelectedClassIds] = useState<string[]>(
-    () => enrolments.map((enrolment) => enrolment.class_id),
+  const selectedTerm = availableTerms.find(
+    (availableTerm) => availableTerm.term_id === selectedTermId,
+  );
+  const trialFollowUpDate = selectedTerm
+    ? format(
+        addWeeks(parseISO(selectedTerm.start_date.slice(0, 10)), 5),
+        "yyyy-MM-dd",
+      )
+    : "";
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>(() =>
+    enrolments.map((enrolment) => enrolment.class_id),
   );
 
   const selectedEnrolments = useMemo(
@@ -105,10 +115,18 @@ const PaymentDialog = ({
   const [formState, setFormState] = useState<PaymentFormState>({
     amountPaid: "",
     paymentDate: toDateInputValue(),
+    followUpNeeded: false,
+    followUpDate: "",
+    useTrialFollowUp: false,
     paymentType: "",
     receipt: "",
     notes: "",
   });
+  const followUpDate = formState.useTrialFollowUp
+    ? trialFollowUpDate
+    : formState.followUpDate;
+  const saving = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<PaymentDialogErrors>({});
 
   useEffect(() => {
@@ -140,10 +158,7 @@ const PaymentDialog = ({
                   new Date(availableTerm.start_date) >=
                   new Date(term.start_date),
               )
-              .map((availableTerm) => [
-                availableTerm.term_id,
-                availableTerm,
-              ]),
+              .map((availableTerm) => [availableTerm.term_id, availableTerm]),
           ).values(),
         ),
       );
@@ -166,20 +181,18 @@ const PaymentDialog = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const defaultPaymentType =
-      payment?.payment_type ?? paymentTypes[0] ?? "";
+    const defaultPaymentType = payment?.payment_type ?? paymentTypes[0] ?? "";
     setFormState({
       amountPaid: String(payment?.amount_paid ?? ""),
       paymentDate: toDateInputValue(payment?.payment_date),
+      followUpNeeded: Boolean(payment?.follow_up_date),
+      followUpDate: payment?.follow_up_date ?? "",
+      useTrialFollowUp: false,
       paymentType: defaultPaymentType,
       receipt: payment?.receipt ?? "",
       notes: payment?.notes ?? "",
     });
-  }, [
-    isOpen,
-    payment,
-    paymentTypes,
-  ]);
+  }, [isOpen, payment, paymentTypes]);
 
   const selectTerm = (termId: string) => {
     setSelectedTermId(termId);
@@ -227,6 +240,10 @@ const PaymentDialog = ({
       nextErrors.paymentType = "Payment type is required.";
     }
 
+    if (formState.followUpNeeded && !followUpDate) {
+      nextErrors.followUpDate = "Follow-up date is required.";
+    }
+
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
@@ -237,9 +254,6 @@ const PaymentDialog = ({
     let paymentEnrolmentId = paymentAnchorEnrolmentId;
 
     if (!payment) {
-      const selectedTerm = availableTerms.find(
-        (availableTerm) => availableTerm.term_id === selectedTermId,
-      );
       try {
         const targetEnrolments = await Promise.all(
           selectedEnrolments.map(async (enrolment) => {
@@ -282,6 +296,7 @@ const PaymentDialog = ({
       payment_date: formState.paymentDate
         ? new Date(formState.paymentDate).toISOString()
         : null,
+      follow_up_date: formState.followUpNeeded ? followUpDate : null,
       payment_type: formState.paymentType as PaymentType,
       status: (amountPaid <= 0
         ? "unpaid"
@@ -294,7 +309,10 @@ const PaymentDialog = ({
 
     try {
       if (payment) {
-        await paymentService.updatePaymentAsync(payment.payment_id, paymentData);
+        await paymentService.updatePaymentAsync(
+          payment.payment_id,
+          paymentData,
+        );
         toast.success("Payment updated.");
       } else {
         await paymentService.createPaymentAsync(paymentData);
@@ -312,13 +330,27 @@ const PaymentDialog = ({
     onClose();
   };
 
+  const savePayment = async () => {
+    if (saving.current) return;
+    saving.current = true;
+    setIsSaving(true);
+    try {
+      await handleConfirm();
+    } finally {
+      saving.current = false;
+      setIsSaving(false);
+    }
+  };
+
   return (
     <ReusableDialog
       isOpen={isOpen}
       title={payment ? "Edit payment" : "Add payment"}
       onClose={onClose}
       onCancel={onClose}
-      onConfirm={handleConfirm}
+      onConfirm={savePayment}
+      confirmDisabled={isSaving}
+      contentClassName="max-h-[90dvh] overflow-y-auto"
       confirmText={payment ? "Save Payment" : "Add Payment"}
     >
       <div className="grid gap-4">
@@ -341,7 +373,10 @@ const PaymentDialog = ({
             </SelectTrigger>
             <SelectContent>
               {availableTerms.map((availableTerm) => (
-                <SelectItem key={availableTerm.term_id} value={availableTerm.term_id}>
+                <SelectItem
+                  key={availableTerm.term_id}
+                  value={availableTerm.term_id}
+                >
                   {availableTerm.year} Term {availableTerm.name}
                 </SelectItem>
               ))}
@@ -474,6 +509,57 @@ const PaymentDialog = ({
             )}
           </div>
         </div>
+
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="follow_up_needed"
+            checked={formState.followUpNeeded}
+            onCheckedChange={(checked) => {
+              updateField("followUpNeeded", checked === true);
+              setErrors((current) => ({ ...current, followUpDate: undefined }));
+            }}
+          />
+          <Label htmlFor="follow_up_needed">Follow-up needed</Label>
+        </div>
+
+        {formState.followUpNeeded && (
+          <div className="grid gap-2">
+            <Label htmlFor="follow_up_date">
+              Follow-up Date <RequiredMark />
+            </Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                id="follow_up_date"
+                type="date"
+                className="w-auto"
+                required
+                value={followUpDate}
+                aria-invalid={Boolean(errors.followUpDate)}
+                aria-describedby={errors.followUpDate ? "follow_up_date_error" : undefined}
+                onChange={(event) => {
+                  updateField("followUpDate", event.target.value);
+                  updateField("useTrialFollowUp", false);
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!trialFollowUpDate}
+                onClick={() => {
+                  updateField("useTrialFollowUp", true);
+                  setErrors((current) => ({ ...current, followUpDate: undefined }));
+                }}
+              >
+                5-week trial
+              </Button>
+            </div>
+            {errors.followUpDate && (
+              <p id="follow_up_date_error" className="text-sm text-red-600" role="alert">
+                {errors.followUpDate}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="grid gap-2">
           <Label htmlFor="payment_notes">Notes</Label>

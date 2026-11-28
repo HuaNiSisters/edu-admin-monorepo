@@ -14,9 +14,10 @@ interface ReusableDialogProps extends React.PropsWithChildren {
   canClose?: boolean;
   onClose: () => void;
   onCancel: () => void;
-  onConfirm: (data: any) => void;
+  onConfirm: React.MouseEventHandler<HTMLButtonElement>;
   cancelText?: string;
   confirmText?: string;
+  confirmDisabled?: boolean;
   contentClassName?: string;
 }
 
@@ -30,6 +31,7 @@ export const ReusableDialog = ({
   onCancel,
   cancelText = "Cancel",
   confirmText = "OK",
+  confirmDisabled = false,
   contentClassName,
   children,
 }: ReusableDialogProps) => {
@@ -48,7 +50,7 @@ export const ReusableDialog = ({
               {cancelText}
             </Button>
           )}
-          <Button onClick={onConfirm} className="btn btn-primary">
+          <Button onClick={onConfirm} disabled={confirmDisabled} className="btn btn-primary">
             {confirmText}
           </Button>
         </DialogFooter>
